@@ -12,7 +12,7 @@ export type CollisionKind =
   | "decorative-nonblocking";
 
 const excluded =
-  /floor|walking[ _-]?path|walkway|trigger|spawn|entrance|screen|display|monitor|console|laptop|tv|light|lamp|photo|plant|pillow|book|notebook|penna|satellite|solar|inner_wall|drone|rover|panorama|sky/i;
+  /floor|walking[ _-]?path|walkway|trigger|spawn|entrance|screen|display|monitor|console|tv|light|lamp|photo|plant|pillow|book|notebook|penna|satellite|solar|inner_wall|drone|rover|panorama|sky/i;
 const terrain = /PHOBOSIA_MarsTerrain_2km/i;
 const rocks = /rock/i;
 
@@ -27,7 +27,7 @@ export function classifyCollision(
   if (interactive.has(object) || /trigger|spawn|entrance/i.test(name)) return "trigger";
   if (/floor/i.test(name)) return "floor";
   if (/walking[ _-]?path|walkway/i.test(name)) return "walking-path";
-  if (/screen|display|monitor|console|laptop|tv/i.test(name)) return "interactive";
+  if (/screen|display|monitor|console|tv/i.test(name)) return "interactive";
   if (excluded.test(name)) return "decorative-nonblocking";
   return "environment-solid";
 }

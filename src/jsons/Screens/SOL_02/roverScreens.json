@@ -1,0 +1,143 @@
+{
+  "sol": 2,
+  "mission_id": "SOL_02",
+  "screens": {
+    "Computer_Screen_01": {
+      "id": "Computer_Screen_01",
+      "type": "MISSION_OVERVIEW",
+      "width": 512,
+      "height": 256,
+      "profiles": {
+        "arrival": {
+          "title": "SOL 02 MISSION OVERVIEW",
+          "mission": "DAYTIME SOIL INVESTIGATION",
+          "status": "INITIALIZING",
+          "location": "SOL 02 STAGING AREA",
+          "next_destination": "Sol2_Checkpoint"
+        },
+        "investigation_complete": {
+          "title": "SOL 02 SAMPLE RETRIEVAL",
+          "mission": "SOIL ANALYSIS & HABITAT SUITABILITY",
+          "status": "ANALYZING",
+          "location": "CANAL DEPRESSION · SOL 2",
+          "next_destination": "Sol2_Finishing_Point"
+        }
+      }
+    },
+    "Computer_Screen_02": {
+      "id": "Computer_Screen_02",
+      "type": "DAYTIME_ENVIRONMENTAL_TELEMETRY",
+      "width": 512,
+      "height": 256,
+      "profiles": {
+        "arrival": {
+          "title": "DAYTIME MARTIAN ENVIRONMENT",
+          "temperature_celsius": -78,
+          "surface_pressure_mbar": 6.1,
+          "wind_speed_m_s": 7.4,
+          "wind_direction": "NORTH_EAST",
+          "atmospheric_co2_percent": 95.1,
+          "visibility_km": 1.8
+        },
+        "investigation_complete": {
+          "title": "DAYTIME MARTIAN ENVIRONMENT",
+          "temperature_celsius": -79,
+          "surface_pressure_mbar": 6.0,
+          "wind_speed_m_s": 8.1,
+          "wind_direction": "NORTH_EAST",
+          "atmospheric_co2_percent": 95.1,
+          "visibility_km": 1.8
+        }
+      }
+    },
+    "Computer_Screen_03": {
+      "id": "Computer_Screen_03",
+      "type": "SOIL_ANALYSIS_STATUS",
+      "width": 512,
+      "height": 256,
+      "images": [
+        "/assets/images/Selected_Missions/target_03/a_wide_high_resolution_false_color_thermal_infrar.png",
+        "/assets/images/Selected_Missions/target_03/bandw.png",
+        "/assets/images/Selected_Missions/target_03/Cratered Rust Plains of Elysium-2.png"
+      ]
+    },
+    "O2_Screen": {
+      "id": "O2_Screen",
+      "type": "RESOURCE_LEVEL",
+      "label": "CABIN OXYGEN",
+      "unit": "%",
+      "width": 256,
+      "height": 256
+    },
+    "Water_and_Nut_Screen": {
+      "id": "Water_and_Nut_Screen",
+      "type": "RESOURCE_MONITOR",
+      "label": "BOTAN LIFE SUPPORT",
+      "width": 256,
+      "height": 256
+    },
+    "Water_and_Nut_Screen_02": {
+      "id": "Water_and_Nut_Screen_02",
+      "type": "BOTAN_SYSTEM_STATUS",
+      "label": "BOTAN SYSTEM",
+      "width": 256,
+      "height": 128
+    },
+    "sm_Air_filter_screen": {
+      "id": "sm_Air_filter_screen",
+      "label": "AIR FILTER",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_battery_Screen": {
+      "id": "sm_battery_Screen",
+      "label": "BATTERY",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_cabin_pressure": {
+      "id": "sm_cabin_pressure",
+      "label": "CABIN PRESS",
+      "unit": "kPa",
+      "width": 128,
+      "height": 128
+    },
+    "sm_co2_screen": {
+      "id": "sm_co2_screen",
+      "label": "CABIN CO2",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_environment_screen": {
+      "id": "sm_environment_screen",
+      "label": "EXT PRESS",
+      "unit": "mbar",
+      "width": 128,
+      "height": 128
+    },
+    "sm_o2_Screen": {
+      "id": "sm_o2_Screen",
+      "label": "CABIN O2",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_status_screen": {
+      "id": "sm_status_screen",
+      "label": "SYS STATUS",
+      "unit": "",
+      "width": 128,
+      "height": 128
+    },
+    "sm_temperature_screen": {
+      "id": "sm_temperature_screen",
+      "label": "CABIN TEMP",
+      "unit": "°C",
+      "width": 128,
+      "height": 128
+    }
+  }
+}

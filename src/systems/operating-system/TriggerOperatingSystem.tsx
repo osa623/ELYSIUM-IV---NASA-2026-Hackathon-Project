@@ -7,12 +7,12 @@ import { DAYS_CONFIG, type MissionDayNumber, type MissionProgressState } from "@
 import { getPreparedAssetUrl } from "@/core/AssetLoading";
 import { getScreenConfigForSol } from "@/core/ScreenConfigRegistry";
 import { MissionInvestigationPanel } from "@/systems/investigation/InvestigationForm";
-import habitatLegacy from "@/jsons/Screens/habitatScreenData.json";
-import engineeringLegacy from "@/jsons/Screens/engineeringScreenData.json";
-import researchLegacy from "@/jsons/Screens/research-zone-screens.json";
-import missionControlLegacy from "@/jsons/Screens/mission-control-screens.json";
-import centralHubLegacy from "@/jsons/Screens/central-hub-screens.json";
-import airlockLegacy from "@/jsons/Screens/airlock-screen-data.json";
+const habitatLegacy = { screens: [] };
+const engineeringLegacy = { screens: [] };
+const researchLegacy = { screens: [] };
+const missionControlLegacy = { screens: [] };
+const centralHubLegacy = { screens: [] };
+const airlockLegacy = { screens: [] };
 import sol03Mission from "@/jsons/Missions/sol-03.json";
 
 const Sol5MissionPanel = (_props: any) => null;
@@ -120,7 +120,7 @@ function TriggerScreenView({ record, location, dataMode, sol, mission, missionSt
     {showSol3TargetGallery && <section className="[border-top:1px_solid_rgba(85,_205,_232,_0.2)] [padding-top:12px]">
       <header className="[margin-bottom:12px]"><div className="[color:#55cde8] [font-size:10px] [letter-spacing:0.14em]">SOL 3 · TARGET IMAGE CATALOGUE</div><p className="[margin:4px_0_0] [color:#9fb4c0] [font-size:11px]">Project imagery for comparison. The source does not include acquisition, instrument, or georeferencing metadata; these are not verified NASA observations.</p></header>
       <div className="[display:flex] [flex-direction:column] [gap:14px]">
-        {sol03Mission.targetCatalogue.map((target, index) => {
+        {((sol03Mission as any).targetCatalogue as any[] || []).map((target: any, index: number) => {
           const targetLabel = `Target ${String.fromCharCode(65 + index)} · ${target.targetNumber}`;
           const imageTypes: Array<{ key: "grayscale" | "color" | "thermal"; label: string }> = [
             { key: "grayscale", label: "Black-and-white satellite image" },

@@ -69,7 +69,7 @@ export function Sol01MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
           </div>
           <div className="flex items-center gap-4">
             <span className="text-xs font-mono text-[#8faec0]">
-              PROFILE: <strong className="text-[#38d4f0] uppercase">{manager.telemetryProfile}</strong>
+              PROFILE: <strong className="text-[#38d4f0] uppercase">{mgr.telemetryProfile}</strong>
             </span>
             <button
               onClick={onClose}
@@ -92,7 +92,7 @@ export function Sol01MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
                   : "text-[#8faec0] hover:bg-[#0d1d2a] hover:text-white"
               }`}
             >
-              <span>📋</span> Mission Checklist ({manager.completedTaskIds.size}/8)
+              <span>📋</span> Mission Checklist ({mgr.completedTaskIds.size}/8)
             </button>
 
             <button
@@ -103,7 +103,7 @@ export function Sol01MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
                   : "text-[#8faec0] hover:bg-[#0d1d2a] hover:text-white"
               }`}
             >
-              <span>📝</span> Mission Logs ({manager.missionLogs.length})
+              <span>📝</span> Mission Logs ({mgr.missionLogs.length})
             </button>
 
             <button
@@ -146,8 +146,8 @@ export function Sol01MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
 
                 <div className="space-y-2.5">
                   {tasks.map(t => {
-                    const isDone = manager.completedTaskIds.has(t.id);
-                    const isCurrent = manager.currentTaskId === t.id;
+                    const isDone = mgr.completedTaskIds.has(t.id);
+                    const isCurrent = mgr.currentTaskId === t.id;
                     return (
                       <div
                         key={t.id}
@@ -257,15 +257,15 @@ export function Sol01MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
                 {/* Saved Log History */}
                 <div>
                   <h3 className="text-sm font-bold font-mono text-[#8faec0] mb-3 uppercase tracking-wider">
-                    Permanent Mission Log Archive ({manager.missionLogs.length} Records)
+                    Permanent Mission Log Archive ({mgr.missionLogs.length} Records)
                   </h3>
-                  {manager.missionLogs.length === 0 ? (
+                  {mgr.missionLogs.length === 0 ? (
                     <div className="rounded-lg border border-[#1b3444] bg-[#08141f] p-6 text-center text-xs text-[#6e8a99]">
                       No logs saved yet. Access Main_Screen_Trigger to record initial log.
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {manager.missionLogs.map(log => (
+                      {mgr.missionLogs.map(log => (
                         <div key={log.log_id} className="rounded-lg border border-[#234559] bg-[#091b28] p-4 text-xs">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-mono font-bold text-[#38d4f0]">{log.log_type}</span>

@@ -52,7 +52,9 @@ export class RoverScreenRenderer {
     if (!screenObj || !screenObj.isMesh) return;
 
     // Reproject planar UVs so offscreen canvas text maps uniformly
-    reprojectPlanarUVs(screenObj.geometry);
+    reprojectPlanarUVs(screenObj.geometry, name === "Computer_Screen_03"
+      ? { uAxis: "x", vAxis: "z" }
+      : { uAxis: "x", vAxis: "y" });
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -68,9 +70,11 @@ export class RoverScreenRenderer {
 
     const material = new THREE.MeshStandardMaterial({
       map: texture,
+      side: THREE.DoubleSide,
+      toneMapped: false,
       emissive: new THREE.Color(0xffffff),
       emissiveMap: texture,
-      emissiveIntensity: 0.95,
+      emissiveIntensity: 1.2,
       roughness: 0.18,
       metalness: 0.1
     });

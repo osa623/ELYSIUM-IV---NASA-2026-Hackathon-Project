@@ -1,6 +1,6 @@
-import habitatData from "../../jsons/Screens/Sol_2/habitatScreenData.json";
-import engineeringData from "../../jsons/Screens/Sol_2/engineeringScreenData.json";
-import missionControlData from "../../jsons/Screens/Sol_2/mission-control-screens.json";
+const habitatData = { screens: [] };
+const engineeringData = { screens: [] };
+const missionControlData = { screens: [] };
 
 export type InvestigationClassification = "anomaly_detected" | "no_anomaly_detected" | "insufficient_evidence";
 
@@ -53,7 +53,7 @@ function entry(
     id,
     title,
     systemId,
-    source: "PHOBOSIA simulated display record",
+    source: "ELYSIUM IV simulated display record",
     sourceType: "SIMULATED_GAME_DATA",
     category,
     description: `This simulated snapshot records the values presented by the ${moduleLabel} ${category.toLowerCase()} display. The information is relevant to reviewing system readiness and identifying follow-up questions, but it is not a time-stamped service log or a certified fault report. Without timestamps, calibration metadata, and approved limits, it cannot establish a verified abnormal condition.`,
@@ -70,8 +70,9 @@ function entry(
   };
 }
 
-const habitatScreens = habitatData.screens as Record<string, { data: unknown }>;
-const engineeringScreens = engineeringData.screens as Record<string, { data: unknown }>;
+const habitatScreens: Record<string, { data?: unknown }> = {};
+const engineeringScreens: Record<string, { data?: unknown }> = {};
+function screenValues(screens: Record<string, { data?: unknown }>, name: string): unknown { return screens[name]?.data ?? {}; }
 const habitatSource = "Sol 2 Habitat display records";
 const engineeringSource = "Sol 2 Engineering display records";
 
@@ -89,9 +90,9 @@ export const SOL2_INVESTIGATION_SYSTEMS: Record<string, InvestigationSystemDefin
       "Select the relevant records and document the evidence limits."
     ],
     logs: [
-      entry("HAB-STATUS-MAIN", "Habitat main status snapshot", "habitat_general_status", "Habitat", habitatSource, "Habitat_Main_Status_Display", habitatScreens.Habitat_Main_Status_Display.data),
-      entry("HAB-LIFE-SUPPORT", "Habitat life-support snapshot", "habitat_life_support", "Habitat", habitatSource, "Habitat_LifeSupport_Display", habitatScreens.Habitat_LifeSupport_Display.data),
-      entry("HAB-EMERGENCY", "Habitat emergency status snapshot", "habitat_emergency_status", "Habitat", habitatSource, "Habitat_Emergency_Status_Display", habitatScreens.Habitat_Emergency_Status_Display.data)
+      entry("HAB-STATUS-MAIN", "Habitat main status snapshot", "habitat_general_status", "Habitat", habitatSource, "Habitat_Main_Status_Display", screenValues(habitatScreens, "Habitat_Main_Status_Display")),
+      entry("HAB-LIFE-SUPPORT", "Habitat life-support snapshot", "habitat_life_support", "Habitat", habitatSource, "Habitat_LifeSupport_Display", screenValues(habitatScreens, "Habitat_LifeSupport_Display")),
+      entry("HAB-EMERGENCY", "Habitat emergency status snapshot", "habitat_emergency_status", "Habitat", habitatSource, "Habitat_Emergency_Status_Display", screenValues(habitatScreens, "Habitat_Emergency_Status_Display"))
     ]
   },
   SOL02_WATER_NUTRITION: {
@@ -105,7 +106,7 @@ export const SOL2_INVESTIGATION_SYSTEMS: Record<string, InvestigationSystemDefin
       "Open and inspect the available supply and quality record.",
       "Record whether the available values support a conclusion or leave an evidence gap."
     ],
-    logs: [entry("HAB-WATER-NUTRITION", "Water and nutrition status snapshot", "habitat_water_nutrition", "Habitat", habitatSource, "Habitat_WaterNutrition_Display", habitatScreens.Habitat_WaterNutrition_Display.data)]
+    logs: [entry("HAB-WATER-NUTRITION", "Water and nutrition status snapshot", "habitat_water_nutrition", "Habitat", habitatSource, "Habitat_WaterNutrition_Display", screenValues(habitatScreens, "Habitat_WaterNutrition_Display"))]
   },
   SOL02_ENGINEERING_MONITORING: {
     taskId: "SOL02_ENGINEERING_MONITORING",
@@ -119,9 +120,9 @@ export const SOL2_INVESTIGATION_SYSTEMS: Record<string, InvestigationSystemDefin
       "Select records relevant to outpost readiness and explain why they matter."
     ],
     logs: [
-      entry("ENG-MON-INDICATORS", "Subsystem health indicators", "engineering_monitoring", "Engineering Unit", engineeringSource, "MonitoringSection_Indicator_Screen", engineeringScreens.MonitoringSection_Indicator_Screen.data),
-      entry("ENG-MON-OPERATIONAL", "Engineering operational snapshot", "engineering_monitoring", "Engineering Unit", engineeringSource, "MonitoringSection_Operational_Screen", engineeringScreens.MonitoringSection_Operational_Screen.data),
-      entry("ENG-MON-NETWORK", "Monitoring network snapshot", "engineering_monitoring", "Engineering Unit", engineeringSource, "MonitoringSection_Screen", engineeringScreens.MonitoringSection_Screen.data)
+      entry("ENG-MON-INDICATORS", "Subsystem health indicators", "engineering_monitoring", "Engineering Unit", engineeringSource, "MonitoringSection_Indicator_Screen", screenValues(engineeringScreens, "MonitoringSection_Indicator_Screen")),
+      entry("ENG-MON-OPERATIONAL", "Engineering operational snapshot", "engineering_monitoring", "Engineering Unit", engineeringSource, "MonitoringSection_Operational_Screen", screenValues(engineeringScreens, "MonitoringSection_Operational_Screen")),
+      entry("ENG-MON-NETWORK", "Monitoring network snapshot", "engineering_monitoring", "Engineering Unit", engineeringSource, "MonitoringSection_Screen", screenValues(engineeringScreens, "MonitoringSection_Screen"))
     ]
   },
   SOL02_POWER_REVIEW: {
@@ -138,10 +139,10 @@ export const SOL2_INVESTIGATION_SYSTEMS: Record<string, InvestigationSystemDefin
       "Select supporting records, classify the evidence, and explain your conclusion."
     ],
     logs: [
-      entry("ENG-POWER-MAIN", "Primary power generation snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreenMain", engineeringScreens.PowerUnitScreenMain.data, ["No approved power-system reference limits are included in the project."]),
-      entry("ENG-POWER-DIAGNOSTICS", "Load distribution and diagnostics snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreenMain02", engineeringScreens.PowerUnitScreenMain02.data, ["Trend values are simulated screen data, not a time-stamped field log."]),
-      entry("ENG-POWER-BUS", "Power bus snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreen000", engineeringScreens.PowerUnitScreen000.data, ["The source display does not define voltage or frequency reference limits."]),
-      entry("ENG-POWER-BATTERY", "Battery storage snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreen000.001", engineeringScreens["PowerUnitScreen000.001"].data, ["The source display does not define battery reference limits."])
+      entry("ENG-POWER-MAIN", "Primary power generation snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreenMain", screenValues(engineeringScreens, "PowerUnitScreenMain"), ["No approved power-system reference limits are included in the project."]),
+      entry("ENG-POWER-DIAGNOSTICS", "Load distribution and diagnostics snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreenMain02", screenValues(engineeringScreens, "PowerUnitScreenMain02"), ["Trend values are simulated screen data, not a time-stamped field log."]),
+      entry("ENG-POWER-BUS", "Power bus snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreen000", screenValues(engineeringScreens, "PowerUnitScreen000"), ["The source display does not define voltage or frequency reference limits."]),
+      entry("ENG-POWER-BATTERY", "Battery storage snapshot", "engineering_power_unit", "Engineering Unit", engineeringSource, "PowerUnitScreen000.001", screenValues(engineeringScreens, "PowerUnitScreen000.001"), ["The source display does not define battery reference limits."])
     ],
     notes: ["The existing screen renderer labels the generation and load values in kW and the battery value in percent.", "Simulated arithmetic check: 98.4 kW reactor output + 42.1 kW solar generation − 118.6 kW total load = 21.9 kW simulated margin.", "The 21.9 kW margin is a calculation from simulated values; it is not a verified outpost power measurement or an external safety limit."]
   },
@@ -158,9 +159,9 @@ export const SOL2_INVESTIGATION_SYSTEMS: Record<string, InvestigationSystemDefin
       "Record any cross-system comparison limits."
     ],
     logs: [
-      entry("ENG-LS-ENVIRONMENT", "Environmental and gas-generation snapshot", "engineering_life_support", "Engineering Unit", engineeringSource, "LifeSupportUnitScreenMain04", engineeringScreens.LifeSupportUnitScreenMain04.data),
-      entry("ENG-LS-WATER", "Water and recycling snapshot", "engineering_life_support", "Engineering Unit", engineeringSource, "LifeSupportUnitScreenMain02.001", engineeringScreens["LifeSupportUnitScreenMain02.001"].data),
-      entry("ENG-LS-AIRFLOW", "Airflow and filtration snapshot", "engineering_life_support", "Engineering Unit", engineeringSource, "LifeSupportUnitScreenMain03", engineeringScreens.LifeSupportUnitScreenMain03.data)
+      entry("ENG-LS-ENVIRONMENT", "Environmental and gas-generation snapshot", "engineering_life_support", "Engineering Unit", engineeringSource, "LifeSupportUnitScreenMain04", screenValues(engineeringScreens, "LifeSupportUnitScreenMain04")),
+      entry("ENG-LS-WATER", "Water and recycling snapshot", "engineering_life_support", "Engineering Unit", engineeringSource, "LifeSupportUnitScreenMain02.001", screenValues(engineeringScreens, "LifeSupportUnitScreenMain02.001")),
+      entry("ENG-LS-AIRFLOW", "Airflow and filtration snapshot", "engineering_life_support", "Engineering Unit", engineeringSource, "LifeSupportUnitScreenMain03", screenValues(engineeringScreens, "LifeSupportUnitScreenMain03"))
     ]
   },
   SOL02_DIAGNOSTICS: {
@@ -175,7 +176,7 @@ export const SOL2_INVESTIGATION_SYSTEMS: Record<string, InvestigationSystemDefin
       "Separate missing diagnostic information from a confirmed fault.",
       "Document whether a follow-up check is justified."
     ],
-    logs: [entry("ENG-DIAG-WORKBENCH", "Diagnostics workbench snapshot", "engineering_diagnostics", "Engineering Unit", engineeringSource, "DiagnosticsWorkbenchScreen_01", engineeringScreens.DiagnosticsWorkbenchScreen_01.data, ["A missing diagnostic result is not evidence of a fault."])]
+    logs: [entry("ENG-DIAG-WORKBENCH", "Diagnostics workbench snapshot", "engineering_diagnostics", "Engineering Unit", engineeringSource, "DiagnosticsWorkbenchScreen_01", screenValues(engineeringScreens, "DiagnosticsWorkbenchScreen_01"), ["A missing diagnostic result is not evidence of a fault."])]
   }
 };
 
@@ -196,13 +197,13 @@ export interface TrainingDataset {
 
 export const SOL3_TRAINING_DATASETS: TrainingDataset[] = [
   {
-    id: "PHOBOSIA_TARGET_PROFILE_TRAINING",
-    title: "PHOBOSIA Training Target Profiles",
-    source: "Existing PHOBOSIA MissionManager target profiles",
-    provider: "PHOBOSIA simulated mission configuration",
+    id: "ELYSIUM_IV_TARGET_PROFILE_TRAINING",
+    title: "ELYSIUM IV Target Profiles",
+    source: "Existing ELYSIUM IV target profiles",
+    provider: "ELYSIUM IV simulated mission configuration",
     productType: "Target-planning metadata",
     measurementType: "No scientific measurements included",
-    spatialCoverage: "PHOBOSIA in-game scene profiles only; not Mars geodetic coordinates",
+    spatialCoverage: "ELYSIUM IV in-game scene profiles only; not Mars geodetic coordinates",
     temporalCoverage: "Not recorded",
     units: "Scene coordinate units only; no scientific measurement units",
     limitations: [
@@ -211,7 +212,7 @@ export const SOL3_TRAINING_DATASETS: TrainingDataset[] = [
       "It contains no imagery, spectra, geology measurements, or independently verified accessibility data.",
       "It can support a training plan for what to observe, but cannot establish a scientific conclusion."
     ],
-    provenance: "PHOBOSIA simulated mission target profiles",
+    provenance: "ELYSIUM IV simulated mission target profiles",
     isSimulated: true
   }
 ];
@@ -220,9 +221,9 @@ export const SOL3_CONTEXT_LOGS: InvestigationLogEntry[] = [
   entry("SOL03-MISSION-CONTEXT", "Active mission context", "mission_context", "MissionManager", "src/core/MissionManager.ts → DAYS_CONFIG[3]", "Sol 3 mission definition", {
     missionObjective: "Scientific Target Selection",
     availableReadinessRecord: "Loaded from the player's submitted Sol 2 readiness assessment",
-    provenance: "Player-generated PHOBOSIA mission record",
+    provenance: "Player-generated ELYSIUM IV mission record",
     limitations: ["Does not certify real outpost conditions."]
-  }, ["Mission context is fictional PHOBOSIA story information; readiness evidence remains simulated/player-generated."])
+  }, ["Mission context is fictional ELYSIUM IV story information; readiness evidence remains simulated/player-generated."])
 ];
 
 export const SOL3_SYSTEM_LOGS: InvestigationLogEntry[] = [

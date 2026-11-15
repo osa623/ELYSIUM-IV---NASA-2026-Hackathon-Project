@@ -3,14 +3,14 @@
   "project": "ELYSIUM_IV",
   "configuration_version": "1.0",
   "mission_id": "SOL_02",
-  "mission_title": "SOL 02 - Night-time Soil Investigation",
-  "mission_type": "NIGHT_TIME_SCIENTIFIC_INVESTIGATION",
+  "mission_title": "SOL 02 - Daytime Soil Investigation",
+  "mission_type": "DAYTIME_SCIENTIFIC_INVESTIGATION",
   "mission_status": "LOCKED_UNTIL_SOL_01_COMPLETION",
 
   "terrain": {
     "asset": "ELYSIUM_IV_SOL_02_Terrain",
-    "time_of_day": "NIGHT",
-    "environment_profile": "MARS_NIGHT",
+    "time_of_day": "DAY",
+    "environment_profile": "MARS_DAY",
     "starting_point": "Sol2_starting_Point",
     "vehicle_spawn_reference": "Vehicle_Spwaning_Point",
     "checkpoint": "Sol2_Checkpoint",
@@ -89,10 +89,10 @@
   },
 
   "mission_environment": {
-    "time_of_day": "NIGHT",
-    "lighting_profile": "MARS_NIGHT",
-    "environmental_mood": "DARK_COLD_MARTIAN_SURFACE",
-    "terrain_visibility": "LOW_TO_MODERATE",
+    "time_of_day": "DAY",
+    "lighting_profile": "MARS_DAY",
+    "environmental_mood": "SUNLIT_MARTIAN_SURFACE",
+    "terrain_visibility": "NORMAL_DAYLIGHT",
     "rover_headlights_required": true,
     "navigation_beam_required": true,
     "environment_data": {
@@ -218,8 +218,8 @@
     },
     {
       "id": "SOL02_TASK_04",
-      "title": "Inspect Night-time Environment",
-      "description": "Inspect the external Martian night environment, including temperature, surface pressure, wind speed, wind direction and visibility.",
+      "title": "Inspect Daytime Environment",
+      "description": "Inspect the external Martian daytime environment, including temperature, surface pressure, wind speed, wind direction and visibility.",
       "type": "ENVIRONMENT_INSPECTION",
       "target": "Environment_Checking_Trigger",
       "completion": {
@@ -660,11 +660,11 @@
   },
 
   "exterior_lighting": {
-    "night_scene": true,
-    "require_rover_headlights": true,
+    "night_scene": false,
+    "require_rover_headlights": false,
     "use_existing_vehicle_lights": true,
     "preserve_existing_light_controls": true,
-    "navigation_beam_visible_at_night": true
+    "navigation_beam_visible_during_day": true
   },
 
   "completion": {

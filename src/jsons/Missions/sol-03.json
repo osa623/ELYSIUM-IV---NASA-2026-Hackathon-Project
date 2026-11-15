@@ -1,220 +1,636 @@
 {
   "project": "ELYSIUM_IV",
-  "configuration_version": "1.0",
+  "version": "1.0",
   "mission_id": "SOL_03",
-  "mission_title": "SOL 03 - Highland Traverse & Mountain Photography",
-  "mission_type": "GEOLOGICAL_PHOTOGRAPHIC_SURVEY",
-  "mission_status": "LOCKED_UNTIL_SOL_02_COMPLETION",
-
-  "terrain": {
-    "asset": "ELYSIUM_IV_SOL_03_Terrain",
-    "time_of_day": "DAY",
-    "environment_profile": "MARS_DAY",
-    "starting_point": "SOL3_starting_Point",
-    "vehicle_spawn_reference": "Terrain_Rover",
-    "checkpoint": "Sol3_Checkpoint",
-    "finishing_point": "SOL3_Finishing_Point",
-    "environment_map": "/assets/exr/mars-dunes-day-light_2K_fc2ff73b-6eed-4836-92ed-f94e0d2d649f.exr"
+  "title": "SOL 03 - Mountain Range Observation",
+  "type": "DAYTIME_MARS_EXPLORATION",
+  "description": "Final exploration mission focusing on mountain range photography, environmental observation, resource verification and mission completion.",
+  "mission_requirements": {
+    "required_previous_missions": [
+      "SOL_01",
+      "SOL_02"
+    ],
+    "require_sol_01_completed": true,
+    "require_sol_02_completed": true,
+    "previous_mission_logs_read_only": true
   },
-
+  "environment": {
+    "time_of_day": "DAY",
+    "lighting_profile": "DAYLIGHT",
+    "environment_map": {
+      "type": "EXR",
+      "asset": null,
+      "load_from_project_assets": true,
+      "instruction": "Inspect the existing project assets and locate the intended SOL 03 EXR environment map. Do not invent an EXR filename or use the SOL 02 night environment."
+    },
+    "terrain": {
+      "asset": "ELYSIUM_IV_SOL_03_Terrain",
+      "load_existing_glb": true,
+      "preserve_existing_terrain_objects": true,
+      "preserve_existing_vehicle_position": true
+    }
+  },
+  "waypoints": {
+    "player_spawn": "Sol3_starting_Point",
+    "checkpoint": "Sol3_Checkpoint",
+    "finishing_point": "SOL3_Finishing_Point"
+  },
+  "gameplay": {
+    "vehicle_system": {
+      "reuse_existing_vehicle": true,
+      "reuse_existing_controller": true,
+      "reuse_existing_physics": true,
+      "reuse_existing_steering": true,
+      "reuse_existing_wheel_animation": true,
+      "reuse_existing_lights": true,
+      "reuse_existing_enter_exit_system": true
+    },
+    "interaction": {
+      "interaction_key": "E",
+      "all_mission_triggers_require_interaction": true
+    },
+    "navigation": {
+      "reuse_existing_dynamic_beam": true,
+      "show_destination_beacon": true,
+      "one_active_destination_at_a_time": true,
+      "update_from_vehicle_world_position": true
+    },
+    "eva": {
+      "reuse_existing_eva_system": true,
+      "camera_available": true,
+      "camera_unlock_condition": "SOL3_CHECKPOINT_REACHED"
+    }
+  },
+  "resource_progression": {
+    "description": "Water and nutrition resources must gradually decrease across SOL 01, SOL 02 and SOL 03. Never increase the water level when progressing to a later SOL.",
+    "water": {
+      "unit": "PERCENT",
+      "sol_01_reference": 80,
+      "sol_02_reference": 70,
+      "sol_03_initial": 40,
+      "must_not_increase_between_sols": true
+    },
+    "nutrition": {
+      "unit": "PERCENT",
+      "sol_01_reference": 92,
+      "sol_02_reference": 89,
+      "sol_03_initial": 85,
+      "must_not_increase_between_sols": true
+    },
+    "environmental_values": {
+      "temperature": "SIMULATED_DYNAMIC",
+      "oxygen": "SIMULATED_DYNAMIC",
+      "carbon_dioxide": "SIMULATED_DYNAMIC",
+      "pressure": "SIMULATED_DYNAMIC",
+      "wind": "SIMULATED_DYNAMIC",
+      "visibility": "SIMULATED_DYNAMIC",
+      "allow_values_to_increase_or_decrease": true
+    },
+    "data_integrity": {
+      "preserve_previous_sol_records": true,
+      "do_not_overwrite_previous_sol_telemetry": true,
+      "use_simulated_gameplay_telemetry": true,
+      "do_not_present_simulated_values_as_live_nasa_measurements": true
+    }
+  },
+  "initial_telemetry": {
+    "environment": {
+      "temperature_celsius": -55,
+      "surface_pressure_mbar": 6.3,
+      "wind_speed_mps": 5.2,
+      "wind_direction": "NORTH_EAST",
+      "atmospheric_co2_percent": 95.1,
+      "atmospheric_o2_percent": 0.16,
+      "visibility_km": 3.2,
+      "dust_condition": "LOW"
+    },
+    "rover_cabin": {
+      "oxygen_percent": 96,
+      "co2_percent": 0.11,
+      "cabin_pressure_kpa": 70,
+      "temperature_celsius": 20.4,
+      "air_filter_percent": 91,
+      "battery_percent": 86,
+      "system_status": "OPERATIONAL"
+    },
+    "resources": {
+      "water_percent": 40,
+      "nutrition_percent": 85
+    }
+  },
   "telemetry_profiles": {
     "initial": {
       "environment": {
-        "temperature_celsius": -52,
-        "pressure_mbar": 6.8,
+        "temperature_celsius": -55,
+        "pressure_mbar": 6.3,
         "wind_speed_m_s": 5.2,
-        "wind_direction": "WEST_NORTH_WEST",
-        "co2_percent": 95.3,
-        "dust_visibility": "CLEAR_TO_MODERATE",
-        "visibility_km": 4.5
+        "wind_direction": "NORTH_EAST",
+        "co2_percent": 95.1,
+        "dust_visibility": "LOW",
+        "visibility_km": 3.2
       },
       "cabin": {
         "oxygen_percent": 96,
         "air_filter_percent": 91,
-        "battery_percent": 88,
-        "cabin_pressure_kpa": 70.2,
-        "cabin_co2_percent": 0.08,
-        "cabin_temperature_celsius": 21.4,
-        "system_status": "OPTIMAL"
+        "battery_percent": 86,
+        "cabin_pressure_kpa": 70,
+        "cabin_co2_percent": 0.11,
+        "cabin_temperature_celsius": 20.4,
+        "system_status": "OPERATIONAL"
       },
       "resources": {
         "water_percent": 40,
         "water_liters": 40,
-        "nutrient_percent": 68,
-        "status": "OPERATIONAL"
+        "nutrient_percent": 85,
+        "status": "NOMINAL"
       }
     },
     "checkpoint_mountain": {
       "environment": {
-        "temperature_celsius": -56,
-        "pressure_mbar": 6.6,
-        "wind_speed_m_s": 7.8,
-        "wind_direction": "NORTH_WEST",
-        "co2_percent": 95.3,
-        "dust_visibility": "CLEAR",
-        "visibility_km": 6.0
+        "temperature_celsius": -58,
+        "pressure_mbar": 6.2,
+        "wind_speed_m_s": 6.4,
+        "wind_direction": "NORTH_EAST",
+        "co2_percent": 95.2,
+        "dust_visibility": "LOW",
+        "visibility_km": 3
       },
       "cabin": {
-        "oxygen_percent": 94,
+        "oxygen_percent": 96,
         "air_filter_percent": 89,
-        "battery_percent": 79,
-        "cabin_pressure_kpa": 70.1,
-        "cabin_co2_percent": 0.10,
-        "cabin_temperature_celsius": 21.0,
-        "system_status": "OPTIMAL"
+        "battery_percent": 78,
+        "cabin_pressure_kpa": 70,
+        "cabin_co2_percent": 0.12,
+        "cabin_temperature_celsius": 20.1,
+        "system_status": "OPERATIONAL"
       },
       "resources": {
         "water_percent": 38,
         "water_liters": 38,
-        "nutrient_percent": 65,
-        "status": "OPERATIONAL"
+        "nutrient_percent": 85,
+        "status": "NOMINAL"
       }
     },
     "final_destination": {
       "environment": {
-        "temperature_celsius": -58,
-        "pressure_mbar": 6.5,
-        "wind_speed_m_s": 8.4,
-        "wind_direction": "NORTH_WEST",
-        "co2_percent": 95.4,
-        "dust_visibility": "CLEAR",
-        "visibility_km": 5.8
+        "temperature_celsius": -62,
+        "pressure_mbar": 6.1,
+        "wind_speed_m_s": 7.1,
+        "wind_direction": "NORTH_EAST",
+        "co2_percent": 95.3,
+        "dust_visibility": "LOW",
+        "visibility_km": 2.8
       },
       "cabin": {
-        "oxygen_percent": 92,
+        "oxygen_percent": 95,
         "air_filter_percent": 87,
-        "battery_percent": 72,
-        "cabin_pressure_kpa": 70.0,
-        "cabin_co2_percent": 0.12,
-        "cabin_temperature_celsius": 20.8,
-        "system_status": "OPTIMAL"
+        "battery_percent": 71,
+        "cabin_pressure_kpa": 70,
+        "cabin_co2_percent": 0.13,
+        "cabin_temperature_celsius": 19.8,
+        "system_status": "OPERATIONAL"
       },
       "resources": {
         "water_percent": 36,
         "water_liters": 36,
-        "nutrient_percent": 62,
-        "status": "OPERATIONAL"
+        "nutrient_percent": 84,
+        "status": "NOMINAL"
       }
     }
   },
-
+  "mission_phases": [
+    "ARRIVAL",
+    "MISSION_LOG_REVIEW",
+    "INITIAL_ENVIRONMENT_INSPECTION",
+    "WATER_AND_NUTRITION_INSPECTION",
+    "ENVIRONMENT_SYSTEM_INSPECTION",
+    "TOOL_INSPECTION",
+    "DRIVE_TO_CHECKPOINT",
+    "EVA_MOUNTAIN_PHOTOGRAPHY",
+    "RETURN_TO_ROVER",
+    "PHOTO_REVIEW_AND_RESEARCH_LOG",
+    "DRIVE_TO_FINISHING_POINT",
+    "FINAL_MISSION_REPORT",
+    "FINAL_RESOURCE_VERIFICATION",
+    "FINAL_ENVIRONMENT_VERIFICATION",
+    "FINAL_TOOL_VERIFICATION",
+    "COMPLETE_JOURNEY"
+  ],
   "tasks": [
     {
       "id": "SOL03_TASK_01",
-      "title": "Enter the Terrain Rover",
-      "description": "Locate the vehicle near the SOL 03 starting point and enter through the ladder.",
-      "type": "INTERACTION",
-      "target": "ladder"
+      "order": 1,
+      "title": "Enter the Terrain Vehicle",
+      "description": "Locate the rover at its existing position and enter using the ladder.",
+      "trigger": "ladder",
+      "interaction": "E",
+      "completion_condition": "PLAYER_ENTERED_VEHICLE",
+      "required": true
     },
     {
       "id": "SOL03_TASK_02",
+      "order": 2,
       "title": "Review Previous Mission Records",
-      "description": "Access Mission OS to review persisted SOL 01 and SOL 02 reconnaissance, resource baselines, and soil investigation logs.",
-      "type": "MISSION_OS",
-      "target": "Main_Screen_Trigger"
+      "description": "Open Mission OS and review the saved mission logs, observations, soil investigation records and reports from SOL 01 and SOL 02.",
+      "trigger": "Main_Screen_Trigger",
+      "interaction": "E",
+      "completion_condition": "SOL01_AND_SOL02_RECORDS_REVIEWED",
+      "required": true,
+      "data_sources": [
+        "SOL_01",
+        "SOL_02"
+      ],
+      "read_only": true
     },
     {
       "id": "SOL03_TASK_03",
-      "title": "Inspect Water and Nutrition Supplies",
-      "description": "Verify current life support reserves (SOL 03 reference water: 40%). Save inspection confirmation.",
-      "type": "RESOURCE_INSPECTION",
-      "target": "Water_and_nut_Trigger"
+      "order": 3,
+      "title": "Inspect Water and Nutrition Systems",
+      "description": "Inspect the remaining water supply and nutrition levels. Compare them with previous SOL records.",
+      "trigger": "Water_and_nut_Trigger",
+      "interaction": "E",
+      "completion_condition": "WATER_AND_NUTRITION_INSPECTED",
+      "required": true,
+      "display_fields": [
+        "water_level_percent",
+        "nutrition_level_percent",
+        "previous_sol_water_comparison",
+        "previous_sol_nutrition_comparison",
+        "system_status"
+      ],
+      "save_inspection_record": true
     },
     {
       "id": "SOL03_TASK_04",
-      "title": "Inspect Environment and Oxygen Systems",
-      "description": "Inspect external daytime Martian telemetry and cabin atmospheric life support. Save inspection record.",
-      "type": "ENVIRONMENT_INSPECTION",
-      "target": "Environment_Checking_Trigger"
+      "order": 4,
+      "title": "Inspect Environmental and Oxygen Systems",
+      "description": "Inspect environmental conditions, oxygen systems, carbon dioxide levels, pressure and temperature.",
+      "trigger": "Environment_Checking_Trigger",
+      "interaction": "E",
+      "completion_condition": "ENVIRONMENT_AND_OXYGEN_INSPECTED",
+      "required": true,
+      "display_fields": [
+        "temperature_celsius",
+        "surface_pressure_mbar",
+        "wind_speed_mps",
+        "wind_direction",
+        "atmospheric_co2_percent",
+        "atmospheric_o2_percent",
+        "cabin_oxygen_percent",
+        "cabin_co2_percent",
+        "cabin_pressure_kpa",
+        "air_filter_percent",
+        "visibility_km",
+        "dust_condition",
+        "system_status"
+      ],
+      "save_inspection_record": true
     },
     {
       "id": "SOL03_TASK_05",
-      "title": "Inspect Mission Equipment & Tools",
-      "description": "Verify the EVA high-resolution imaging and geological equipment inventory.",
-      "type": "TOOL_CHECKLIST",
-      "target": "Tool_Section_Trigger"
+      "order": 5,
+      "title": "Inspect Mission Tools",
+      "description": "Review the available mission equipment and confirm that the required tools are available.",
+      "trigger": "Tool_Section_Trigger",
+      "interaction": "E",
+      "completion_condition": "TOOLS_INSPECTED_AND_CONFIRMED",
+      "required": true,
+      "save_inspection_record": true
     },
     {
       "id": "SOL03_TASK_06",
-      "title": "Drive to Highland Photography Checkpoint",
-      "description": "Follow the navigation beam to Sol3_Checkpoint atop the highland overlook.",
-      "type": "DRIVING",
-      "target": "Sol3_Checkpoint"
+      "order": 6,
+      "title": "Drive to SOL 03 Checkpoint",
+      "description": "Start the rover and follow the navigation beam to Sol3_Checkpoint.",
+      "trigger": "Driving_Section_Trigger",
+      "navigation_target": "Sol3_Checkpoint",
+      "completion_condition": "ROVER_REACHED_SOL3_CHECKPOINT",
+      "required": true,
+      "navigation": {
+        "enabled": true,
+        "dynamic_beam": true,
+        "destination_beacon": true,
+        "visible_at_long_distance": true
+      }
     },
     {
       "id": "SOL03_TASK_07",
+      "order": 7,
       "title": "Capture Mountain Range Photographs",
-      "description": "Exit the rover in EVA suit and capture between 4 and 6 high-resolution mountain photographs with the EVA camera.",
-      "type": "EVA_PHOTOGRAPHY",
-      "target": "Sol3_Checkpoint"
+      "description": "Exit the rover wearing the EVA suit. Use the EVA camera interface to photograph the SOL 03 mountain range.",
+      "trigger": "Sol3_Checkpoint",
+      "interaction": "E",
+      "completion_condition": "MINIMUM_FOUR_SAVED_PHOTOGRAPHS",
+      "required": true,
+      "camera": {
+        "enabled": true,
+        "interface": "EVA_CAMERA",
+        "capture_method": "SCREEN_RENDERER_CAPTURE",
+        "capture_action": "RIGHT_MOUSE_BUTTON",
+        "save_action": "SAVE_BUTTON",
+        "delete_action": "DELETE_BUTTON",
+        "exit_action": "BACKSPACE",
+        "minimum_required_photos": 4,
+        "maximum_allowed_photos": 6,
+        "task_completes_at_minimum": true,
+        "allow_additional_photos_after_minimum": true,
+        "show_controls_on_screen": true,
+        "show_live_camera_preview": true,
+        "preserve_camera_view": true,
+        "save_to_browser_storage": true,
+        "persist_photo_blobs": true,
+        "preserve_photo_metadata": true,
+        "photo_metadata": [
+          "photo_id",
+          "capture_timestamp",
+          "capture_position",
+          "camera_heading_degrees",
+          "camera_pitch_degrees",
+          "camera_direction",
+          "photo_blob_reference"
+        ],
+        "controls": {
+          "right_mouse_button": "CAPTURE_PREVIEW",
+          "save_button": "SAVE_PHOTO",
+          "delete_button": "DELETE_SELECTED_PHOTO",
+          "backspace": "EXIT_CAMERA"
+        },
+        "requirements": [
+          "Do not count preview-only captures as saved photographs.",
+          "Only successfully saved photographs count toward the required four.",
+          "Allow the user to capture up to six photographs.",
+          "Do not automatically exit the camera when the fourth photograph is saved.",
+          "After at least four photographs have been saved, mark the photography task complete when the user exits using Backspace.",
+          "Do not delete saved photographs when exiting the camera."
+        ]
+      }
     },
     {
       "id": "SOL03_TASK_08",
-      "title": "Return to the Terrain Rover",
-      "description": "Return to the vehicle with the captured photographic dataset and re-enter via ladder.",
-      "type": "ROVER_ENTRY",
-      "target": "ladder"
+      "order": 8,
+      "title": "Return to the Terrain Vehicle",
+      "description": "Return to the rover with the saved mountain range photographs and enter using the ladder.",
+      "trigger": "ladder",
+      "interaction": "E",
+      "completion_condition": "PLAYER_RETURNED_TO_VEHICLE",
+      "required": true
     },
     {
       "id": "SOL03_TASK_09",
-      "title": "Review Mountain Photographs in Mission OS",
-      "description": "Open Mission OS and review the photographic gallery and spatial telemetry captured at the overlook.",
-      "type": "MISSION_OS",
-      "target": "Main_Screen_Trigger"
+      "order": 9,
+      "title": "Review Mountain Photographs",
+      "description": "Review the saved mountain range photographs in the Mission OS gallery before preparing the research log.",
+      "trigger": "Main_Screen_Trigger",
+      "interaction": "E",
+      "completion_condition": "SAVED_PHOTOGRAPHS_REVIEWED",
+      "required": true,
+      "photo_gallery": {
+        "source": "SOL3_SAVED_PHOTOGRAPHS",
+        "display_all_saved_photos": true,
+        "preserve_aspect_ratio": true,
+        "allow_photo_review": true,
+        "display_metadata": true
+      }
     },
     {
       "id": "SOL03_TASK_10",
-      "title": "Submit Mountain Research Log",
-      "description": "Complete and save the field geological research log documenting mountain features and observations.",
-      "type": "RESEARCH_LOG",
-      "target": "Main_Screen_Trigger"
+      "order": 10,
+      "title": "Save Mountain Research Log",
+      "description": "Record the highland observations and photo references in the research log, then save the record.",
+      "trigger": "Main_Screen_Trigger",
+      "interaction": "E",
+      "completion_condition": "RESEARCH_LOG_SAVED",
+      "required": true,
+      "research_log": {
+        "required": true,
+        "fields": [
+          "report_heading",
+          "mountain_range_observations",
+          "photo_references",
+          "mountain_heading_degrees",
+          "temperature_celsius",
+          "environmental_conditions",
+          "researcher_notes"
+        ],
+        "optional_fields": [
+          "mountain_heading_degrees",
+          "temperature_celsius",
+          "environmental_conditions",
+          "researcher_notes"
+        ],
+        "save_persistently": true
+      }
     },
     {
       "id": "SOL03_TASK_11",
-      "title": "Drive to Final Expedition Destination",
-      "description": "Navigate following the active beam to SOL3_Finishing_Point.",
-      "type": "DRIVING",
-      "target": "SOL3_Finishing_Point"
+      "order": 11,
+      "title": "Drive to SOL 03 Finishing Point",
+      "description": "Activate driving mode and follow the navigation beam to SOL3_Finishing_Point.",
+      "trigger": "Driving_Section_Trigger",
+      "navigation_target": "SOL3_Finishing_Point",
+      "completion_condition": "ROVER_REACHED_SOL3_FINISHING_POINT",
+      "required": true,
+      "navigation": {
+        "enabled": true,
+        "dynamic_beam": true,
+        "destination_beacon": true
+      }
     },
     {
       "id": "SOL03_TASK_12",
-      "title": "Final Mission Control Overview & Report",
-      "description": "Open Mission OS, review the complete consolidated 3-Sol mission history, and save the final expedition report.",
-      "type": "FINAL_REPORT",
-      "target": "Main_Screen_Trigger"
+      "order": 12,
+      "title": "Complete Final Mission Report",
+      "description": "Return to Mission Control and prepare the final SOL 03 report using the complete SOL 01, SOL 02 and SOL 03 mission records.",
+      "trigger": "Main_Screen_Trigger",
+      "interaction": "E",
+      "completion_condition": "FINAL_REPORT_SAVED",
+      "required": true,
+      "report": {
+        "include_previous_sol_records": true,
+        "include_sol_01": true,
+        "include_sol_02": true,
+        "include_sol_03": true,
+        "include_mission_logs": true,
+        "include_environmental_records": true,
+        "include_resource_records": true,
+        "include_soil_investigation_records": true,
+        "include_mountain_photographs": true,
+        "include_research_observations": true,
+        "include_tool_inspections": true,
+        "include_navigation_records": true,
+        "allow_user_written_report": true,
+        "require_user_save": true,
+        "persist_report": true
+      }
     },
     {
       "id": "SOL03_TASK_13",
-      "title": "Final Water and Nutrition Confirmation",
-      "description": "Perform the final life support resource assessment and save the confirmation record.",
-      "type": "FINAL_CHECK",
-      "target": "Water_and_nut_Trigger"
+      "order": 13,
+      "title": "Final Water and Nutrition Verification",
+      "description": "Inspect the final water and nutrition condition and confirm the resource status. Record any anomaly if observed.",
+      "trigger": "Water_and_nut_Trigger",
+      "interaction": "E",
+      "completion_condition": "FINAL_WATER_INSPECTION_CONFIRMED",
+      "required": true,
+      "display_fields": [
+        "water_level_percent",
+        "nutrition_level_percent",
+        "system_status"
+      ],
+      "anomaly_report": {
+        "enabled": true,
+        "optional": true,
+        "field": "water_anomaly_description",
+        "allow_empty": true,
+        "save_persistently": true
+      },
+      "require_confirmation": true
     },
     {
       "id": "SOL03_TASK_14",
-      "title": "Final Environmental Telemetry Confirmation",
-      "description": "Perform final environmental sensor checks and confirm surface telemetry.",
-      "type": "FINAL_CHECK",
-      "target": "Environment_Checking_Trigger"
+      "order": 14,
+      "title": "Final Environmental Verification",
+      "description": "Perform the final environmental and oxygen system inspection. Confirm the readings and optionally record anomalies.",
+      "trigger": "Environment_Checking_Trigger",
+      "interaction": "E",
+      "completion_condition": "FINAL_ENVIRONMENT_INSPECTION_CONFIRMED",
+      "required": true,
+      "display_fields": [
+        "temperature_celsius",
+        "surface_pressure_mbar",
+        "wind_speed_mps",
+        "atmospheric_co2_percent",
+        "atmospheric_o2_percent",
+        "cabin_oxygen_percent",
+        "cabin_co2_percent",
+        "visibility_km",
+        "dust_condition",
+        "system_status"
+      ],
+      "anomaly_report": {
+        "enabled": true,
+        "optional": true,
+        "field": "environment_anomaly_description",
+        "allow_empty": true,
+        "save_persistently": true
+      },
+      "require_confirmation": true
     },
     {
       "id": "SOL03_TASK_15",
-      "title": "Final Equipment Inventory Audit",
-      "description": "Verify and lock the equipment inventory locker.",
-      "type": "FINAL_CHECK",
-      "target": "Tool_Section_Trigger"
+      "order": 15,
+      "title": "Final Mission Tool Verification",
+      "description": "Inspect and confirm the mission equipment inventory before completing the journey.",
+      "trigger": "Tool_Section_Trigger",
+      "interaction": "E",
+      "completion_condition": "FINAL_TOOL_INSPECTION_CONFIRMED",
+      "required": true,
+      "save_inspection_record": true
     },
     {
       "id": "SOL03_TASK_16",
-      "title": "Complete Journey",
-      "description": "Authorize final expedition sign-off in Mission OS and play the final expedition cinematic.",
-      "type": "EXPEDITION_COMPLETION",
-      "target": "Main_Screen_Trigger"
+      "order": 16,
+      "title": "Complete the Journey",
+      "description": "Return to Mission Control, review the final mission status and confirm Complete Journey to finish ELYSIUM IV.",
+      "trigger": "Main_Screen_Trigger",
+      "interaction": "E",
+      "completion_condition": "ALL_REQUIRED_MISSION_TASKS_COMPLETE_AND_COMPLETE_JOURNEY_CONFIRMED",
+      "required": true,
+      "final_action": {
+        "button_label": "COMPLETE JOURNEY",
+        "require_all_previous_tasks": true,
+        "require_final_report_saved": true,
+        "require_final_water_confirmation": true,
+        "require_final_environment_confirmation": true,
+        "require_final_tool_confirmation": true,
+        "mark_sol_03_completed": true,
+        "mark_entire_elysium_iv_mission_completed": true,
+        "unlock_no_further_sol": true,
+        "save_final_mission_state": true,
+        "play_final_video": true
+      }
     }
   ],
-
+  "screen_rendering": {
+    "configuration_directory": "src/jsons/Screens/SOL_03/",
+    "reuse_existing_screen_renderer": true,
+    "reuse_existing_glb_screen_objects": true,
+    "screens": {
+      "Computer_Screen_01": "MISSION_OVERVIEW_AND_LOGS",
+      "Computer_Screen_02": "ENVIRONMENT_AND_OXYGEN_STATUS",
+      "Computer_Screen_03": "MOUNTAIN_PHOTO_AND_RESEARCH_STATUS",
+      "O2_Screen": "OXYGEN_AND_CABIN_STATUS",
+      "Water_and_Nut_Screen": "WATER_AND_NUTRITION_STATUS",
+      "Water_and_Nut_Screen_02(small)": "RESOURCE_SUMMARY",
+      "sm_Air_filter_screen": "AIR_FILTER_STATUS",
+      "sm_battery_Screen": "BATTERY_STATUS",
+      "sm_cabin_pressure": "CABIN_PRESSURE",
+      "sm_co2_screen": "CARBON_DIOXIDE_STATUS",
+      "sm_environment_screen": "ENVIRONMENT_STATUS",
+      "sm_o2_Screen": "OXYGEN_STATUS",
+      "sm_status_screen": "SYSTEM_STATUS",
+      "sm_temperature_screen": "TEMPERATURE_STATUS"
+    },
+    "requirements": [
+      "Reuse the SOL 01 and SOL 02 screen rendering architecture.",
+      "Use SOL 03-specific telemetry.",
+      "Update small screens with the correct SOL 03 values.",
+      "Do not create duplicate screen rendering systems.",
+      "Keep GLB screens as passive rendered displays.",
+      "Use the existing Main_Screen_Trigger to open Mission OS."
+    ]
+  },
+  "persistence": {
+    "namespace": "elysium_iv",
+    "storage_key": "elysium_iv_sol_03_progress",
+    "save_task_progress": true,
+    "save_telemetry": true,
+    "save_inspection_records": true,
+    "save_navigation_state": true,
+    "save_photographs": true,
+    "save_photo_metadata": true,
+    "save_research_log": true,
+    "save_final_report": true,
+    "save_anomaly_reports": true,
+    "save_completion_state": true,
+    "restore_after_reload": true,
+    "preserve_sol_01_records": true,
+    "preserve_sol_02_records": true,
+    "preserve_sol_03_records": true,
+    "do_not_overwrite_previous_sol_data": true
+  },
   "final_video": {
-    "path": "/assets/videos/finalVideo/finalVideo.mp4",
-    "trigger": "COMPLETE_JOURNEY_BUTTON"
-  }
+    "enabled": true,
+    "filesystem_path": "F:\\Elysium_iv\\public\\assets\\videos\\finalVideo\\finalVideo.mp4",
+    "browser_url": "/assets/videos/finalVideo/finalVideo.mp4",
+    "play_only_after": "COMPLETE_JOURNEY_CONFIRMED",
+    "autoplay": true,
+    "controls": true,
+    "full_screen_supported": true,
+    "show_video_after_all_mission_tasks_complete": true,
+    "prevent_duplicate_playback": true
+  },
+  "completion": {
+    "sol_id": "SOL_03",
+    "mission_id": "ELYSIUM_IV",
+    "require_all_tasks_complete": true,
+    "require_final_report": true,
+    "require_final_inspections": true,
+    "require_complete_journey_confirmation": true,
+    "save_final_state": true,
+    "play_final_video": true
+  },
+  "important_constraints": [
+    "Do not implement SOL 01 or SOL 02 again.",
+    "Do not reset or overwrite previous SOL progress.",
+    "Do not modify existing rover physics or vehicle controls.",
+    "Do not duplicate the existing navigation beam system.",
+    "Do not duplicate the existing EVA system.",
+    "Do not replace the existing Mission OS.",
+    "Do not make GLB screens clickable.",
+    "Do not expose the SOL 03 finishing navigation target before the research log has been saved.",
+    "Do not complete the photography task using fewer than four successfully saved photographs.",
+    "Do not increase water or nutrition levels between SOL missions.",
+    "All environmental telemetry values are simulated gameplay values unless explicitly connected to a verified data source."
+  ]
 }

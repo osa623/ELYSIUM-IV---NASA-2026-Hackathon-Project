@@ -110,7 +110,7 @@ export function TransitionLoadingScreen({ source, destination, progress, onPoint
   }} aria-live="polite" aria-label="Destination module loading">
     <div ref={globeHost} className={styles.globe} aria-hidden="true" />
     <div className={styles.readout}>
-      <div className={styles.kicker}>PHOBOSIA · MODULE TRANSIT</div>
+      <div className={styles.kicker}>ELYSIUM IV · EXPEDITION TRANSIT</div>
       <div className={styles.percentage} aria-label={percent === null ? "Loading progress unavailable" : `${percent}%`}>
         <span>{percent === null ? "—" : percent}</span>{percent !== null && <small>%</small>}
       </div>

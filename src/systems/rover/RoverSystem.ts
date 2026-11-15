@@ -5,9 +5,9 @@ const TRIGGER_NAMES = ["ladder", "Ladder", "terrainRover_trigger"] as const;
 const WHEEL_NAMES = ["Rover_Front_Wheels", "Rover_Midde_Wheels", "Rover_Rear_Wheels"] as const;
 const AXLE_STEERING_FACTORS = [1, 0.35, 0.2] as const;
 
-/** Forward and lateral axes in Terrain_Rover local space (model authored with +20° yaw offset from -X) */
-export const ROVER_LOCAL_FORWARD = new THREE.Vector3(-0.939692632, 0, 0.342020112).normalize();
-export const ROVER_LOCAL_RIGHT = new THREE.Vector3(0.342020112, 0, 0.939692632).normalize();
+/** Forward and lateral axes in Terrain_Rover local space (aligned with vehicle chassis and wheel axles) */
+export const ROVER_LOCAL_FORWARD = new THREE.Vector3(-0.9424548, 0, 0.3326311).normalize();
+export const ROVER_LOCAL_RIGHT = new THREE.Vector3(0.3326311, 0, 0.9424548).normalize();
 
 export type RoverView = "FIRST PERSON" | "THIRD PERSON";
 export interface RoverSnapshot { active: boolean; speed: number; view: RoverView; }
@@ -41,7 +41,7 @@ export class RoverSystem {
   private up = new THREE.Vector3(0, 1, 0);
   private bounds = new THREE.Box3();
   private readonly maxSpeed = 16.5;
-  private readonly wheelRadius = 0.43;
+  private readonly wheelRadius = 1.16;
   private readonly maxSteer = 0.42;
 
   constructor(private root: THREE.Object3D, private camera: THREE.PerspectiveCamera) {
@@ -66,7 +66,8 @@ export class RoverSystem {
     this.bounds.getCenter(this.localCenter);
     this.rover.getWorldPosition(this.worldPosition);
     this.centerOffset.copy(this.localCenter).sub(this.worldPosition);
-    this.bottomOffset = this.bounds.min.y - this.worldPosition.y;
+    // Explicit ground clearance to wheel contact point (-2.75m), avoiding ladder distortion
+    this.bottomOffset = -2.75;
     this.baseWorldQuaternion.copy(this.rover.getWorldQuaternion(new THREE.Quaternion()));
     const initialForward = ROVER_LOCAL_FORWARD.clone().applyQuaternion(this.baseWorldQuaternion);
     this.baseYaw = Math.atan2(-initialForward.x, -initialForward.z);
@@ -103,6 +104,12 @@ export class RoverSystem {
   }
 
   exit(): void { this.velocity = 0; this.steering = 0; this.active = false; this.animateWheels(this.wheelRollAngle, 0); }
+
+  /** Restore the parked rover without changing its world position. */
+  prepareForExterior(): void {
+    this.rover.visible = true;
+    this.rover.updateWorldMatrix(true, true);
+  }
   switchView(): void { this.view = "THIRD PERSON"; }
   setView(view: RoverView): void { this.view = "THIRD PERSON"; }
 
@@ -120,6 +127,15 @@ export class RoverSystem {
     } else {
       this.rover.getWorldQuaternion(this.baseWorldQuaternion);
     }
+  }
+
+  /** Move the existing rover without rebuilding it or changing its active cabin state. */
+  public teleportWorldPose(position: THREE.Vector3, quaternion?: THREE.Quaternion): void {
+    this.velocity = 0;
+    this.steering = 0;
+    this.pitch = 0;
+    this.setWorldPose(position, quaternion);
+    this.animateWheels(this.wheelRollAngle, 0);
   }
 
   /** Returns true when the proposed rover footprint is clear. */
@@ -197,7 +213,9 @@ export class RoverSystem {
   private followCamera(dt: number, groundHeight: (x: number, z: number) => number): void {
     this.rover.updateWorldMatrix(true, false);
     const roverPos = this.rover.getWorldPosition(new THREE.Vector3());
-    const fwd = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw)).normalize();
+    const roverWorldQ = this.rover.getWorldQuaternion(new THREE.Quaternion());
+    // Directly sample true vehicle world heading so the camera is precisely behind the vehicle
+    const fwd = ROVER_LOCAL_FORWARD.clone().applyQuaternion(roverWorldQ).setY(0).normalize();
 
     // Position camera squarely on the centerline directly behind the vehicle
     const chaseDistance = Math.max(9.5, this.dimensions.x * 1.35);
