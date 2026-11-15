@@ -94,10 +94,9 @@ export interface GameState {
   sol5Message: string | null;
   finalDepartureVideo: boolean;
 
-  // Cinematic screen interaction + PHOBOSIA OS Desktop
+  // Cinematic screen interaction + OS Desktop
   showCinematicOverlay: boolean;
   showOSDesktop: boolean;
-  showPersonalLaptop: boolean;
   osInitialApp?: string;
 
   // Elysium IV SOL 01

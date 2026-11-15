@@ -17,18 +17,79 @@ import {
   type ScienceAnalysisRecord,
   type DroneSurveyRecord
 } from "./MissionManager";
-import { canLand, createDroneCameraRig, createDroneFlightState, createSol5Guidance, createSol5LandingBeacon, createSol5TargetBeacon, disposeSol5Guidance, disposeSol5LandingBeacon, disposeSol5TargetBeacon, detachDroneCameraRig, droneControlsFromKeys, getSol5TakeoffPosition, isInsideSol5LandingTrigger, orientDroneCameraRig, resolveSol5EAction, setSol5LandingBeaconVisible, setSol5TargetBeaconVisible, stepDroneFlight, updateSol5Guidance, updateSol5TargetBeacon, SOL5_LIMITS, type DroneCameraRig, type DroneFlightState, type DroneCameraView, type Sol5GuidanceRig, type Sol5LandingBeacon, type Sol5TargetBeacon } from "../missions/sol-05/droneSimulation";
-import { resolveSol5Target, SOL5_EVIDENCE_ASSETS, SOL5_SCENE_TARGETS } from "../missions/sol-05/targetMapping";
 import { ScreenRenderer } from "./ScreenRenderer";
-import { HabitatScreenRenderer } from "./HabitatScreenRenderer";
-import { EngineeringScreenRenderer } from "./EngineeringScreenRenderer";
-import { ResearchScreenRenderer } from "./ResearchScreenRenderer";
-import { MissionControlScreenRenderer } from "./MissionControlScreenRenderer";
-import { CentralHubScreenRenderer } from "./CentralHubScreenRenderer";
-import { AirlockScreenRenderer } from "./AirlockScreenRenderer";
-import { LaptopScreenRenderer } from "@/jsons/Screens/Laptop_Screen/LaptopScreenRenderer";
-import { LaptopPositionalAudio } from "@/systems/personal-laptop/LaptopPositionalAudio";
-import type { LaptopAudioController } from "@/systems/personal-laptop/LaptopAudioController";
+
+// No-op screen and effects stubs for isolated 3-Sol scope
+class NoopRenderer {
+  attachToHabitat(..._args: any[]) {}
+  attachToEngineering(..._args: any[]) {}
+  attachToScience(..._args: any[]) {}
+  attachToMissionControl(..._args: any[]) {}
+  attachToHub(..._args: any[]) {}
+  attachToAirlock(..._args: any[]) {}
+  dispose() {}
+  renderAll(..._args: any[]) {}
+}
+const HabitatScreenRenderer = NoopRenderer;
+const EngineeringScreenRenderer = NoopRenderer;
+const ResearchScreenRenderer = NoopRenderer;
+const MissionControlScreenRenderer = NoopRenderer;
+const CentralHubScreenRenderer = NoopRenderer;
+const AirlockScreenRenderer = NoopRenderer;
+
+class NoopStormController {
+  start() {}
+  endAfterValidatedReport() {}
+  dispose() {}
+  isActive() { return false; }
+  applyToModule(..._args: any[]) {}
+  update(_dt: number) {}
+}
+const Sol07StormController = NoopStormController;
+
+class NoopPowerEffects {
+  start() {}
+  disableModuleLights(..._args: any[]) {}
+  restoreLights() {}
+  fadeOut() {}
+  dispose() {}
+  isActive() { return false; }
+  update(_dt: number) {}
+}
+const Sol08PowerEffects = NoopPowerEffects;
+const SOL10_TRIGGER_CHECKS: any[] = [];
+
+type DroneCameraRig = any;
+type DroneFlightState = any;
+type DroneCameraView = any;
+type Sol5GuidanceRig = any;
+type Sol5LandingBeacon = any;
+type Sol5TargetBeacon = any;
+const canLand = () => false;
+const createDroneCameraRig = (..._args: any[]) => null;
+const createDroneFlightState = (..._args: any[]) => null;
+const createSol5Guidance = (..._args: any[]) => null;
+const createSol5LandingBeacon = (..._args: any[]) => null;
+const createSol5TargetBeacon = (..._args: any[]) => null;
+const disposeSol5Guidance = (..._args: any[]) => {};
+const disposeSol5LandingBeacon = (..._args: any[]) => {};
+const disposeSol5TargetBeacon = (..._args: any[]) => {};
+const detachDroneCameraRig = (..._args: any[]) => {};
+const droneControlsFromKeys = (..._args: any[]) => ({});
+const getSol5TakeoffPosition = (..._args: any[]) => new THREE.Vector3();
+const isInsideSol5LandingTrigger = (..._args: any[]) => false;
+const orientDroneCameraRig = (..._args: any[]) => {};
+const resolveSol5EAction = (..._args: any[]) => null;
+const setSol5LandingBeaconVisible = (..._args: any[]) => {};
+const setSol5TargetBeaconVisible = (..._args: any[]) => {};
+const stepDroneFlight = (..._args: any[]) => null;
+const updateSol5Guidance = (..._args: any[]) => {};
+const updateSol5TargetBeacon = (..._args: any[]) => {};
+const SOL5_LIMITS: any = {};
+const resolveSol5Target = (..._args: any[]) => null;
+const SOL5_EVIDENCE_ASSETS: Record<string, any[]> = {};
+const SOL5_SCENE_TARGETS: Record<string, any> = {};
+
 import { CameraPresentationManager } from "./CameraPresentation";
 import { GameAudioManager, resolveIndoorMovementAudioState } from "./GameAudioManager";
 import { DEFAULT_MOVEMENT_CONFIG, EVA_MOVEMENT_CONFIG } from "./MovementConfig";
@@ -45,9 +106,6 @@ import { Sol03MissionManager } from "../missions/SOL_03/Sol03MissionManager";
 import { Sol03RoverScreenRenderer } from "../missions/SOL_03/Sol03RoverScreenRenderer";
 import { NavigationBeamSystem } from "../missions/SOL_01/NavigationBeamSystem";
 import { resolveNextMissionNavigation } from "../systems/navigation/missionNavigation";
-import { Sol07StormController } from "../missions/sol-07/Sol07StormController";
-import { Sol08PowerEffects } from "../missions/sol-08/Sol08PowerEffects";
-import { SOL10_TRIGGER_CHECKS } from "../missions/sol-10/taskDefinitions";
 import {
   TRIGGER_TO_GROUP_MAP,
   MODULE_TO_ZONE_MAP,
@@ -167,9 +225,6 @@ export class Game {
 
   public missionManager: MissionManager;
   private screenRenderer = new ScreenRenderer();
-  private laptopScreenRenderer = new LaptopScreenRenderer();
-  private laptopPositionalAudio = new LaptopPositionalAudio();
-  private laptopAudioController?: LaptopAudioController;
   private habitatScreenRenderer = new HabitatScreenRenderer();
   private engineeringScreenRenderer = new EngineeringScreenRenderer();
   private researchScreenRenderer = new ResearchScreenRenderer();
@@ -371,7 +426,6 @@ export class Game {
 
       showCinematicOverlay: false,
       showOSDesktop: false,
-      showPersonalLaptop: false,
       osInitialApp: undefined,
       cameraPresentation: null,
 
@@ -552,18 +606,7 @@ export class Game {
     this.emit(this.state);
   }
 
-  public connectLaptopAudio(controller: LaptopAudioController) {
-    this.laptopAudioController = controller;
-    const habitat = this.loaded.get("Habitat");
-    if (habitat) this.attachLaptopPositionalAudio(habitat);
-  }
 
-  private attachLaptopPositionalAudio(model: THREE.Group) {
-    const controller = this.laptopAudioController;
-    if (!controller) return;
-    const output = this.laptopPositionalAudio.attach(model, this.camera, controller.getMediaElement(), this.player.eyeHeight);
-    controller.attachSpatialOutput(output.context, output.gate);
-  }
 
   private getEVAAccessBlockMessage(destination: ModuleName): string | null {
     return destination === "Terrain" || destination === "Hub"
@@ -649,7 +692,7 @@ export class Game {
   private applySol11HabitatPresentation(active: boolean) {
     const habitat = this.loaded.get("Habitat");
     if (!habitat) return;
-    const targets = new Set(["Laptop01", "Laptop02", "Sketchfab_model", "NoteBook", "SetOfBook", "PhotoGraph", "Habitat_Workstation_Display"]);
+    const targets = new Set(["Sketchfab_model", "NoteBook", "SetOfBook", "PhotoGraph", "Habitat_Workstation_Display"]);
     const isTarget = (object: THREE.Object3D) => [object.name, object.userData?.name].some(name =>
       typeof name === "string" && [...targets].some(target => name === target || name.startsWith(`${target}.`))
     );
@@ -773,7 +816,7 @@ export class Game {
       this.state.panel || this.state.showBriefingModal || this.state.showRoutePlanning ||
       this.state.showGeologicalForm || this.state.showSurfaceObservationForm || this.state.showScienceAnalysisModal ||
       this.state.showDroneConsoleModal || this.state.restFeedback || this.state.showCinematicOverlay ||
-      this.state.showOSDesktop || this.state.showPersonalLaptop || this.cameraPresentationManager.isPresentationActive()
+      this.state.showOSDesktop || this.cameraPresentationManager.isPresentationActive()
     );
     const result = advanceNighttimeGameplayClock(this.nighttimeElapsedSeconds, dt, paused);
     if (paused) return;
@@ -874,7 +917,6 @@ export class Game {
       this.state.restFeedback ||
       this.state.showCinematicOverlay ||
       this.state.showOSDesktop ||
-      this.state.showPersonalLaptop ||
       this.state.showSol01MissionOS ||
       this.state.showSol01EnvironmentModal ||
       this.state.showSol01ToolModal ||
@@ -916,7 +958,7 @@ export class Game {
     return Boolean(this.nearby) && !this.transitioning && !this.state.panel && !this.state.showBriefingModal &&
       !this.state.showRoutePlanning && !this.state.showGeologicalForm && !this.state.showSurfaceObservationForm &&
       !this.state.showScienceAnalysisModal && !this.state.showDroneConsoleModal && !this.state.showOSDesktop &&
-      !this.state.showPersonalLaptop && !this.state.showCinematicOverlay &&
+      !this.state.showCinematicOverlay &&
       !this.state.showSol01MissionOS && !this.state.showSol01EnvironmentModal &&
       !this.state.showSol01ToolModal && !this.state.showSol01ResourceModal &&
       !this.state.showSol02MissionOS && !this.state.showSol02EnvironmentModal &&
@@ -1259,19 +1301,6 @@ export class Game {
     }
     this.cinematicGliding = false;
     this.set({ showOSDesktop: false, showCinematicOverlay: false });
-    this.lock();
-  }
-
-  openPersonalLaptop() {
-    if (this.active !== "Habitat" || this.transitioning) return;
-    if (document.pointerLockElement) document.exitPointerLock();
-    this.player.keys.clear();
-    this.set({ showPersonalLaptop: true, prompt: "" });
-  }
-
-  closePersonalLaptop() {
-    if (!this.state.showPersonalLaptop) return;
-    this.set({ showPersonalLaptop: false });
     this.lock();
   }
 
@@ -1797,7 +1826,6 @@ export class Game {
       this.state.restFeedback ||
       this.state.showCinematicOverlay ||
       this.state.showOSDesktop ||
-      this.state.showPersonalLaptop ||
       this.cameraPresentationManager.isPresentationActive();
 
     if (isModalOpen) return;
@@ -1996,14 +2024,6 @@ export class Game {
       if (e.code === "Escape") {
         e.preventDefault();
         this.closeOSDesktop();
-      }
-      return;
-    }
-
-    if (this.state.showPersonalLaptop) {
-      if (e.code === "Escape") {
-        e.preventDefault();
-        this.closePersonalLaptop();
       }
       return;
     }
@@ -2328,12 +2348,8 @@ export class Game {
     // Attach 3D screen plane rendering to actual screen meshes
     if (module === "Habitat") {
       this.habitatScreenRenderer.attachToHabitat(model, this.missionManager.getState());
-      if (this.state.missionDay === 11) this.laptopScreenRenderer.dispose();
-      else this.laptopScreenRenderer.attachToHabitat(model);
-      this.attachLaptopPositionalAudio(model);
     } else {
       this.habitatScreenRenderer.dispose();
-      this.laptopScreenRenderer.dispose();
     }
     if (module === "Engineering") {
       this.engineeringScreenRenderer.attachToEngineering(model, this.missionManager.getState());
@@ -2936,9 +2952,8 @@ export class Game {
       document.exitPointerLock();
       const result = this.missionManager.handleContextEvent({ type: "trigger_interacted", module: this.active, identifier: this.nearby.identifier });
       this.set({
-        notification: result.feedback ?? (this.state.missionDay === 1 ? "Habitat workstation opened. Personal laptop ready." : null),
-        prompt: "",
-        showPersonalLaptop: true
+        notification: result.feedback ?? "Workstation console inspected.",
+        prompt: ""
       });
       this.player.keys.clear();
       return;
@@ -3980,6 +3995,21 @@ export class Game {
         this.state.restFeedback ||
         this.state.showCinematicOverlay ||
         this.state.showOSDesktop ||
+        this.state.showSol01MissionOS ||
+        this.state.showSol01EnvironmentModal ||
+        this.state.showSol01ToolModal ||
+        this.state.showSol01ResourceModal ||
+        this.state.showSol02MissionOS ||
+        this.state.showSol02EnvironmentModal ||
+        this.state.showSol02ToolModal ||
+        this.state.showBotanCheckModal ||
+        this.state.showSoilInvestigationModal ||
+        this.state.showSol03MissionOS ||
+        this.state.showSol03WaterModal ||
+        this.state.showSol03EnvironmentModal ||
+        this.state.showSol03ToolModal ||
+        this.state.showEVACameraModal ||
+        this.state.showFinalVideoModal ||
         this.cameraPresentationManager.isPresentationActive();
 
       if (!isModalOpen) {
@@ -4001,8 +4031,9 @@ export class Game {
           }
         }
         const terrainEVAActive = this.active === "Terrain" && this.evaSuitActive && playerControlled;
+        const indoorActive = (this.active !== "Terrain" || this.playerInsideInterior) && playerControlled;
         this.audioManager.setIndoorMovement(resolveIndoorMovementAudioState({
-          indoor: this.active !== "Terrain",
+          indoor: indoorActive,
           playerControlled,
           grounded: this.player.grounded,
           horizontalSpeed,
@@ -4079,8 +4110,6 @@ export class Game {
     }
 
     this.habitatScreenRenderer.dispose();
-    this.laptopScreenRenderer.dispose();
-    this.laptopPositionalAudio.dispose();
     this.engineeringScreenRenderer.dispose();
     this.researchScreenRenderer.dispose();
     this.missionControlScreenRenderer.dispose();

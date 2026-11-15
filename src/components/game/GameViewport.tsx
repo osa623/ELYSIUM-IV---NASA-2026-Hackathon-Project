@@ -11,8 +11,6 @@ import {
   type MissionProgressState,
   type TerrainRouteTarget
 } from "@/core/MissionManager";
-import { PersonalLaptopOS } from "@/systems/personal-laptop/PersonalLaptopOS";
-import { LaptopAudioController, type LaptopAudioSnapshot } from "@/systems/personal-laptop/LaptopAudioController";
 import { areRequiredAssetsReady, getPreparedAssetUrl } from "@/core/AssetLoading";
 import { TransitionLoadingScreen } from "@/components/loading/TransitionLoadingScreen";
 import { MobileControls } from "./MobileControls";
@@ -44,16 +42,16 @@ const initialState: GameState = {
   transitionProgress: null,
 
   missionDay: 1,
-  missionTitle: "Outpost Orientation",
-  objectiveTitle: "Complete base orientation checklist",
+  missionTitle: "ELYSIUM PLAIN TRAVERSE",
+  objectiveTitle: "Enter the Terrain Rover",
   objectiveState: "in_progress",
   completedStepCount: 0,
-  totalStepCount: 19,
-  dayBriefingSeen: false,
-  showBriefingModal: true,
+  totalStepCount: 8,
+  dayBriefingSeen: true,
+  showBriefingModal: false,
   briefingText:
-    "Welcome to ELYSIUM IV. Before commencing scientific field observations, explore the terrain, inspect each operational zone and vehicle console, and complete the Day 1 orientation checklist.",
-  primaryObjective: "Explore the outpost, inspect the required systems and consoles across all modules, and complete the 19-task orientation checklist.",
+    "Welcome to ELYSIUM IV. Board the Terrain Rover via the ladder, explore the Martian surface, and navigate to the Sol 01 finishing point.",
+  primaryObjective: "Enter the Terrain Rover, initiate the mission in the rover interior, perform system checks, traverse to the checkpoint, and proceed to the finishing point.",
   controlHint: "W A S D move · Shift jog · Space jump · E interact · Esc unlock",
   isOutdoorTerrain: false,
   evaSuitActive: false,
@@ -94,7 +92,6 @@ const initialState: GameState = {
 
   showCinematicOverlay: false,
   showOSDesktop: false,
-  showPersonalLaptop: false,
   osInitialApp: undefined,
   cameraPresentation: null,
 
@@ -128,8 +125,6 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
   const game = useRef<Game | null>(null);
   const video = useRef<HTMLVideoElement>(null);
   const [state, setState] = useState<GameState>(initialState);
-  const [laptopAudio, setLaptopAudio] = useState<LaptopAudioController | null>(null);
-  const [laptopAudioSnapshot, setLaptopAudioSnapshot] = useState<Readonly<LaptopAudioSnapshot> | null>(null);
   const [finalVideoError, setFinalVideoError] = useState(false);
 
   useEffect(() => { if (state.ready) onReady?.(); }, [state.ready, onReady]);
@@ -167,21 +162,6 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
   }, [state.notification, state.objectiveState, onReturnToMenu]);
 
   useEffect(() => {
-    const controller = new LaptopAudioController();
-    setLaptopAudio(controller);
-    const unsubscribe = controller.subscribe(setLaptopAudioSnapshot);
-    game.current?.connectLaptopAudio(controller);
-    return () => {
-      unsubscribe();
-      controller.dispose();
-    };
-  }, []);
-
-  useEffect(() => {
-    laptopAudio?.setHabitatAudible(state.module === "Habitat");
-  }, [laptopAudio, state.module]);
-
-  useEffect(() => {
     if (!state.finalDepartureVideo || !video.current) return;
     const element = video.current;
     void element.play().then(() => setFinalVideoError(false)).catch(() => setFinalVideoError(true));
@@ -200,7 +180,6 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
     !state.restFeedback &&
     !state.showCinematicOverlay &&
     !state.showOSDesktop &&
-    !state.showPersonalLaptop &&
     !state.cameraPresentation;
   const compassPoints = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   const compassIndex = Math.round(state.evaHeadingDegrees / 45) % compassPoints.length;
@@ -208,7 +187,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
   const mobileMode = state.sol5DroneActive ? "sol5" : state.droneModeActive ? "drone" : state.roverActive ? "rover" : "walk";
   const mobileControlsBlocked = Boolean(state.panel || state.transition || state.showBriefingModal || state.showRoutePlanning ||
     state.showGeologicalForm || state.showSurfaceObservationForm || state.showScienceAnalysisModal || state.showDroneConsoleModal ||
-    state.restFeedback || state.restTransition || state.showCinematicOverlay || state.showOSDesktop || state.showPersonalLaptop ||
+    state.restFeedback || state.restTransition || state.showCinematicOverlay || state.showOSDesktop ||
     state.cameraPresentation || state.finalDepartureVideo);
 
   return (
@@ -228,7 +207,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
         onTravel={(targetModule) => void game.current?.speedTravel(targetModule)}
       />  */}
       {/* EVA visor frame and edge-positioned telemetry, based on the supplied Mars helmet reference. */}
-      {state.evaSuitActive && !state.transition && !state.droneModeActive && !state.sol5DroneActive && !state.panel && !state.showOSDesktop && !state.showPersonalLaptop && !state.showCinematicOverlay && (
+      {state.evaSuitActive && !state.transition && !state.droneModeActive && !state.sol5DroneActive && !state.panel && !state.showOSDesktop && !state.showCinematicOverlay && (
         <div className="[position:fixed] [inset:0] [pointer-events:none] [z-index:20] [overflow:hidden]" aria-label="EVA helmet visor and suit HUD">
           <div className="[position:absolute] [inset:0] [background:radial-gradient(ellipse_at_center,_transparent_59%,_rgba(4,_7,_10,_0.12)_76%,_rgba(2,_4,_6,_0.48)_100%)]" />
           {state.isOutdoorTerrain && <div className="[position:absolute] [inset:0] [background:radial-gradient(ellipse_at_center,_rgba(151,_78,_42,_0.035)_22%,_rgba(129,_69,_42,_0.08)_72%,_rgba(93,_48,_30,_0.17)_100%)] [mix-blend-mode:soft-light]" />}
@@ -300,12 +279,20 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
 
       {/* 2. PERSISTENT IN-GAME HUD */}
       <div data-mobile-hud="true" className="[position:fixed] [inset:0] [pointer-events:none] [color:#dce8ec] [font-size:13px] [text-shadow:0_1px_3px_rgba(0,_0,_0,_0.9)] [z-index:30]">
-        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && <div className="[position:absolute] [top:0px] [left:10px] [letter-spacing:0.22em] [font-size:14px] [font-weight:bold] [color:#e88747]">  <img className="[width:min(200px,_74vw)] top-0 [height:auto] [object-fit:contain]" src={getPreparedAssetUrl("/assets/images/elysium_iv_official_logo_4k_transparent.png")} alt="ELYSIUM IV" /></div>}
-        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && <div className="[position:absolute] [top:42px] [left:24px] [font-size:12px] [letter-spacing:0.1em] [color:#8da6b2]">ACTIVE MODULE · {state.module}</div>}
+        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && (
+          <div className="[position:absolute] [top:14px] [left:152px] [z-index:60]">
+            <img className="[height:34px] [width:auto] [object-fit:contain]" src={getPreparedAssetUrl("/assets/images/elysium_iv_official_logo_4k_transparent.png")} alt="ELYSIUM IV" />
+          </div>
+        )}
+        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && (
+          <div className="[position:absolute] [top:56px] [left:24px] [font-size:11px] [letter-spacing:0.1em] [color:#8da6b2]">
+            ACTIVE MODULE · {state.module}
+          </div>
+        )}
 
         {/* Mission Status Badge */}
         {!state.droneModeActive && !state.sol5DroneActive && (
-          <div data-mobile-task="true" className="[position:absolute] rounded-2xl [top:72px] [left:24px] [width:min(500px,_86vw)] bg-gradient-to-r from-[rgba(0,10,50,0.85)] via-[rgba(4,79,129,0.85)] to-[rgba(0,10,50,0.85)] [border:1px_solid_rgba(63,_105,_123,_0.6)] [border-left:3px_solid_#e88747] [padding:10px_14px] [backdrop-filter:blur(4px)]">
+          <div data-mobile-task="true" className="[position:absolute] rounded-2xl [top:84px] [left:24px] [width:min(500px,_86vw)] bg-gradient-to-r from-[rgba(0,10,50,0.85)] via-[rgba(4,79,129,0.85)] to-[rgba(0,10,50,0.85)] [border:1px_solid_rgba(63,_105,_123,_0.6)] [border-left:3px_solid_#e88747] [padding:10px_14px] [backdrop-filter:blur(4px)]">
             <div className="[display:flex] [align-items:center] [gap:6px] text-[15px] font-kdam-thmor-pro font-bold [letter-spacing:0.12em] [color:#e88747]">
               <span className="[width:6px] [height:6px] [border-radius:50%] [background:#55cde8] [box-shadow:0_0_6px_#55cde8] [animation:pulse_2s_infinite_ease-in-out]" />
               SOL {state.missionDay} · {state.missionTitle.toUpperCase()}
@@ -322,7 +309,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
             <div className="[margin-top:6px] text-[11px] font-mono [color:#87a4af]">
               {state.completedStepCount} / {state.totalStepCount} {"TASKS COMPLETED"}
               {state.objectiveState === "completed" && state.totalStepCount > 0 && state.completedStepCount >= state.totalStepCount && (
-                <span className="[color:#44d788] [font-weight:bold]"> — OBJECTIVE VALIDATED (REST IN HABITAT)</span>
+                <span className="[color:#44d788] [font-weight:bold]"> — SOL OBJECTIVE COMPLETE</span>
               )}
             </div>
           </div>
@@ -416,14 +403,6 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
           />
         )}
 
-        {laptopAudio && laptopAudioSnapshot && (
-          <PersonalLaptopOS
-            open={state.showPersonalLaptop}
-            onClose={() => game.current?.closePersonalLaptop()}
-            audio={laptopAudio}
-            audioSnapshot={laptopAudioSnapshot}
-          />
-        )}
 
         {/* ELYSIUM IV · SOL 01 MODALS */}
         {state.showSol01EnvironmentModal && (

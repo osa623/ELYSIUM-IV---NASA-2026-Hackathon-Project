@@ -7,12 +7,12 @@ import { DAYS_CONFIG, type MissionDayNumber, type MissionProgressState } from "@
 import { getPreparedAssetUrl } from "@/core/AssetLoading";
 import { getScreenConfigForSol } from "@/core/ScreenConfigRegistry";
 import { MissionInvestigationPanel } from "@/systems/investigation/InvestigationForm";
-import habitatLegacy from "@/jsons/Screens/habitatScreenData.json";
-import engineeringLegacy from "@/jsons/Screens/engineeringScreenData.json";
-import researchLegacy from "@/jsons/Screens/research-zone-screens.json";
-import missionControlLegacy from "@/jsons/Screens/mission-control-screens.json";
-import centralHubLegacy from "@/jsons/Screens/central-hub-screens.json";
-import airlockLegacy from "@/jsons/Screens/airlock-screen-data.json";
+const habitatLegacy = { screens: [] };
+const engineeringLegacy = { screens: [] };
+const researchLegacy = { screens: [] };
+const missionControlLegacy = { screens: [] };
+const centralHubLegacy = { screens: [] };
+const airlockLegacy = { screens: [] };
 import sol03Mission from "@/jsons/Missions/sol-03.json";
 
 const Sol5MissionPanel = (_props: any) => null;

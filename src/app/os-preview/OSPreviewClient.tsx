@@ -14,7 +14,7 @@ const mockState: GameState = {
   showSurfaceObservationForm: false, showScienceAnalysisModal: false, showDroneConsoleModal: false, droneModeActive: false, roverActive: false,
   roverSpeed: 0, roverView: "FIRST PERSON", droneTelemetry: { battery: 88, signal: 96, altitude: 15, x: 470, z: -58.7 },
   sol5DroneActive: false, sol5LandingPromptActive: false, sol5Telemetry: null, sol5Images: [], sol5Flight: null, sol5Message: null,
-  finalDepartureVideo: false, showCinematicOverlay: false, showOSDesktop: true, showPersonalLaptop: false, osInitialApp: undefined, cameraPresentation: null,
+  finalDepartureVideo: false, showCinematicOverlay: false, showOSDesktop: true, osInitialApp: undefined, cameraPresentation: null,
   showSol01MissionOS: false, showSol01EnvironmentModal: false, showSol01ToolModal: false, showSol01ResourceModal: false,
   showSol02MissionOS: false, showSol02EnvironmentModal: false, showSol02ToolModal: false, showBotanCheckModal: false, showSoilInvestigationModal: false,
   showSol03MissionOS: false, showSol03WaterModal: false, showSol03EnvironmentModal: false, showSol03ToolModal: false, showEVACameraModal: false, showFinalVideoModal: false

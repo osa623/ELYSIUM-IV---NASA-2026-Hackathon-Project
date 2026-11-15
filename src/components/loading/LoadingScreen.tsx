@@ -42,9 +42,6 @@ function displayGroups(snapshot: AssetLoadingSnapshot): DisplayGroup[] {
     { key: "environment", label: "ENVIRONMENT MAPS", assets: required.filter(asset => asset.kind === "exr") },
     { key: "images", label: "IMAGES", assets: required.filter(asset => asset.kind === "image") },
     { key: "sounds", label: "SOUNDS", assets: required.filter(asset => asset.kind === "audio") },
-    { key: "songs", label: "LAPTOP SONGS", assets: optional.filter(asset => asset.kind === "audio"), deferred: true },
-    { key: "laptop-images", label: "LAPTOP IMAGES", assets: optional.filter(asset => asset.kind === "image" && !asset.path.toLowerCase().includes("wallpaper")), deferred: true },
-    { key: "wallpapers", label: "WALLPAPERS", assets: optional.filter(asset => asset.path.toLowerCase().includes("wallpaper")), deferred: true },
     { key: "videos", label: "VIDEOS", assets: optional.filter(asset => asset.kind === "video"), deferred: true }
   ];
   for (const group of definitions) if (group.assets.length) groups.push(group);

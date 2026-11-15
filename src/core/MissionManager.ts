@@ -6,22 +6,10 @@
  */
 
 import { DAY1_TASKS, DAY1_ZONES, TRIGGER_TO_TASK_MAP } from "./Day1Config";
-import { SOL2_INVESTIGATION_RULES } from "../missions/sol-02/taskDefinitions";
-import { SOL3_DATASET_IDS } from "../missions/sol-03/taskDefinitions";
 import { resolveNextMissionNavigation } from "../systems/navigation/missionNavigation";
 import sol03Mission from "../jsons/Missions/sol-03.json";
-import { SOL5_TASKS } from "../missions/sol-05/taskDefinitions";
-import { SOL06_TASKS, type Sol6AnalysisRecord, type Sol6CultivationExperiment, type Sol6FieldObservation, type Sol6Report, type Sol6SampleRecord } from "../missions/SOL_06/taskDefinitions";
-import sol06Mission from "../jsons/Missions/sol-06.json";
-import { SOL07_TASKS, createInitialSol7Progress, type Sol7Progress, type Sol7TaskId, type Sol7PowerAssessment } from "../missions/sol-07/taskDefinitions";
-import { SOL08_TASKS, createInitialSol08Progress, validateSol08Connections, type Sol08Connection, type Sol08Progress, type Sol08PuzzleId, type Sol08TaskId } from "../missions/sol-08/taskDefinitions";
-import sol08Mission from "../jsons/Missions/sol-08.json";
-import sol09Mission from "../jsons/Missions/sol-09.json";
-import sol10Mission from "../jsons/Missions/sol-10.json";
-import { SOL10_TRIGGER_CHECKS, type Sol10TriggerVerification, type Sol10VerificationStatus } from "../missions/sol-10/taskDefinitions";
-import { SOL09_TASKS, createInitialSol09Progress, type Sol09Progress, type Sol09RackId, type Sol09TaskId } from "../missions/sol-09/taskDefinitions";
 
-export type MissionDayNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+export type MissionDayNumber = 1 | 2 | 3;
 
 export type ObjectiveState = "not_started" | "in_progress" | "completed" | "waiting_for_rest";
 
@@ -290,6 +278,16 @@ export interface MissionProgressState {
   sol11: { selinaAcknowledged: boolean; finalLog: string | null; evaPrepared: boolean; vehicleEntered: boolean; routeDistanceMeters: number; finalVideoCompleted: boolean };
 }
 
+export type Sol7Progress = any;
+export type Sol08Progress = any;
+export type Sol09Progress = any;
+export type Sol6FieldObservation = any;
+export type Sol6SampleRecord = any;
+export type Sol6AnalysisRecord = any;
+export type Sol6CultivationExperiment = any;
+export type Sol6Report = any;
+export type Sol10TriggerVerification = any;
+
 export interface Sol6MissionProgress {
   equipmentPrepared: boolean;
   evaActive: boolean;
@@ -301,13 +299,14 @@ export interface Sol6MissionProgress {
   report: Sol6Report | null;
 }
 
+const createInitialSol7Progress = (): any => ({});
+const createInitialSol08Progress = (): any => ({});
+const createInitialSol09Progress = (): any => ({});
 const createInitialSol6Progress = (): Sol6MissionProgress => ({ equipmentPrepared: false, evaActive: false, targetReached: false, fieldObservations: [], sample: null, analysis: null, cultivation: null, report: null });
 const createInitialSol10Progress = (): MissionProgressState["sol10"] => ({ reviewedReportSols: [], triggerVerifications: {} });
 const createInitialSol11Progress = (): MissionProgressState["sol11"] => ({ selinaAcknowledged: false, finalLog: null, evaPrepared: false, vehicleEntered: false, routeDistanceMeters: 0, finalVideoCompleted: false });
-const sol6Steps = SOL06_TASKS.map(task => ({ stepId: task.stepId, label: task.label, description: task.description, targetTrigger: "targetTrigger" in task ? task.targetTrigger : undefined, targetModule: "targetModule" in task ? task.targetModule : undefined, requiresCompletedTasks: [...("requiresCompletedTasks" in task ? task.requiresCompletedTasks ?? [] : [])], completed: false }));
-const sol10NavigationRequirements: Record<string, string[]> = Object.fromEntries(
-  sol10Mission.tasks.map((task, index) => [task.taskId, index ? [sol10Mission.tasks[index - 1].taskId] : []])
-);
+const sol6Steps: any[] = [];
+const sol10NavigationRequirements: Record<string, string[]> = {};
 
 export interface InvestigationRecord {
   id: string; missionId: string; sol: number; taskId: string; triggerId: string; systemId: string;
@@ -399,142 +398,14 @@ export const DAYS_CONFIG: Record<MissionDayNumber, DayMissionDefinition> = {
     ],
     allowedModules: ["Terrain", "RoverInterior"],
     completionFeedback: "ELYSIUM IV three-Sol exploration mission successfully completed."
-  },
-  4: {
-    day: 4,
-    id: "DAY_04_LIFE_SUPPORT_VERIFICATION",
-    title: "Selected Target Investigation and Drone Mission Preparation",
-    storyContext: "The target submitted and validated during Sol 3 is now the focus of a careful scientific review. Mission Control and the Science Lab support the investigation; the Drone Section must be visited physically for inspection. The drone remains grounded until Sol 5.",
-    briefing: "Continue with the target you selected during Sol 3; do not choose another. Review its available records in Mission Control, assess datasets and terrain evidence in the Science Lab, then physically visit and inspect the drone. Prepare the Sol 5 aerial observation plan and submit the preliminary assessment. No drone flight takes place today.",
-    primaryObjective: "Investigate the selected target, assess evidence and terrain limitations, inspect the drone in person, and submit the Sol 5 preparation report.",
-    steps: [
-      { stepId: "SOL04_MISSION_CONTEXT", label: "Review Sol 4 Mission Objectives", description: "Review the selected target and Sol 4 constraints.", targetTrigger: "MC_MAIN_01", completed: false },
-      { stepId: "SOL04_SELECTED_TARGET_INVESTIGATION", label: "Investigate Selected Observation Target", description: "Review available records for the Sol 3 target and record uncertainties.", targetTrigger: "MC_NAVIGATION_01", completed: false, requiresCompletedTasks: ["SOL04_MISSION_CONTEXT"] },
-      { stepId: "SOL04_TERRAIN_DATA_REVIEW", label: "Review Terrain and Scientific Dataset Evidence", description: "Assess available datasets and terrain evidence in the Science Lab.", targetTrigger: "LAB_RESEARCH_ANALYSIS_01", completed: false, requiresCompletedTasks: ["SOL04_SELECTED_TARGET_INVESTIGATION"] },
-      { stepId: "SOL04_DRONE_PHYSICAL_INSPECTION", label: "Visit and Inspect the Drone", description: "Physically enter the Drone Section and interact with the existing drone.", targetModule: "Drone Section", completed: false, requiresCompletedTasks: ["SOL04_MISSION_CONTEXT"] },
-      { stepId: "SOL04_DRONE_MISSION_PLAN", label: "Prepare the Sol 5 Drone Observation Plan", description: "Prepare observation objectives and constraints for Sol 5.", targetTrigger: "MC_NAVIGATION_01", completed: false, requiresCompletedTasks: ["SOL04_SELECTED_TARGET_INVESTIGATION", "SOL04_TERRAIN_DATA_REVIEW", "SOL04_DRONE_PHYSICAL_INSPECTION"] },
-      { stepId: "SOL04_SUBMIT_PREPARATION_REPORT", label: "Submit the Preliminary Terrain Assessment and Preparation Report", description: "Submit the evidence-linked Sol 4 assessment and preparation report.", targetTrigger: "MC_MAIN_01", completed: false, requiresCompletedTasks: ["SOL04_MISSION_CONTEXT", "SOL04_SELECTED_TARGET_INVESTIGATION", "SOL04_TERRAIN_DATA_REVIEW", "SOL04_DRONE_PHYSICAL_INSPECTION", "SOL04_DRONE_MISSION_PLAN"] }
-    ],
-    allowedModules: ["MissionControl", "Science", "Drone", "Hub", "Habitat"],
-    completionFeedback: "Sol 4 preparation report validated. Return to Habitat Rest Area to begin Sol 5."
-  },
-  5: {
-    day: 5,
-    id: "DAY_05_DRONE_AERIAL_RECONNAISSANCE",
-    title: "Drone-Based Aerial Reconnaissance",
-    storyContext: "Manually fly the existing drone from Drone_TakeoffPoint to inspect the target submitted during Sol 3, review its prepared evidence, and return safely.",
-    briefing: "At Mission Control, confirm the target-specific briefing and controls. Fly from the designated pad to the official target using the visual guide, press E in the valid inspection area to load mission-provided evidence, then follow the return guide and large beacon to the pad. Press E to land; when the on-pad completion prompt appears, press G to complete the landing objective and return to Mission Control. Review the evidence and submit the report.",
-    primaryObjective: "Manually inspect the official target, review its prepared evidence, follow the landing beacon to the designated pad, and press G to confirm the landing before submitting the report.",
-    steps: SOL5_TASKS.map(task => ({ ...task, completed: false })),
-    allowedModules: ["MissionControl", "Hub", "Habitat", "Terrain", "Drone"],
-    completionFeedback: "Sol 5 reconnaissance report submitted. Return to Habitat Rest Area to begin the next mission day."
-  },  6: {
-    day: 6,
-    id: "DAY_06_GEOLOGICAL_SITE_SURVEY",
-    title: sol06Mission.title,
-    storyContext: "Continue on foot to the official Sol 3 target, document field observations, secure a provenance-linked sample, return through the Airlock, and begin laboratory analysis.",
-    briefing: sol06Mission.description,
-    primaryObjective: "Complete the target-linked field investigation, sample transfer and analysis, start the pending Sol 8 cultivation experiment, and submit the Sol 6 report.",
-    steps: sol6Steps,
-    allowedModules: ["MissionControl", "Hub", "Habitat", "Airlock", "Terrain", "Science"],
-    completionFeedback: "Sol 6 surface investigation report validated. Cultivation results remain pending for Sol 8. Return to Habitat Rest Area to conclude Sol 6."
-  },
-  7: {
-    day: 7,
-    id: "PHOBOSIA_SOL_07_DUST_STORM_ASSESSMENT",
-    title: "Dust Storm Emergency Assessment",
-    storyContext: "A gameplay-simulated dust storm has activated the outpost emergency assessment. Outdoor access is temporarily restricted through the shared EVA policy.",
-    briefing: "Complete Tasks 1–6 in order using existing unit screens, then submit the impact report in Engineering. Outdoor access remains restricted until report validation.",
-    primaryObjective: "Assess storm safety, outpost systems, EVA lockdown, science power and Engineering power; submit the final impact report.",
-    steps: SOL07_TASKS.map(task => ({ stepId: task.stepId, label: task.label, description: task.description, targetTrigger: task.targetTrigger, requiresCompletedTasks: task.stepId === "SOL07_SUBMIT_STORM_REPORT" ? SOL07_TASKS.slice(0, 6).map(item => item.stepId) : undefined, completed: false })),
-    allowedModules: ["Habitat", "MissionControl", "Hub", "Airlock", "Science", "Engineering"],
-    completionFeedback: "Sol 7 storm assessment validated. Post-storm power assessment saved for Sol 8. Sol 8 has not been started."
-  },
-  8: {
-    day: 8,
-    id: sol08Mission.missionId,
-    title: sol08Mission.title,
-    storyContext: sol08Mission.description,
-    briefing: "Restore outpost power through the existing solar repair triggers, then independently restore external communications. Reserve telemetry is gameplay simulation unless a verified persisted value exists.",
-    primaryObjective: "Repair Solar Panels A and B and the main connection, restore main power, recover communication, and submit the recovery report.",
-    steps: [
-      ...SOL08_TASKS.map((task, index) => ({ stepId: task.stepId, label: task.label, description: sol08Mission.tasks[index]?.objective ?? task.label, targetTrigger: task.trigger, completed: false, requiresCompletedTasks: index ? [SOL08_TASKS[index - 1].stepId] : undefined }))
-    ],
-    allowedModules: ["Habitat", "Engineering", "MissionControl", "Airlock", "Terrain"],
-    completionFeedback: "Sol 8 recovery report validated. Power and communication records are saved for Sol 9; Sol 9 has not been started."
-  },
-  9: {
-    day: 9,
-    id: sol09Mission.missionId,
-    title: sol09Mission.title,
-    storyContext: sol09Mission.description,
-    briefing: sol09Mission.description,
-    primaryObjective: "Review the Sol 6 cultivation record, inspect each cultivation rack independently, assess water and nutrient availability, and submit a provenance-aware recovery report.",
-    steps: SOL09_TASKS.map((task, index) => ({
-      stepId: task.stepId,
-      label: task.label,
-      description: sol09Mission.tasks[index].objective,
-      targetTrigger: task.trigger,
-      requiresCompletedTasks: index ? [SOL09_TASKS[index - 1].stepId] : undefined,
-      completed: false
-    })),
-    allowedModules: ["Habitat", "Science", "Engineering", "MissionControl"],
-    completionFeedback: "Sol 9 assessment report validated. Mission records are saved; the day does not advance automatically."
-  },
-  10: {
-    day: 10,
-    id: sol10Mission.missionId,
-    title: sol10Mission.title,
-    storyContext: sol10Mission.description,
-    briefing: sol10Mission.description,
-    primaryObjective: "Review the Phase One archive, verify the available records, and prepare the final expedition handover.",
-    steps: sol10Mission.tasks.map(task => ({
-      stepId: task.taskId,
-      label: task.title,
-      description: task.objective,
-      triggerId: task.triggerId,
-      interfaceId: task.interfaceId,
-      completed: false,
-      requiresCompletedTasks: sol10NavigationRequirements[task.taskId] ?? []
-    })),
-    allowedModules: ["MissionControl", "Habitat", "Science", "Engineering"],
-    completionFeedback: "The Phase One final expedition report and crew handover are complete."
-  },
-  11: {
-    day: 11,
-    id: "PHOBOSIA_SOL_11",
-    title: "Final Farewell",
-    storyContext: "Selina is travelling from Deimosian Outpost to PHOBOSIA Outpost. The player prepares to depart on a separate route.",
-    briefing: "Read and acknowledge Selina's incoming message, write your personal expedition log, prepare for EVA, enter the assigned vehicle and follow the departure route.",
-    primaryObjective: "Complete the final personal log and departure sequence. The campaign ends only after the final cinematic finishes.",
-    steps: [
-      ["SOL11_ACKNOWLEDGE_SELINAS_MESSAGE", "Acknowledge Selina's Message", "Read the incoming message from Selina, who is still travelling from Deimosian Outpost to PHOBOSIA Outpost.", "MC_MAIN_01", []],
-      ["SOL11_SUBMIT_FINAL_LOG", "Write the Final Expedition Log", "Write and submit a personal reflection on SOL 1 through SOL 10.", "MC_MAIN_01", ["SOL11_ACKNOWLEDGE_SELINAS_MESSAGE"]],
-      ["SOL11_PREPARE_EVA", "Prepare for Departure", "Equip the existing EVA suit at the Airlock preparation point.", "Mars_Observation_Preparation_Trigger", ["SOL11_SUBMIT_FINAL_LOG"]],
-      ["SOL11_ENTER_VEHICLE", "Enter the Assigned Vehicle", "Enter the existing Terrain Rover.", "terrainRover_trigger", ["SOL11_PREPARE_EVA"]],
-      ["SOL11_COMPLETE_DEPARTURE_ROUTE", "Follow the Departure Route", "Drive 200 metres along the configured route using the existing rover.", undefined, ["SOL11_ENTER_VEHICLE"]],
-      ["SOL11_PLAY_FINAL_VIDEO", "Final Departure", "Watch the fullscreen final cinematic to completion.", undefined, ["SOL11_COMPLETE_DEPARTURE_ROUTE"]]
-    ].map(([stepId, label, description, triggerId, requiresCompletedTasks]) => ({ stepId: stepId as string, label: label as string, description: description as string, triggerId: triggerId as string | undefined, targetTrigger: triggerId as string | undefined, requiresCompletedTasks: requiresCompletedTasks as string[], completed: false })),
-    allowedModules: ["MissionControl", "Airlock", "Terrain"],
-    completionFeedback: "The PHOBOSIA expedition is complete."
   }
 };
 
 export function getMissionTaskProgressFor(day: MissionDayNumber, completedStepIds: readonly string[]): { completed: number; total: number; remaining: number } {
+  const steps = DAYS_CONFIG[day]?.steps ?? [];
   const completedSet = new Set(completedStepIds);
-  if (day === 1) {
-    const required = DAY1_TASKS.filter(task => task.required);
-    const completed = required.filter(task => completedSet.has(task.taskId)).length;
-    return { completed, total: required.length, remaining: required.length - completed };
-  }
-  const steps = DAYS_CONFIG[day].steps;
-  // Sols 2–5 expose the validated mission tasks individually; later legacy days
-  // retain their existing single-objective progress treatment.
-  const total = day >= 2 && day <= 11 ? steps.length : steps.length ? 1 : 0;
-  const completed = day >= 2 && day <= 11
-    ? new Set(steps.filter(step => completedSet.has(step.stepId)).map(step => step.stepId)).size
-    : total > 0 && steps.every(step => completedSet.has(step.stepId)) ? 1 : 0;
-  return { completed, total, remaining: total - completed };
+  const completed = steps.filter(step => completedSet.has(step.stepId)).length;
+  return { completed, total: steps.length, remaining: steps.length - completed };
 }
 
 function getStepSol(stepId: string): MissionDayNumber | undefined {

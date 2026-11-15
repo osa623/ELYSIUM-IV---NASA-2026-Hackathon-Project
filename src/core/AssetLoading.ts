@@ -7,23 +7,9 @@ import { assetPaths, type ModuleName } from "./Discovery";
 import { DAYTIME_EXR_URL, NIGHTTIME_EXR_URL } from "./MasterTerrainEnvironment";
 const SOL5_EVIDENCE_ASSETS: Record<string, { id: string; assetPath: string; targetId: string; fileName: string }[]> = {};
 import sol3 from "../jsons/Missions/sol-03.json";
-import laptopManifest from "../systems/personal-laptop/assets.generated.json";
-
-interface LaptopManifestFile {
-  id: string;
-  url: string;
-  title: string;
-}
-
-const laptopAssets = laptopManifest as unknown as {
-  songs: LaptopManifestFile[];
-  images: LaptopManifestFile[];
-  wallpapers: LaptopManifestFile[];
-  documents: LaptopManifestFile[];
-};
 
 export type AssetKind = "gltf" | "exr" | "image" | "audio" | "video" | "document";
-export type AssetCategory = "Branding" | "Habitat" | "Mission Control" | "Research Laboratory" | "Engineering Unit" | "Central Hub" | "Airlock" | "Mars Terrain" | "Drone Area" | "Gameplay Audio" | "Mission Imagery" | "Transition Video" | "Cinematic Video" | "Personal Laptop Media";
+export type AssetCategory = "Branding" | "Habitat" | "Mission Control" | "Research Laboratory" | "Engineering Unit" | "Central Hub" | "Airlock" | "Mars Terrain" | "Drone Area" | "Gameplay Audio" | "Mission Imagery" | "Transition Video" | "Cinematic Video";
 export type AssetStatus = "pending" | "downloading" | "processing" | "ready" | "failed";
 export type AssetPhase = "idle" | "loading" | "processing" | "verifying" | "ready" | "error";
 
@@ -84,20 +70,8 @@ const uniqueModuleAssets: AssetDefinition[] = [
   asset("model.RoverVehicle", "/assets/models/terrainVehicle.glb", "Terrain Rover", "Mars Terrain", "gltf"),
 ];
 
-const sol3Images = sol3.targetCatalogue.flatMap((target, targetIndex) =>
-  Object.entries(target.images).map(([view, path]) => asset(
-    `sol3.${target.targetId}.${view}`,
-    path,
-    `Sol 3 Site ${String(targetIndex + 1).padStart(2, "0")} ${view}`,
-    "Mission Imagery",
-    "image",
-    false
-  ))
-);
-
-const sol5Images = Object.values(SOL5_EVIDENCE_ASSETS).flatMap(items => items.map(item =>
-  asset(`sol5.${item.id}`, item.assetPath, `Sol 5 ${item.targetId.replace("TARGET_", "").replaceAll("_", " ")} ${item.fileName}`, "Mission Imagery", "image", false)
-));
+const sol3Images: AssetDefinition[] = [];
+const sol5Images: AssetDefinition[] = [];
 
 export const REQUIRED_ASSETS: readonly AssetDefinition[] = [
   asset("branding.loading-logo", "/assets/images/PHOBOSIA_Martian_Modern_Logo_4K.png", "ELYSIUM IV Logo", "Branding", "image"),
@@ -126,11 +100,7 @@ const solOnDemandModels = [
 export const ON_DEMAND_ASSETS: readonly AssetDefinition[] = [
   ...solOnDemandModels,
   ...sol3Images,
-  ...sol5Images,
-  ...laptopAssets.songs.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "audio", false)),
-  ...laptopAssets.images.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "image", false)),
-  ...laptopAssets.wallpapers.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "image", false)),
-  ...laptopAssets.documents.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "document", false))
+  ...sol5Images
 ];
 
 const LOADING_TRACKS: readonly AssetDefinition[] = [
