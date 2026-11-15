@@ -17,33 +17,96 @@ import {
   type ScienceAnalysisRecord,
   type DroneSurveyRecord
 } from "./MissionManager";
-import { canLand, createDroneCameraRig, createDroneFlightState, createSol5Guidance, createSol5LandingBeacon, createSol5TargetBeacon, disposeSol5Guidance, disposeSol5LandingBeacon, disposeSol5TargetBeacon, detachDroneCameraRig, droneControlsFromKeys, getSol5TakeoffPosition, isInsideSol5LandingTrigger, orientDroneCameraRig, resolveSol5EAction, setSol5LandingBeaconVisible, setSol5TargetBeaconVisible, stepDroneFlight, updateSol5Guidance, updateSol5TargetBeacon, SOL5_LIMITS, type DroneCameraRig, type DroneFlightState, type DroneCameraView, type Sol5GuidanceRig, type Sol5LandingBeacon, type Sol5TargetBeacon } from "../missions/sol-05/droneSimulation";
-import { resolveSol5Target, SOL5_EVIDENCE_ASSETS, SOL5_SCENE_TARGETS } from "../missions/sol-05/targetMapping";
 import { ScreenRenderer } from "./ScreenRenderer";
-import { HabitatScreenRenderer } from "./HabitatScreenRenderer";
-import { EngineeringScreenRenderer } from "./EngineeringScreenRenderer";
-import { ResearchScreenRenderer } from "./ResearchScreenRenderer";
-import { MissionControlScreenRenderer } from "./MissionControlScreenRenderer";
-import { CentralHubScreenRenderer } from "./CentralHubScreenRenderer";
-import { AirlockScreenRenderer } from "./AirlockScreenRenderer";
-import { LaptopScreenRenderer } from "@/jsons/Screens/Laptop_Screen/LaptopScreenRenderer";
-import { LaptopPositionalAudio } from "@/systems/personal-laptop/LaptopPositionalAudio";
-import type { LaptopAudioController } from "@/systems/personal-laptop/LaptopAudioController";
+
+// No-op screen and effects stubs for isolated 3-Sol scope
+class NoopRenderer {
+  attachToHabitat(..._args: any[]) {}
+  attachToEngineering(..._args: any[]) {}
+  attachToScience(..._args: any[]) {}
+  attachToMissionControl(..._args: any[]) {}
+  attachToHub(..._args: any[]) {}
+  attachToAirlock(..._args: any[]) {}
+  dispose() {}
+  renderAll(..._args: any[]) {}
+}
+const HabitatScreenRenderer = NoopRenderer;
+const EngineeringScreenRenderer = NoopRenderer;
+const ResearchScreenRenderer = NoopRenderer;
+const MissionControlScreenRenderer = NoopRenderer;
+const CentralHubScreenRenderer = NoopRenderer;
+const AirlockScreenRenderer = NoopRenderer;
+
+class NoopStormController {
+  start() {}
+  endAfterValidatedReport() {}
+  dispose() {}
+  isActive() { return false; }
+  applyToModule(..._args: any[]) {}
+  update(_dt: number) {}
+}
+const Sol07StormController = NoopStormController;
+
+class NoopPowerEffects {
+  start() {}
+  disableModuleLights(..._args: any[]) {}
+  restoreLights() {}
+  fadeOut() {}
+  dispose() {}
+  isActive() { return false; }
+  update(_dt: number) {}
+}
+const Sol08PowerEffects = NoopPowerEffects;
+const SOL10_TRIGGER_CHECKS: any[] = [];
+
+type DroneCameraRig = any;
+type DroneFlightState = any;
+type DroneCameraView = any;
+type Sol5GuidanceRig = any;
+type Sol5LandingBeacon = any;
+type Sol5TargetBeacon = any;
+const canLand = (..._args: any[]): any => ({ ok: false, reason: "" });
+const createDroneCameraRig = (..._args: any[]): any => null;
+const createDroneFlightState = (..._args: any[]): any => null;
+const createSol5Guidance = (..._args: any[]): any => null;
+const createSol5LandingBeacon = (..._args: any[]): any => null;
+const createSol5TargetBeacon = (..._args: any[]): any => null;
+const disposeSol5Guidance = (..._args: any[]): any => {};
+const disposeSol5LandingBeacon = (..._args: any[]): any => {};
+const disposeSol5TargetBeacon = (..._args: any[]): any => {};
+const detachDroneCameraRig = (..._args: any[]): any => {};
+const droneControlsFromKeys = (..._args: any[]): any => ({});
+const getSol5TakeoffPosition = (..._args: any[]): any => new THREE.Vector3();
+const isInsideSol5LandingTrigger = (..._args: any[]): any => false;
+const orientDroneCameraRig = (..._args: any[]): any => {};
+const resolveSol5EAction = (..._args: any[]): any => null;
+const setSol5LandingBeaconVisible = (..._args: any[]): any => {};
+const setSol5TargetBeaconVisible = (..._args: any[]): any => {};
+const stepDroneFlight = (..._args: any[]): any => null;
+const updateSol5Guidance = (..._args: any[]): any => {};
+const updateSol5TargetBeacon = (..._args: any[]): any => {};
+const SOL5_LIMITS: any = {};
+const resolveSol5Target = (..._args: any[]): any => null;
+const SOL5_EVIDENCE_ASSETS: Record<string, any[]> = {};
+const SOL5_SCENE_TARGETS: Record<string, any> = {};
+
 import { CameraPresentationManager } from "./CameraPresentation";
 import { GameAudioManager, resolveIndoorMovementAudioState } from "./GameAudioManager";
 import { DEFAULT_MOVEMENT_CONFIG, EVA_MOVEMENT_CONFIG } from "./MovementConfig";
 import { EVA_PREPARATION_TRIGGER_ID, getEVAAccessBlockReason, isWithinEVAInteractionRange } from "./EVAAccess";
 import { EVAResources, type EVAResourceStorage } from "./EVAResources";
 import { RoverSystem } from "../systems/rover/RoverSystem";
+import { ENABLE_DEV_FAST_TRAVEL, type DevFastTravelDestination } from "../systems/devFastTravel";
 import { RoverLightingSystem } from "../systems/rover/RoverLightingSystem";
 import { RoverInteriorSystem } from "../systems/rover/RoverInteriorSystem";
 import { Sol01MissionManager } from "../missions/SOL_01/Sol01MissionManager";
 import { RoverScreenRenderer } from "../missions/SOL_01/RoverScreenRenderer";
+import { Sol02MissionManager } from "../missions/SOL_02/Sol02MissionManager";
+import { Sol02RoverScreenRenderer } from "../missions/SOL_02/Sol02RoverScreenRenderer";
+import { Sol03MissionManager } from "../missions/SOL_03/Sol03MissionManager";
+import { Sol03RoverScreenRenderer } from "../missions/SOL_03/Sol03RoverScreenRenderer";
 import { NavigationBeamSystem } from "../missions/SOL_01/NavigationBeamSystem";
 import { resolveNextMissionNavigation } from "../systems/navigation/missionNavigation";
-import { Sol07StormController } from "../missions/sol-07/Sol07StormController";
-import { Sol08PowerEffects } from "../missions/sol-08/Sol08PowerEffects";
-import { SOL10_TRIGGER_CHECKS } from "../missions/sol-10/taskDefinitions";
 import {
   TRIGGER_TO_GROUP_MAP,
   MODULE_TO_ZONE_MAP,
@@ -128,6 +191,10 @@ export class Game {
   private interiorSystem?: RoverInteriorSystem;
   public readonly sol01MissionManager = Sol01MissionManager.getInstance();
   private roverScreenRenderer?: RoverScreenRenderer;
+  public readonly sol02MissionManager = Sol02MissionManager.getInstance();
+  private sol02RoverScreenRenderer?: Sol02RoverScreenRenderer;
+  public readonly sol03MissionManager = Sol03MissionManager.getInstance();
+  private sol03RoverScreenRenderer?: Sol03RoverScreenRenderer;
   private navigationBeamSystem?: NavigationBeamSystem;
   private playerInsideInterior = false;
   private currentSolNumber: 1 | 2 | 3 = 1;
@@ -159,9 +226,6 @@ export class Game {
 
   public missionManager: MissionManager;
   private screenRenderer = new ScreenRenderer();
-  private laptopScreenRenderer = new LaptopScreenRenderer();
-  private laptopPositionalAudio = new LaptopPositionalAudio();
-  private laptopAudioController?: LaptopAudioController;
   private habitatScreenRenderer = new HabitatScreenRenderer();
   private engineeringScreenRenderer = new EngineeringScreenRenderer();
   private researchScreenRenderer = new ResearchScreenRenderer();
@@ -186,8 +250,9 @@ export class Game {
   private nighttimePersistAccumulator = 0;
   private nighttimeSessionInitializedForDay: number | null = null;
   private groundHeightCache = new Map<string, number>();
+  private devTravelSuppressedTarget: string | null = null;
   private nighttimeSkyRotation = 0;
-  private terrainSunIntensityTarget = 2.6;
+  private terrainSunIntensityTarget = 3.6;
   private terrainSunTransitionInitialized = false;
   private hemiLight: THREE.HemisphereLight;
 
@@ -237,12 +302,12 @@ export class Game {
   private sol5EInteractionConsumed = false;
   private sol5LastSnapshotAt = 0;
 
-  constructor(private host: HTMLDivElement, private emit: SetState, replayState?: MissionProgressState) {
-    this.missionManager = new MissionManager(replayState);
-    this.evaResources = new EVAResources(replayState ? undefined : getEVAStorage());
+  constructor(private host: HTMLDivElement, private emit: SetState, private replayState?: MissionProgressState, private startMode: "new" | "continue" | "replay" = "continue") {
+    this.missionManager = new MissionManager(this.replayState);
+    this.evaResources = new EVAResources(this.replayState ? undefined : getEVAStorage());
     const evaSnapshot = this.evaResources.getState();
     this.evaSuitActive = evaSnapshot.suitActive;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: true });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
@@ -359,25 +424,36 @@ export class Game {
       sol5Images: mState.sol5.images,
       sol5Flight: mState.sol5.flight,
       sol5Message: null,
-      finalDepartureVideo: false,
 
       showCinematicOverlay: false,
       showOSDesktop: false,
-      showPersonalLaptop: false,
       osInitialApp: undefined,
       cameraPresentation: null,
 
       showSol01MissionOS: false,
       showSol01EnvironmentModal: false,
       showSol01ToolModal: false,
-      showSol01ResourceModal: false
+      showSol01ResourceModal: false,
+
+      showSol02MissionOS: false,
+      showSol02EnvironmentModal: false,
+      showSol02ToolModal: false,
+      showBotanCheckModal: false,
+      showSoilInvestigationModal: false,
+
+      showSol03MissionOS: false,
+      showSol03WaterModal: false,
+      showSol03EnvironmentModal: false,
+      showSol03ToolModal: false,
+      showEVACameraModal: false,
+      showFinalVideoModal: false
     };
 
     this.cameraPresentationManager = new CameraPresentationManager(this.camera);
     if (this.evaSuitActive) this.player.setConfig(EVA_MOVEMENT_CONFIG);
     this.audioManager = new GameAudioManager();
-    if (mState.currentDay === 7 && !mState.sol7.stormEnded) this.sol7Storm.start();
-    if (mState.currentDay === 8 && mState.sol8.powerFailureActive) this.sol8PowerEffects.start();
+    if ((mState.currentDay as number) === 7 && !(mState as any).sol7?.stormEnded) this.sol7Storm.start();
+    if ((mState.currentDay as number) === 8 && (mState as any).sol8?.powerFailureActive) this.sol8PowerEffects.start();
     this.renderer.domElement.addEventListener("pointerdown", this.unlockAudio);
 
     this.observer = new ResizeObserver(this.resize);
@@ -411,7 +487,19 @@ export class Game {
       this.syncRoverScreens();
     });
 
-    if (this.currentSolNumber === 1) {
+    // Subscribe to Sol 02 mission manager
+    this.sol02MissionManager.subscribe(() => {
+      this.syncMissionState();
+      this.syncRoverScreens();
+    });
+
+    // Subscribe to Sol 03 mission manager
+    this.sol03MissionManager.subscribe(() => {
+      this.syncMissionState();
+      this.syncRoverScreens();
+    });
+
+    if (this.currentSolNumber === 1 || this.currentSolNumber === 2 || this.currentSolNumber === 3) {
       this.syncMissionState();
     }
 
@@ -435,13 +523,50 @@ export class Game {
         totalStepCount: totalCount,
         navigationInstruction: navInstruction
       });
+    } else if (this.currentSolNumber === 2) {
+      const mgr = this.sol02MissionManager;
+      const currentTask = mgr.getCurrentTask();
+      const completedCount = mgr.completedTaskIds.size;
+      const totalCount = mgr.getTasks().length;
+      const navInstruction = resolveNextMissionNavigation(2, Array.from(mgr.completedTaskIds));
+
+      this.set({
+        missionDay: 2,
+        missionTitle: "DAYTIME SOIL INVESTIGATION",
+        objectiveTitle: currentTask ? currentTask.title : "Mission Complete",
+        objectiveState: mgr.sol02Completed ? "completed" : "in_progress",
+        completedStepCount: completedCount,
+        totalStepCount: totalCount,
+        navigationInstruction: navInstruction
+      });
+    } else if (this.currentSolNumber === 3) {
+      const mgr = this.sol03MissionManager;
+      const currentTask = mgr.getCurrentTask();
+      const completedCount = mgr.completedTaskIds.size;
+      const totalCount = mgr.getTasks().length;
+      const navInstruction = resolveNextMissionNavigation(3, Array.from(mgr.completedTaskIds));
+
+      this.set({
+        missionDay: 3,
+        missionTitle: "HIGHLAND ASCENT & MOUNTAIN SURVEY",
+        objectiveTitle: currentTask ? currentTask.title : "Mission Complete",
+        objectiveState: mgr.sol03Completed ? "completed" : "in_progress",
+        completedStepCount: completedCount,
+        totalStepCount: totalCount,
+        navigationInstruction: navInstruction
+      });
     }
   }
 
   public syncRoverScreens() {
-    if (!this.roverScreenRenderer) return;
-    const mgr = this.sol01MissionManager;
-    this.roverScreenRenderer.update(mgr.getTelemetry(), mgr.telemetryProfile, mgr.completedTaskIds);
+    if (this.currentSolNumber === 1 && this.roverScreenRenderer) {
+      const mgr = this.sol01MissionManager;
+      this.roverScreenRenderer.update(mgr.getTelemetry(), mgr.telemetryProfile, mgr.completedTaskIds);
+    } else if (this.currentSolNumber === 2 && this.sol02RoverScreenRenderer) {
+      this.sol02RoverScreenRenderer.update(this.sol02MissionManager);
+    } else if (this.currentSolNumber === 3 && this.sol03RoverScreenRenderer) {
+      this.sol03RoverScreenRenderer.update(this.sol03MissionManager);
+    }
   }
 
   public closeSol01Modals() {
@@ -454,27 +579,39 @@ export class Game {
     this.lock();
   }
 
+  public closeSol02Modals() {
+    this.set({
+      showSol02MissionOS: false,
+      showSol02EnvironmentModal: false,
+      showSol02ToolModal: false,
+      showBotanCheckModal: false,
+      showSoilInvestigationModal: false
+    });
+    this.lock();
+  }
+
+  public closeSol03Modals() {
+    this.set({
+      showSol03MissionOS: false,
+      showSol03WaterModal: false,
+      showSol03EnvironmentModal: false,
+      showSol03ToolModal: false,
+      showEVACameraModal: false,
+      showFinalVideoModal: false
+    });
+    this.lock();
+  }
+
   private set(p: Partial<GameState>) {
     this.state = { ...this.state, ...p };
     this.emit(this.state);
   }
 
-  public connectLaptopAudio(controller: LaptopAudioController) {
-    this.laptopAudioController = controller;
-    const habitat = this.loaded.get("Habitat");
-    if (habitat) this.attachLaptopPositionalAudio(habitat);
-  }
 
-  private attachLaptopPositionalAudio(model: THREE.Group) {
-    const controller = this.laptopAudioController;
-    if (!controller) return;
-    const output = this.laptopPositionalAudio.attach(model, this.camera, controller.getMediaElement(), this.player.eyeHeight);
-    controller.attachSpatialOutput(output.context, output.gate);
-  }
 
   private getEVAAccessBlockMessage(destination: ModuleName): string | null {
     return destination === "Terrain" || destination === "Hub"
-      ? getEVAAccessBlockReason(destination, this.evaSuitActive, destination === "Terrain" && this.state.missionDay === 7 && !this.missionManager.getSol7Progress().stormEnded)
+      ? getEVAAccessBlockReason(destination, this.evaSuitActive, false)
       : null;
   }
 
@@ -484,9 +621,6 @@ export class Game {
       !isWithinEVAInteractionRange(this.camera.position.distanceTo(target.center), target.range)) return;
 
     this.evaSuitActive = !this.evaSuitActive;
-    if (this.evaSuitActive && this.state.missionDay === 11) this.missionManager.markSol11EVAPrepared(true);
-    this.missionManager.markSol6EVAActivated(this.evaSuitActive);
-    if (this.evaSuitActive && this.state.missionDay === 8) this.missionManager.markSol08EVAPrepared(this.evaSuitActive);
     const resourceSnapshot = this.evaSuitActive ? this.evaResources.beginSession() : this.evaResources.endSession();
     const feedback = this.evaSuitActive
       ? "EVA SUIT READY · You are cleared for Mars surface observation."
@@ -508,55 +642,13 @@ export class Game {
   }
 
   private syncMissionStateToUI(mState: Readonly<MissionProgressState>) {
-    if (this.currentSolNumber === 1) {
-      this.syncMissionState();
-      return;
-    }
-    this.applySol11HabitatPresentation(mState.currentDay === 11);
-    if (mState.currentDay === 8 && mState.sol8.powerFailureActive) {
-      this.sol8PowerEffects.start();
-      this.sol8PowerEffects.disableModuleLights(this.current ?? new THREE.Group(), this.active);
-    } else if (mState.currentDay === 8 && mState.sol8.mainPowerRestored && !this.sol8PowerEffectsResolved) {
-      this.sol8PowerEffectsResolved = true;
-      this.sol8PowerEffects.restoreLights();
-      this.sol8PowerEffects.fadeOut();
-    } else if (mState.currentDay !== 8 && this.sol8PowerEffects.isActive()) {
-      this.sol8PowerEffects.dispose();
-      this.sol8PowerEffectsResolved = false;
-    }
-    if (mState.currentDay === 7 && !mState.sol7.stormEnded) this.sol7Storm.start();
-    else if (mState.currentDay === 7 && mState.sol7.report?.validated) this.sol7Storm.endAfterValidatedReport();
-    else if (mState.currentDay !== 7 && this.sol7Storm.isActive()) this.sol7Storm.dispose();
-    if (mState.currentDay === 7 && !mState.sol7.stormEnded && this.current) this.sol7Storm.applyToModule(this.current, this.active);
-    const mission = this.missionManager.getCurrentMission();
-    const taskProgress = this.missionManager.getMissionTaskProgress();
-    this.set({
-      missionDay: mState.currentDay,
-      missionTitle: mission.title,
-      objectiveTitle: mission.primaryObjective,
-      objectiveState: mState.objectiveState,
-      completedStepCount: taskProgress.completed,
-      totalStepCount: taskProgress.total,
-      dayBriefingSeen: mState.dayBriefingSeen,
-      showBriefingModal: !mState.dayBriefingSeen,
-      briefingText: this.missionManager.getCurrentMissionBriefing(),
-      primaryObjective: mission.primaryObjective,
-      selectedRouteTargetId: mState.selectedRouteTarget?.id ?? null,
-      notification: mState.notification,
-      navigationInstruction: this.missionManager.getCurrentNavigationInstruction(),
-      geologicalSurvey: mState.geologicalSurvey,
-      surfaceObservation: mState.surfaceObservation,
-      scienceAnalysis: mState.scienceAnalysis,
-      droneSurvey: mState.droneSurvey,
-      sol5Images: mState.sol5.images,
-      sol5Flight: mState.sol5.flight
-    });
+    this.syncMissionState();
   }
 
   private applySol11HabitatPresentation(active: boolean) {
     const habitat = this.loaded.get("Habitat");
     if (!habitat) return;
-    const targets = new Set(["Laptop01", "Laptop02", "Sketchfab_model", "NoteBook", "SetOfBook", "PhotoGraph", "Habitat_Workstation_Display"]);
+    const targets = new Set(["Sketchfab_model", "NoteBook", "SetOfBook", "PhotoGraph", "Habitat_Workstation_Display"]);
     const isTarget = (object: THREE.Object3D) => [object.name, object.userData?.name].some(name =>
       typeof name === "string" && [...targets].some(target => name === target || name.startsWith(`${target}.`))
     );
@@ -576,16 +668,8 @@ export class Game {
     habitat.traverse(object => { delete object.userData.sol11VisibilityCaptured; });
   }
 
-  public verifySol7EVALockdown(): boolean {
-    // Verification depends on the active Sol 7 access policy, not on audio/light
-    // playback successfully starting in the presentation controller.
-    if (this.state.missionDay !== 7 || this.missionManager.getSol7Progress().stormEnded) return false;
-    const temporaryLock = getEVAAccessBlockReason("Terrain", true, true);
-    const normalSuitGate = getEVAAccessBlockReason("Terrain", false, false);
-    return Boolean(temporaryLock && normalSuitGate);
-  }
-
-  public onSol7ReportValidated(): void { this.sol7Storm.endAfterValidatedReport(); }
+  public verifySol7EVALockdown(): boolean { return false; }
+  public onSol7ReportValidated(): void {}
 
   private async loadEnvironment() {
     try {
@@ -625,11 +709,13 @@ export class Game {
     const hemiConfig = getModuleHemisphereConfig(this.active);
     this.hemiLight.color.setHex(hemiConfig.skyColor);
     this.hemiLight.groundColor.setHex(hemiConfig.groundColor);
-    const useNight = this.active === "Terrain" && !this.transitioning && this.nighttimeActive && Boolean(this.nighttimeEnvironmentTarget);
-    this.hemiLight.intensity = useNight ? 0.12 : hemiConfig.intensity;
+    const useNight = this.active === "Terrain" && this.currentSolNumber !== 2 && !this.transitioning && this.nighttimeActive && Boolean(this.nighttimeEnvironmentTarget);
+    // Keep a small moonlit fill on the terrain itself; the authored night
+    // fixtures only cover the outpost and leave the open ground unreadable.
+    this.hemiLight.intensity = useNight ? 0.28 : hemiConfig.intensity;
     const terrainSun = this.current?.getObjectByName("MarsSun_DirectionalLight") as THREE.DirectionalLight | undefined;
     if (terrainSun) {
-      this.terrainSunIntensityTarget = useNight ? 0 : 2.8;
+      this.terrainSunIntensityTarget = useNight ? 0.22 : 3.6;
       if (!this.terrainSunTransitionInitialized) {
         terrainSun.intensity = this.terrainSunIntensityTarget;
         this.terrainSunTransitionInitialized = true;
@@ -640,7 +726,7 @@ export class Game {
     setTerrainNightLightsEnabled(this.terrainLightClusters, useNight);
     // Keep the daytime EXR as the sky/reflection source, but let the authored
     // directional sun establish stronger contrast on the terrain and structures.
-    this.scene.environmentIntensity = useNight ? 0.3 : (this.active === "Terrain" ? 0.18 : 1);
+    this.scene.environmentIntensity = useNight ? 0.42 : (this.active === "Terrain" ? 0.18 : 1);
     this.scene.environmentRotation.y = useNight ? this.nighttimeSkyRotation : 0;
     this.scene.backgroundRotation.y = useNight ? this.nighttimeSkyRotation : 0;
 
@@ -655,7 +741,8 @@ export class Game {
   }
 
   private syncMasterTerrainEnvironment(state: Readonly<MissionProgressState>) {
-    const eligible = isMasterTerrainNighttimeEligible(state, this.transitioning);
+    const sol = this.currentSolNumber;
+    const eligible = sol !== 2 && isMasterTerrainNighttimeEligible({ ...state, currentDay: sol }, this.transitioning);
     if (!eligible) {
       this.nighttimeActive = false;
       this.nighttimeElapsedSeconds = 0;
@@ -663,13 +750,13 @@ export class Game {
       this.nighttimeExpiredForCycle = false;
       this.nighttimeSessionInitializedForDay = null;
       this.clearStoredNightSession();
-    } else if (this.active === "Terrain" && this.nighttimeEnvironmentTarget && this.nighttimeSessionInitializedForDay !== state.currentDay) {
-      const stored = this.readStoredNightSession(state.currentDay);
-      this.nighttimeSessionInitializedForDay = state.currentDay;
+    } else if (this.active === "Terrain" && this.nighttimeEnvironmentTarget && this.nighttimeSessionInitializedForDay !== sol) {
+      const stored = this.readStoredNightSession(sol);
+      this.nighttimeSessionInitializedForDay = sol;
       this.nighttimeExpiredForCycle = stored?.expired ?? false;
       this.nighttimeElapsedSeconds = stored?.elapsedSeconds ?? 0;
       this.nighttimeActive = !this.nighttimeExpiredForCycle;
-      if (this.nighttimeActive) this.persistNightSession(state.currentDay, false);
+      if (this.nighttimeActive) this.persistNightSession(sol, false);
     }
     this.updateEnvironment();
   }
@@ -680,7 +767,7 @@ export class Game {
       this.state.panel || this.state.showBriefingModal || this.state.showRoutePlanning ||
       this.state.showGeologicalForm || this.state.showSurfaceObservationForm || this.state.showScienceAnalysisModal ||
       this.state.showDroneConsoleModal || this.state.restFeedback || this.state.showCinematicOverlay ||
-      this.state.showOSDesktop || this.state.showPersonalLaptop || this.cameraPresentationManager.isPresentationActive()
+      this.state.showOSDesktop || this.cameraPresentationManager.isPresentationActive()
     );
     const result = advanceNighttimeGameplayClock(this.nighttimeElapsedSeconds, dt, paused);
     if (paused) return;
@@ -688,7 +775,7 @@ export class Game {
     this.nighttimePersistAccumulator += dt;
     if (!result.expired && this.nighttimePersistAccumulator < 60) return;
     this.nighttimePersistAccumulator = 0;
-    const currentDay = this.missionManager.getState().currentDay;
+    const currentDay = this.currentSolNumber;
     if (!result.expired) {
       this.persistNightSession(currentDay, false);
       return;
@@ -727,8 +814,22 @@ export class Game {
     let initialModule: ModuleName = "Terrain";
     let initialSpawn = "Spawning_Point";
 
-    // Load any saved game progress for ELYSIUM IV
-    const hasSave = this.loadGameState();
+    if (this.startMode === "new") {
+      this.missionManager.resetProgress();
+      this.sol01MissionManager.resetMission();
+      this.sol02MissionManager.resetMission();
+      this.sol03MissionManager.resetMission();
+      try { localStorage.removeItem("elysium_iv_save_state"); } catch { /* Storage can be unavailable. */ }
+      this.currentSolNumber = 1;
+      this.playerInsideInterior = false;
+    } else if (this.startMode === "replay" && this.replayState && [1, 2, 3].includes(this.replayState.currentDay)) {
+      this.currentSolNumber = this.replayState.currentDay as 1 | 2 | 3;
+      this.playerInsideInterior = false;
+    }
+
+    // Continue restores the last saved Sol and position. New and replay start
+    // at the selected Sol's arrival point.
+    const hasSave = this.startMode === "continue" && this.loadGameState();
     if (hasSave) {
       if (this.currentSolNumber === 2) {
         initialSpawn = "Sol2_starting_Point";
@@ -781,11 +882,21 @@ export class Game {
       this.state.restFeedback ||
       this.state.showCinematicOverlay ||
       this.state.showOSDesktop ||
-      this.state.showPersonalLaptop ||
       this.state.showSol01MissionOS ||
       this.state.showSol01EnvironmentModal ||
       this.state.showSol01ToolModal ||
-      this.state.showSol01ResourceModal;
+      this.state.showSol01ResourceModal ||
+      this.state.showSol02MissionOS ||
+      this.state.showSol02EnvironmentModal ||
+      this.state.showSol02ToolModal ||
+      this.state.showBotanCheckModal ||
+      this.state.showSoilInvestigationModal ||
+      this.state.showSol03MissionOS ||
+      this.state.showSol03WaterModal ||
+      this.state.showSol03EnvironmentModal ||
+      this.state.showSol03ToolModal ||
+      this.state.showEVACameraModal ||
+      this.state.showFinalVideoModal;
 
     if (!isModalOpen && !this.isMobileTouch()) {
       void this.renderer.domElement.requestPointerLock();
@@ -812,9 +923,15 @@ export class Game {
     return Boolean(this.nearby) && !this.transitioning && !this.state.panel && !this.state.showBriefingModal &&
       !this.state.showRoutePlanning && !this.state.showGeologicalForm && !this.state.showSurfaceObservationForm &&
       !this.state.showScienceAnalysisModal && !this.state.showDroneConsoleModal && !this.state.showOSDesktop &&
-      !this.state.showPersonalLaptop && !this.state.showCinematicOverlay &&
+      !this.state.showCinematicOverlay &&
       !this.state.showSol01MissionOS && !this.state.showSol01EnvironmentModal &&
-      !this.state.showSol01ToolModal && !this.state.showSol01ResourceModal;
+      !this.state.showSol01ToolModal && !this.state.showSol01ResourceModal &&
+      !this.state.showSol02MissionOS && !this.state.showSol02EnvironmentModal &&
+      !this.state.showSol02ToolModal && !this.state.showBotanCheckModal &&
+      !this.state.showSoilInvestigationModal &&
+      !this.state.showSol03MissionOS && !this.state.showSol03WaterModal &&
+      !this.state.showSol03EnvironmentModal && !this.state.showSol03ToolModal &&
+      !this.state.showEVACameraModal && !this.state.showFinalVideoModal;
   }
 
   /** Invoke the exact existing contextual interaction path used by the E key. */
@@ -822,12 +939,7 @@ export class Game {
     this.audioManager.unlock();
     if (!this.canMobileInteract) return;
     if (this.playerInsideInterior) {
-      if (this.nearby?.identifier === "Driving_Section_Trigger") this.startDriving();
-      else if (this.nearby?.identifier === "Outdoor_Navigation_Trigger") this.exitRoverToExterior();
-      else if (this.nearby?.identifier === "Main_Screen_Trigger") this.set({ showSol01MissionOS: true, prompt: "" });
-      else if (this.nearby?.identifier === "Environment_Checking_Trigger") this.set({ showSol01EnvironmentModal: true, prompt: "" });
-      else if (this.nearby?.identifier === "Tool_Section_Trigger") this.set({ showSol01ToolModal: true, prompt: "" });
-      else if (this.nearby?.identifier === "Water_and_nut_Trigger") this.set({ showSol01ResourceModal: true, prompt: "" });
+      if (this.nearby) this.interact("E");
       return;
     }
     if ((this.nearby?.identifier === "terrainRover_trigger" || this.nearby?.identifier === "ladder") && this.active === "Terrain") {
@@ -1136,19 +1248,6 @@ export class Game {
     this.lock();
   }
 
-  openPersonalLaptop() {
-    if (this.active !== "Habitat" || this.transitioning) return;
-    if (document.pointerLockElement) document.exitPointerLock();
-    this.player.keys.clear();
-    this.set({ showPersonalLaptop: true, prompt: "" });
-  }
-
-  closePersonalLaptop() {
-    if (!this.state.showPersonalLaptop) return;
-    this.set({ showPersonalLaptop: false });
-    this.lock();
-  }
-
   confirmSol5Briefing() {
     const result = this.missionManager.confirmSol5Briefing();
     this.set({ sol5Message: result.message, notification: result.success ? result.message : this.state.notification });
@@ -1223,7 +1322,6 @@ export class Game {
     this.sol5LandingBeacon = createSol5LandingBeacon(this.scene, takeoffRef);
     setSol5LandingBeaconVisible(this.sol5LandingBeacon, false);
     this.sol5DroneActive = true;
-    this.audioManager.setSol5DroneActive(true);
     this.droneKeys.clear();
     this.sol5EInteractionConsumed = false;
     const ground = this.sol5GroundHeight(this.sol5Flight.position.x, this.sol5Flight.position.z);
@@ -1329,7 +1427,7 @@ export class Game {
     this.sol5TargetNode?.getWorldPosition(flight.target);
     if (this.sol5TakeoffNode) flight.takeoff.copy(getSol5TakeoffPosition(this.sol5TakeoffNode));
     const controls = droneControlsFromKeys(this.droneKeys, this.sol5BodyYaw);
-    stepDroneFlight(flight, controls, dt, (x, z) => this.sol5GroundHeight(x, z), (from, to) => segmentHitsAnyBox(from, to, this.sol5BuildingColliders));
+    stepDroneFlight(flight, controls, dt, (x: any, z: any) => this.sol5GroundHeight(x, z), (from: any, to: any) => segmentHitsAnyBox(from, to, this.sol5BuildingColliders));
     this.setSol5DroneWorldPose(flight.position, this.sol5BodyYaw);
     const progress = this.missionManager.getSol5Progress();
     const landingPromptActive = this.isSol5LandingApproachReady();
@@ -1408,7 +1506,6 @@ export class Game {
     const valid = this.isSol5LandingPromptValid();
     this.set({ sol5LandingPromptActive: valid, sol5Message: valid ? "Landing validated. Press L to complete the landing and return to Mission Control." : "Landing rejected: the landed position is outside the designated pad." });
     setSol5TargetBeaconVisible(this.sol5TargetBeacon, false);
-    this.audioManager.setSol5DroneActive(false);
     this.droneKeys.clear();
     document.exitPointerLock();
     return valid;
@@ -1482,7 +1579,7 @@ export class Game {
   abortSol5Flight() {
     if (!this.sol5DroneActive || !this.sol5Flight) return;
     this.missionManager.abortSol5SimulationAttempt();
-    this.sol5DroneActive = false; this.audioManager.setSol5DroneActive(false); setSol5TargetBeaconVisible(this.sol5TargetBeacon, false); this.droneKeys.clear(); document.exitPointerLock();
+    this.sol5DroneActive = false; setSol5TargetBeaconVisible(this.sol5TargetBeacon, false); this.droneKeys.clear(); document.exitPointerLock();
     this.set({ sol5LandingPromptActive: false });
     void this.returnPlayerToMissionControlNavigation("Drone attempt aborted. Return to Mission Control to activate a new attempt from the launch pad.");
   }
@@ -1611,7 +1708,6 @@ export class Game {
     this.sol5DroneActive = false;
     this.set({ sol5LandingPromptActive: false });
     this.droneKeys.clear();
-    this.audioManager.setSol5DroneActive(false);
     setSol5TargetBeaconVisible(this.sol5TargetBeacon, false);
     setSol5LandingBeaconVisible(this.sol5LandingBeacon, false);
   };
@@ -1622,7 +1718,7 @@ export class Game {
     }
   };
 
-  private unlockAudio = () => { this.audioManager.unlock(); this.sol7Storm.unlock(); this.sol8PowerEffects.unlock(); };
+  private unlockAudio = () => { this.audioManager.unlock(); (this.sol7Storm as any)?.unlock?.(); (this.sol8PowerEffects as any)?.unlock?.(); };
 
   private resize = () => {
     const width = this.host.clientWidth;
@@ -1633,7 +1729,7 @@ export class Game {
     this.transitionCamera.aspect = width / height;
     this.transitionCamera.updateProjectionMatrix();
     if (this.sol5CameraRig) {
-      for (const camera of Object.values(this.sol5CameraRig)) {
+      for (const camera of Object.values(this.sol5CameraRig) as any[]) {
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
       }
@@ -1671,7 +1767,6 @@ export class Game {
       this.state.restFeedback ||
       this.state.showCinematicOverlay ||
       this.state.showOSDesktop ||
-      this.state.showPersonalLaptop ||
       this.cameraPresentationManager.isPresentationActive();
 
     if (isModalOpen) return;
@@ -1691,7 +1786,6 @@ export class Game {
   };
 
   private keyDown = (e: KeyboardEvent) => {
-    if (this.state.finalDepartureVideo) { e.preventDefault(); return; }
     const target = e.target as HTMLElement | undefined;
     if (target?.matches("input,textarea,[contenteditable='true']")) return;
     this.audioManager.unlock();
@@ -1788,6 +1882,8 @@ export class Game {
           this.startDriving();
         } else if (this.nearby?.identifier === "Outdoor_Navigation_Trigger") {
           this.exitRoverToExterior();
+        } else if (this.nearby) {
+          this.interact("E");
         }
       }
       return;
@@ -1874,18 +1970,26 @@ export class Game {
       return;
     }
 
-    if (this.state.showPersonalLaptop) {
-      if (e.code === "Escape") {
-        e.preventDefault();
-        this.closePersonalLaptop();
-      }
-      return;
-    }
-
     if (this.state.showSol01MissionOS || this.state.showSol01EnvironmentModal || this.state.showSol01ToolModal || this.state.showSol01ResourceModal) {
       if (e.code === "Escape") {
         e.preventDefault();
         this.closeSol01Modals();
+      }
+      return;
+    }
+
+    if (this.state.showSol02MissionOS || this.state.showSol02EnvironmentModal || this.state.showSol02ToolModal || this.state.showBotanCheckModal || this.state.showSoilInvestigationModal) {
+      if (e.code === "Escape") {
+        e.preventDefault();
+        this.closeSol02Modals();
+      }
+      return;
+    }
+
+    if (this.state.showSol03MissionOS || this.state.showSol03WaterModal || this.state.showSol03EnvironmentModal || this.state.showSol03ToolModal || this.state.showEVACameraModal || this.state.showFinalVideoModal) {
+      if (e.code === "Escape") {
+        e.preventDefault();
+        this.closeSol03Modals();
       }
       return;
     }
@@ -2042,6 +2146,20 @@ export class Game {
       ) {
         this.terrain = o;
       }
+      if (/Panorama/i.test(o.name) && (o as THREE.Mesh).isMesh) {
+        const mesh = o as THREE.Mesh;
+        const mat = mesh.material as THREE.MeshStandardMaterial;
+        if (mat) {
+          mat.depthWrite = true;
+          mat.side = THREE.DoubleSide;
+          if (mat.map) {
+            mat.emissiveMap = mat.map;
+            mat.emissive = new THREE.Color(0xffffff);
+            mat.emissiveIntensity = 1.0;
+          }
+          mat.needsUpdate = true;
+        }
+      }
       if (module === "Drone" && o.name === "Floor" && (o as THREE.Mesh).isMesh) {
         this.droneFloorHeight = getSurfaceHeight(o);
       }
@@ -2068,7 +2186,13 @@ export class Game {
           this.scene.add(interiorModel);
           this.interiorSystem = new RoverInteriorSystem(interiorModel);
           this.interiorSystem.setLightsActive(false);
-          this.roverScreenRenderer = new RoverScreenRenderer(interiorModel);
+          if (this.currentSolNumber === 1) {
+            this.roverScreenRenderer = new RoverScreenRenderer(interiorModel);
+          } else if (this.currentSolNumber === 2) {
+            this.sol02RoverScreenRenderer = new Sol02RoverScreenRenderer(interiorModel);
+          } else if (this.currentSolNumber === 3) {
+            this.sol03RoverScreenRenderer = new Sol03RoverScreenRenderer(interiorModel);
+          }
           this.syncRoverScreens();
         } catch (err) {
           console.error("Could not load terrainVehicleInterior.glb:", err);
@@ -2106,42 +2230,28 @@ export class Game {
       model.traverse(o => {
         const mesh = o as THREE.Mesh;
         if (!mesh.isMesh) return;
-        if (/terrain/i.test(mesh.name) && !/rover|vehicle|trigger|spawn/i.test(mesh.name)) {
-          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-          for (const mat of mats) {
-            if ((mat as THREE.MeshStandardMaterial).isMeshStandardMaterial) {
-              const stdMat = mat as THREE.MeshStandardMaterial;
-              stdMat.roughness = Math.min(stdMat.roughness, 0.92);
-              stdMat.metalness = 0.0;
-              if (stdMat.map) {
-                stdMat.map.wrapS = THREE.RepeatWrapping;
-                stdMat.map.wrapT = THREE.RepeatWrapping;
-                stdMat.map.needsUpdate = true;
-              }
-              stdMat.needsUpdate = true;
+        if (this.currentSolNumber === 2 && mesh.name === "SOL_02_Mars_Terrain") {
+          const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          for (const material of materials) {
+            const surface = material as THREE.MeshStandardMaterial;
+            if (surface.map) {
+              // The SOL 02 model UVs stretch a single 4K albedo over the full
+              // kilometer-scale ground. Tile it so the regolith detail remains
+              // visible at player and rover distances.
+              surface.map.wrapS = THREE.RepeatWrapping;
+              surface.map.wrapT = THREE.RepeatWrapping;
+              surface.map.repeat.set(18, 18);
+              surface.map.colorSpace = THREE.SRGBColorSpace;
+              surface.map.needsUpdate = true;
             }
+            surface.roughness = Math.max(surface.roughness, 0.88);
+            surface.needsUpdate = true;
           }
         }
         if (/panorama/i.test(mesh.name)) {
           mesh.castShadow = false;
           mesh.receiveShadow = false;
           mesh.renderOrder = -100;
-          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-          mats.forEach(m => {
-            if (m) {
-              m.depthWrite = false;
-              m.transparent = true;
-              m.side = THREE.DoubleSide;
-              if ((m as THREE.MeshStandardMaterial).isMeshStandardMaterial) {
-                const std = m as THREE.MeshStandardMaterial;
-                std.roughness = 1.0;
-                std.metalness = 0.0;
-                std.emissive = new THREE.Color(0xd47744);
-                std.emissiveIntensity = 0.35;
-                std.needsUpdate = true;
-              }
-            }
-          });
         }
       });
       this.syncMasterTerrainEnvironment(this.missionManager.getState());
@@ -2168,12 +2278,8 @@ export class Game {
     // Attach 3D screen plane rendering to actual screen meshes
     if (module === "Habitat") {
       this.habitatScreenRenderer.attachToHabitat(model, this.missionManager.getState());
-      if (this.state.missionDay === 11) this.laptopScreenRenderer.dispose();
-      else this.laptopScreenRenderer.attachToHabitat(model);
-      this.attachLaptopPositionalAudio(model);
     } else {
       this.habitatScreenRenderer.dispose();
-      this.laptopScreenRenderer.dispose();
     }
     if (module === "Engineering") {
       this.engineeringScreenRenderer.attachToEngineering(model, this.missionManager.getState());
@@ -2566,7 +2672,7 @@ export class Game {
       if (this.disposed || this.pending !== route) return;
 
       // Sol 6 return completion is tied specifically to the successful Terrain → Airlock transition.
-      if (this.missionManager.getState().currentDay === 6 && this.transitionSourceModule === "Terrain" && route.module === "Airlock") {
+      if ((this.missionManager.getState().currentDay as number) === 6 && this.transitionSourceModule === "Terrain" && route.module === "Airlock") {
         this.missionManager.markSol6AirlockReturned();
       }
       this.transitionSourceModule = undefined;
@@ -2615,29 +2721,92 @@ export class Game {
       }
       if (this.nearby?.identifier === "Main_Screen_Trigger") {
         document.exitPointerLock?.();
-        this.set({ showSol01MissionOS: true, prompt: "" });
+        if (this.currentSolNumber === 1) {
+          this.set({ showSol01MissionOS: true, prompt: "" });
+        } else if (this.currentSolNumber === 2) {
+          this.set({ showSol02MissionOS: true, prompt: "" });
+        } else {
+          this.set({ showSol03MissionOS: true, prompt: "" });
+        }
         return;
       }
       if (this.nearby?.identifier === "Environment_Checking_Trigger") {
         document.exitPointerLock?.();
-        this.set({ showSol01EnvironmentModal: true, prompt: "" });
+        if (this.currentSolNumber === 1) {
+          this.set({ showSol01EnvironmentModal: true, prompt: "" });
+        } else if (this.currentSolNumber === 2) {
+          this.set({ showSol02EnvironmentModal: true, prompt: "" });
+        } else {
+          this.set({ showSol03EnvironmentModal: true, prompt: "" });
+        }
         return;
       }
       if (this.nearby?.identifier === "Tool_Section_Trigger") {
         document.exitPointerLock?.();
-        this.set({ showSol01ToolModal: true, prompt: "" });
+        if (this.currentSolNumber === 1) {
+          this.set({ showSol01ToolModal: true, prompt: "" });
+        } else if (this.currentSolNumber === 2) {
+          this.set({ showSol02ToolModal: true, prompt: "" });
+        } else {
+          this.set({ showSol03ToolModal: true, prompt: "" });
+        }
         return;
       }
       if (this.nearby?.identifier === "Water_and_nut_Trigger") {
         document.exitPointerLock?.();
-        this.set({ showSol01ResourceModal: true, prompt: "" });
+        if (this.currentSolNumber === 1) {
+          this.set({ showSol01ResourceModal: true, prompt: "" });
+        } else if (this.currentSolNumber === 2) {
+          this.set({ showBotanCheckModal: true, prompt: "" });
+        } else {
+          this.set({ showSol03WaterModal: true, prompt: "" });
+        }
         return;
       }
     }
 
-    if (this.active === "Terrain" && key === "E" && (this.nearby?.identifier === "terrainRover_trigger" || this.nearby?.identifier === "ladder")) {
-      this.enterRoverInterior();
-      return;
+    if (this.active === "Terrain" && key === "E") {
+      if (this.nearby?.identifier === "terrainRover_trigger" || this.nearby?.identifier === "ladder") {
+        if (this.currentSolNumber === 3 && this.sol03MissionManager.currentTaskId === "SOL03_TASK_08") {
+          this.sol03MissionManager.onReturnToRover();
+          this.syncMissionState();
+          this.syncRoverScreens();
+        }
+        this.enterRoverInterior();
+        return;
+      }
+      if (this.nearby?.identifier === "Sol2_Mission_investigation") {
+        document.exitPointerLock?.();
+        this.set({ showSoilInvestigationModal: true, prompt: "" });
+        return;
+      }
+      if (this.nearby?.identifier === "Sol2_Finishing_Point") {
+        const completed = this.sol02MissionManager.onCompleteSol02();
+        if (completed) {
+          this.syncMissionState();
+          this.set({ notification: "SOL 02 COMPLETED · Scientific Soil Analysis Accomplished! Transferring to SOL 03..." });
+          setTimeout(() => { void this.transitionToSol(3); }, 3000);
+        } else {
+          this.set({ notification: "SOL 02 INCOMPLETE · Ensure all investigation tasks & scientific reports are saved first." });
+        }
+        return;
+      }
+      if (this.nearby?.identifier === "Sol3_Checkpoint") {
+        document.exitPointerLock?.();
+        this.set({ showEVACameraModal: true, prompt: "" });
+        return;
+      }
+      if (this.nearby?.identifier === "SOL3_Finishing_Point") {
+        document.exitPointerLock?.();
+        if (this.sol03MissionManager.sol03Completed) return;
+        if (this.sol03MissionManager.completeJourney()) {
+          this.syncMissionState();
+          this.set({ showFinalVideoModal: true, showSol03MissionOS: false, prompt: "", notification: "SOL 03 complete. Expedition records saved." });
+        } else {
+          this.set({ showSol03MissionOS: true, prompt: "", notification: "SOL 03 completion requirements are not all recorded yet. Review the Mission OS." });
+        }
+        return;
+      }
     }
 
     if (key === "E" && this.active === "Drone") {
@@ -2656,7 +2825,7 @@ export class Game {
       const day = mState.currentDay;
 
       // Sol 6 field observations and sample registration are only valid at the selected target.
-      if (day === 6) {
+      if ((day as number) === 6) {
         const target = resolveSol5Target(this.loaded.get("Terrain") ?? new THREE.Group(), this.missionManager.getSelectedSiteId(), MASTER_TERRAIN_TARGETS);
         if (target && pos.distanceTo(target.position) <= SOL5_LIMITS.targetInspectionRadiusM && this.missionManager.isStepComplete("SOL06_REACH_SELECTED_TARGET") && (!this.missionManager.isStepComplete("SOL06_COMPLETE_FIELD_OBSERVATIONS") || !this.missionManager.isStepComplete("SOL06_COLLECT_SOIL_SAMPLE"))) {
           document.exitPointerLock();
@@ -2727,9 +2896,8 @@ export class Game {
       document.exitPointerLock();
       const result = this.missionManager.handleContextEvent({ type: "trigger_interacted", module: this.active, identifier: this.nearby.identifier });
       this.set({
-        notification: result.feedback ?? (this.state.missionDay === 1 ? "Habitat workstation opened. Personal laptop ready." : null),
-        prompt: "",
-        showPersonalLaptop: true
+        notification: result.feedback ?? "Workstation console inspected.",
+        prompt: ""
       });
       this.player.keys.clear();
       return;
@@ -2743,7 +2911,7 @@ export class Game {
       }
       const check = this.missionManager.canRestAndAdvance();
       if (!check.canAdvance) {
-        const terminalMissionComplete = this.state.missionDay === 9 && Boolean(this.missionManager.getSol09Progress().report?.validated);
+        const terminalMissionComplete = false;
         const remaining = this.missionManager.getRemainingSteps();
         const missingTasks = remaining.map(task => {
           const dayOneTask = DAY1_TASKS.find(item => item.taskId === task.stepId);
@@ -2829,47 +2997,15 @@ export class Game {
       }
     }
 
-    // 3. Sol 8 Science Lab analysis sequence. Sol 3 uses the same physical
-    // analysis trigger for its dataset investigation through TriggerOperatingSystem.
-    if (
-      this.state.missionDay === 8 &&
-      !this.missionManager.getSol8Progress().started &&
-      this.active === "Science" &&
-      (this.nearby.identifier === "LAB_RESEARCH_ANALYSIS_01" || this.nearby.identifier === "LAB_RESEARCH_MONITORING_01")
-    ) {
-      document.exitPointerLock();
-      const mState = this.missionManager.getState();
-      if (!mState.surfaceObservation) {
-        this.set({
-          restFeedback: {
-            type: "blocked",
-            message: "Prerequisite Incomplete: No saved Day 7 surface observation found. Complete Sol 07 outdoor scan before analysing in the Science Lab."
-          },
-          prompt: ""
-        });
-        return;
-      }
-      this.missionManager.completeStep("D8_OBJ_01_OPEN_SOURCE_RECORD");
-      this.missionManager.completeStep("D8_OBJ_02_REVIEW_COMPARISON");
-      this.set({
-        showScienceAnalysisModal: true,
-        prompt: ""
-      });
-      return;
-    }
-
-    // 5. Mission Contextual Interaction (Days 1–4)
+    // 5. Mission Contextual Interaction (Days 1–3)
     const contextResult = this.missionManager.handleContextEvent({
       type: "trigger_interacted",
       module: this.active,
       identifier: this.nearby.identifier
     });
 
-    // 6. Screen Actions / Cinematic Transition to PHOBOSIA OS Desktop
-    const sol8Interactives = ["HAB_MONITOR_01", "Engineering_PowerUnit_Trigger", "MC_SYSTEMS_01", "MC_MAIN_01", "PowerUnit_A", "PowerUnit_B", "PowerUnit_AB_Main", "Commuication_fix_Trigger"];
-    const interactedTriggerId = this.nearby?.identifier ?? "";
-    const sol10Trigger = this.state.missionDay === 10 && SOL10_TRIGGER_CHECKS.some(check => check.triggerId === interactedTriggerId);
-    const title = screenActions[this.nearby.identifier] ?? (this.state.missionDay === 8 && sol8Interactives.includes(this.nearby.identifier) ? this.nearby.identifier : sol10Trigger ? this.nearby.identifier : undefined);
+    // 6. Screen Actions
+    const title = screenActions[this.nearby.identifier];
     if (title) {
       document.exitPointerLock();
 
@@ -2922,7 +3058,7 @@ export class Game {
     const day = mState.currentDay;
 
     // Sol 6 arrival is measured against the official target's loaded scene transform.
-    if (day === 6) {
+    if ((day as number) === 6) {
       const targetId = this.missionManager.getSelectedSiteId();
       const target = resolveSol5Target(this.loaded.get("Terrain") ?? new THREE.Group(), targetId, MASTER_TERRAIN_TARGETS);
       const sol6Progress = this.missionManager.getSol6Progress();
@@ -3037,6 +3173,51 @@ export class Game {
       if (roverTarget && (!best || best.identifier !== "terrainRover_trigger")) best = roverTarget;
     }
 
+    if (this.active === "Terrain" && this.currentSolNumber === 2 && !this.playerInsideInterior) {
+      const investObj = this.current?.getObjectByName("Sol2_Mission_investigation") ??
+                        this.current?.getObjectByName("Sol2_Mission_investigation.001");
+      if (investObj && at.distanceTo(investObj.getWorldPosition(new THREE.Vector3())) <= 18) {
+        best = {
+          object: investObj,
+          identifier: "Sol2_Mission_investigation",
+          center: investObj.getWorldPosition(new THREE.Vector3()),
+          range: 18
+        };
+      }
+
+      const finishObj = this.current?.getObjectByName("Sol2_Finishing_Point");
+      if (finishObj && at.distanceTo(finishObj.getWorldPosition(new THREE.Vector3())) <= 30) {
+        best = {
+          object: finishObj,
+          identifier: "Sol2_Finishing_Point",
+          center: finishObj.getWorldPosition(new THREE.Vector3()),
+          range: 30
+        };
+      }
+    }
+
+    if (this.active === "Terrain" && this.currentSolNumber === 3 && !this.playerInsideInterior) {
+      const checkObj = this.current?.getObjectByName("Sol3_Checkpoint");
+      if (checkObj && at.distanceTo(checkObj.getWorldPosition(new THREE.Vector3())) <= 25) {
+        best = {
+          object: checkObj,
+          identifier: "Sol3_Checkpoint",
+          center: checkObj.getWorldPosition(new THREE.Vector3()),
+          range: 25
+        };
+      }
+
+      const finishObj = this.current?.getObjectByName("SOL3_Finishing_Point");
+      if (finishObj && at.distanceTo(finishObj.getWorldPosition(new THREE.Vector3())) <= 30) {
+        best = {
+          object: finishObj,
+          identifier: "SOL3_Finishing_Point",
+          center: finishObj.getWorldPosition(new THREE.Vector3()),
+          range: 30
+        };
+      }
+    }
+
     // The three Airlock portal meshes are authored close together. Resolve an
     // aimed-at portal before falling back to nearest-center proximity so the
     // Drone Section entrance remains selectable beside the Hub/Terrain exits.
@@ -3084,7 +3265,15 @@ export class Game {
     }
 
     const route = transitions[this.active][best.identifier];
-    if (best.identifier === "terrainRover_trigger" || best.identifier === "ladder") {
+    if (best.identifier === "Sol2_Mission_investigation") {
+      this.set({ prompt: "Press E to Collect Martian Soil Sample" });
+    } else if (best.identifier === "Sol2_Finishing_Point") {
+      this.set({ prompt: "Press E to Complete SOL 02 Mission" });
+    } else if (best.identifier === "Sol3_Checkpoint") {
+      this.set({ prompt: "Press E to Activate EVA Camera" });
+    } else if (best.identifier === "SOL3_Finishing_Point") {
+      this.set({ prompt: this.sol03MissionManager.sol03Completed ? "SOL 03 EXPEDITION COMPLETE" : "Press E to Complete SOL 03 Expedition" });
+    } else if (best.identifier === "terrainRover_trigger" || best.identifier === "ladder") {
       this.set({ prompt: "Press E to Enter Rover" });
     } else if (best.identifier === EVA_PREPARATION_TRIGGER_ID) {
       this.set({ prompt: this.evaSuitActive ? "[E] REMOVE EVA SUIT" : "[E] PREPARE EVA SUIT" });
@@ -3298,6 +3487,22 @@ export class Game {
       this.sol01MissionManager.onPlayerEnterRover();
       this.syncMissionState();
       this.syncRoverScreens();
+    } else if (this.currentSolNumber === 2) {
+      if (this.sol02MissionManager.currentTaskId === "SOL02_TASK_01") {
+        this.sol02MissionManager.onPlayerEnterRover();
+      } else if (this.sol02MissionManager.currentTaskId === "SOL02_TASK_08") {
+        this.sol02MissionManager.onReturnToRoverWithSample();
+      }
+      this.syncMissionState();
+      this.syncRoverScreens();
+    } else if (this.currentSolNumber === 3) {
+      if (this.sol03MissionManager.currentTaskId === "SOL03_TASK_08") {
+        this.sol03MissionManager.onReturnToRover();
+      } else {
+        this.sol03MissionManager.onPlayerEnterRover();
+      }
+      this.syncMissionState();
+      this.syncRoverScreens();
     }
     this.saveGameState();
   }
@@ -3373,6 +3578,7 @@ export class Game {
   private exitRoverToExterior() {
     if (!this.roverSystem) return;
     this.playerInsideInterior = false;
+    this.roverSystem.prepareForExterior();
     this.interiorSystem?.setLightsActive(false);
 
     // Get rover world position and ladder/exit position
@@ -3417,6 +3623,13 @@ export class Game {
       ? this.roverSystem.rover.getWorldPosition(new THREE.Vector3())
       : this.camera.position;
 
+    if (this.devTravelSuppressedTarget) {
+      const suppressed = this.current.getObjectByName(this.devTravelSuppressedTarget);
+      const radius = this.devTravelSuppressedTarget === "2ndCheckpoint" ? 45 : 50;
+      if (suppressed && checkPos.distanceTo(suppressed.getWorldPosition(new THREE.Vector3())) <= radius) return;
+      this.devTravelSuppressedTarget = null;
+    }
+
     if (this.currentSolNumber === 1) {
       const cp2 = this.current.getObjectByName("2ndCheckpoint");
       const finish = this.current.getObjectByName("Finishing_Point");
@@ -3445,21 +3658,15 @@ export class Game {
       }
     } else if (this.currentSolNumber === 2) {
       const cp = this.current.getObjectByName("Sol2_Checkpoint");
-      const invest = this.current.getObjectByName("Sol2_Mission_investigation") ?? this.current.getObjectByName("Sol2_Mission_investigation.001");
       const finish = this.current.getObjectByName("Sol2_Finishing_Point");
       if (cp && !this.solCheckpoints[2].checkpointReached) {
         const cpPos = cp.getWorldPosition(new THREE.Vector3());
         if (checkPos.distanceTo(cpPos) <= 50) {
           this.solCheckpoints[2].checkpointReached = true;
-          this.set({ notification: "SOL 02 CHECKPOINT REACHED · Investigate canyon formation." });
-          this.saveGameState();
-        }
-      }
-      if (invest && !this.solCheckpoints[2].investigationReached) {
-        const investPos = invest.getWorldPosition(new THREE.Vector3());
-        if (checkPos.distanceTo(investPos) <= 50) {
-          this.solCheckpoints[2].investigationReached = true;
-          this.set({ notification: "INVESTIGATION COMPLETE · Proceed to Sol 2 Finishing Point." });
+          this.sol02MissionManager.onReachCheckpoint();
+          this.syncMissionState();
+          this.syncRoverScreens();
+          this.set({ notification: "SOL 02 CHECKPOINT REACHED · Exit rover and proceed to Soil Investigation site on foot." });
           this.saveGameState();
         }
       }
@@ -3467,9 +3674,11 @@ export class Game {
         const finishPos = finish.getWorldPosition(new THREE.Vector3());
         if (checkPos.distanceTo(finishPos) <= 50) {
           this.solCheckpoints[2].completed = true;
-          this.set({ notification: "SOL 02 COMPLETED · Preparing transfer to SOL 03..." });
+          this.sol02MissionManager.onReachFinishingPoint();
+          this.syncMissionState();
+          this.syncRoverScreens();
+          this.set({ notification: "FINAL DESTINATION REACHED · Exit rover and press E to complete SOL 02 mission." });
           this.saveGameState();
-          setTimeout(() => { void this.transitionToSol(3); }, 2200);
         }
       }
     } else if (this.currentSolNumber === 3) {
@@ -3479,7 +3688,10 @@ export class Game {
         const cpPos = cp.getWorldPosition(new THREE.Vector3());
         if (checkPos.distanceTo(cpPos) <= 50) {
           this.solCheckpoints[3].checkpointReached = true;
-          this.set({ notification: "SOL 03 CHECKPOINT REACHED · Ascend Highland Ridge to Final Destination." });
+          this.sol03MissionManager.onReachCheckpoint();
+          this.syncMissionState();
+          this.syncRoverScreens();
+          this.set({ notification: "SOL 03 CHECKPOINT REACHED · Exit rover and activate camera at viewpoint to photograph mountain." });
           this.saveGameState();
         }
       }
@@ -3487,11 +3699,78 @@ export class Game {
         const finishPos = finish.getWorldPosition(new THREE.Vector3());
         if (checkPos.distanceTo(finishPos) <= 50) {
           this.solCheckpoints[3].completed = true;
-          this.set({ notification: "MISSION ACCOMPLISHED · ELYSIUM IV EXPEDITION SUCCESSFUL!" });
+          this.sol03MissionManager.onReachFinishingPoint();
+          this.syncMissionState();
+          this.syncRoverScreens();
+          this.set({ notification: "FINAL TERMINUS REACHED · Complete final inspections and compile final report in Mission OS." });
           this.saveGameState();
         }
       }
     }
+  }
+
+  public getDevFastTravelDestinations(): DevFastTravelDestination[] {
+    if (!ENABLE_DEV_FAST_TRAVEL || this.active !== "Terrain" || !this.current || this.transitioning) return [];
+    const names: Record<1 | 2 | 3, string[]> = {
+      1: ["Spawning_Point", "Vehicle_Spwaning_Point", "2ndCheckpoint", "Finishing_Point"],
+      2: ["Sol2_starting_Point", "Object", "Vehicle_Spwaning_Point", "Sol2_Checkpoint", "Sol2_Mission_investigation", "Sol2_Finishing_Point"],
+      3: ["SOL3_starting_Point", "Vehicle_Spwaning_Point", "Sol3_Checkpoint", "SOL3_Finishing_Point"]
+    };
+    return names[this.currentSolNumber].flatMap(name => {
+      const object = this.current?.getObjectByName(name);
+      const label = name === "Object" ? "Object · SOL 02 start position" : name.replaceAll("_", " ");
+      return object ? [{ name, label }] : [];
+    });
+  }
+
+  public devFastTravel(destinationName: string): string | null {
+    if (!ENABLE_DEV_FAST_TRAVEL) return "Development fast travel is disabled.";
+    if (this.transitioning || this.active !== "Terrain" || !this.current || !this.roverSystem) return "Fast travel is unavailable while the terrain is loading or the rover is missing.";
+    const destination = this.current.getObjectByName(destinationName);
+    if (!destination || !this.getDevFastTravelDestinations().some(item => item.name === destinationName)) return "That destination is not available in the loaded SOL.";
+
+    this.current.updateWorldMatrix(true, true);
+    destination.updateWorldMatrix(true, false);
+    const target = destination.getWorldPosition(new THREE.Vector3());
+    const targetRotation = destination.getWorldQuaternion(new THREE.Quaternion());
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(targetRotation).setY(0).normalize();
+    const right = new THREE.Vector3(-forward.z, 0, forward.x);
+    const priorRover = this.roverSystem.rover.getWorldPosition(new THREE.Vector3());
+    const pose = new THREE.Vector3();
+    let placed = false;
+    for (const distance of [14, 20, 28, 36]) {
+      for (const side of [1, -1, 0]) {
+        pose.copy(target).addScaledVector(forward, distance).addScaledVector(right, side * 12);
+        const ground = this.groundHeight(pose);
+        if (!Number.isFinite(ground)) continue;
+        pose.y = ground - this.roverSystem.bottomOffset;
+        const playerProbe = pose.clone().add(new THREE.Vector3(0, this.player.eyeHeight, 0));
+        if (!this.playerInsideInterior && !this.canOccupy(playerProbe)) continue;
+        placed = true;
+        break;
+      }
+      if (placed) break;
+    }
+    if (!placed) return "No clear rover arrival area was found near that destination.";
+
+    const oldCamera = this.camera.position.clone();
+    const delta = pose.clone().sub(priorRover);
+    this.roverSystem.teleportWorldPose(pose, targetRotation);
+    this.roverKeys.clear();
+    if (this.playerInsideInterior && this.interiorSystem) {
+      this.interiorSystem.interiorGroup.position.add(delta);
+      this.interiorSystem.interiorGroup.updateWorldMatrix(true, true);
+      this.camera.position.copy(oldCamera).add(delta);
+    } else {
+      this.camera.position.copy(oldCamera).add(delta);
+      this.player.syncBasePosition();
+      this.player.velocity.set(0, 0, 0);
+    }
+    this.nearby = undefined;
+    this.devTravelSuppressedTarget = destinationName;
+    this.groundHeightCache.clear();
+    this.set({ prompt: "", notification: `DEV FAST TRAVEL · ${destinationName}` });
+    return null;
   }
 
   public async transitionToSol(solNumber: 1 | 2 | 3) {
@@ -3501,8 +3780,30 @@ export class Game {
     if (this.roverSystem?.isActive) this.roverSystem.exit();
     this.playerInsideInterior = false;
 
+    this.roverScreenRenderer?.dispose();
+    this.sol02RoverScreenRenderer?.dispose();
+    this.sol03RoverScreenRenderer?.dispose();
+    this.sol03RoverScreenRenderer?.dispose();
+    this.roverScreenRenderer = undefined;
+    this.sol02RoverScreenRenderer = undefined;
+    this.sol03RoverScreenRenderer = undefined;
+
+    this.nighttimeActive = false;
+
     const spawn = solNumber === 1 ? "Spawning_Point" : solNumber === 2 ? "Sol2_starting_Point" : "SOL3_starting_Point";
     await this.beginTransition({ module: "Terrain", spawn });
+
+    if (this.interiorSystem) {
+      if (solNumber === 1) {
+        this.roverScreenRenderer = new RoverScreenRenderer(this.interiorSystem.interiorGroup);
+      } else if (solNumber === 2) {
+        this.sol02RoverScreenRenderer = new Sol02RoverScreenRenderer(this.interiorSystem.interiorGroup);
+      } else if (solNumber === 3) {
+        this.sol03RoverScreenRenderer = new Sol03RoverScreenRenderer(this.interiorSystem.interiorGroup);
+      }
+      this.syncRoverScreens();
+    }
+    this.syncMissionState();
     this.saveGameState();
   }
 
@@ -3546,8 +3847,6 @@ export class Game {
 
   private updateSol11DepartureRoute() {}
   private clearSol11DepartureRoute() {}
-  public finishSol11FinalVideo(): boolean { return true; }
-
   private updateTerrainSunTransition(dt: number) {
     const sun = this.active === "Terrain"
       ? this.current?.getObjectByName("MarsSun_DirectionalLight") as THREE.DirectionalLight | undefined
@@ -3597,17 +3896,53 @@ export class Game {
 
     this.checkSolProgression();
 
-    if (this.currentSolNumber === 1 && this.active === "Terrain") {
+    if (this.active === "Terrain") {
       let targetObj: THREE.Object3D | null = null;
-      const currentTaskId = this.sol01MissionManager.currentTaskId;
-      if (currentTaskId === "SOL01_TASK_06") {
-        targetObj = this.current?.getObjectByName("2ndCheckpoint") ?? null;
-      } else if (currentTaskId === "SOL01_TASK_08") {
-        targetObj = this.current?.getObjectByName("Finishing_Point") ?? null;
-      }
-      const roverPos = this.roverSystem?.rover.getWorldPosition(new THREE.Vector3()) ?? this.camera.position;
       const isDriving = this.roverSystem?.isActive ?? false;
-      this.navigationBeamSystem?.update(dt, roverPos, targetObj, isDriving);
+
+      if (this.currentSolNumber === 1) {
+        const currentTaskId = this.sol01MissionManager.currentTaskId;
+        if (currentTaskId === "SOL01_TASK_06") {
+          targetObj = this.current?.getObjectByName("2ndCheckpoint") ?? null;
+        } else if (currentTaskId === "SOL01_TASK_08") {
+          targetObj = this.current?.getObjectByName("Finishing_Point") ?? null;
+        }
+        const roverPos = this.roverSystem?.rover.getWorldPosition(new THREE.Vector3()) ?? this.camera.position;
+        this.navigationBeamSystem?.update(dt, roverPos, targetObj, isDriving);
+      } else if (this.currentSolNumber === 2) {
+        const currentTaskId = this.sol02MissionManager.currentTaskId;
+        if (currentTaskId === "SOL02_TASK_06") {
+          targetObj = this.current?.getObjectByName("Sol2_Checkpoint") ?? null;
+        } else if (currentTaskId === "SOL02_TASK_07") {
+          targetObj = this.current?.getObjectByName("Sol2_Mission_investigation") ??
+                      this.current?.getObjectByName("Sol2_Mission_investigation.001") ?? null;
+        } else if (currentTaskId === "SOL02_TASK_08") {
+          targetObj = this.roverSystem?.rover ?? this.current?.getObjectByName("ladder") ?? null;
+        } else if (currentTaskId === "SOL02_TASK_11" || currentTaskId === "SOL02_TASK_12") {
+          targetObj = this.current?.getObjectByName("Sol2_Finishing_Point") ?? null;
+        }
+
+        const originPos = isDriving
+          ? (this.roverSystem?.rover.getWorldPosition(new THREE.Vector3()) ?? this.camera.position)
+          : this.camera.position;
+        const showBeam = isDriving || currentTaskId === "SOL02_TASK_07" || currentTaskId === "SOL02_TASK_08";
+        this.navigationBeamSystem?.update(dt, originPos, targetObj, showBeam);
+      } else if (this.currentSolNumber === 3) {
+        const currentTaskId = this.sol03MissionManager.currentTaskId;
+        if (currentTaskId === "SOL03_TASK_06" || currentTaskId === "SOL03_TASK_07") {
+          targetObj = this.current?.getObjectByName("Sol3_Checkpoint") ?? null;
+        } else if (currentTaskId === "SOL03_TASK_08") {
+          targetObj = this.roverSystem?.rover ?? this.current?.getObjectByName("ladder") ?? null;
+        } else if (currentTaskId === "SOL03_TASK_11") {
+          targetObj = this.current?.getObjectByName("SOL3_Finishing_Point") ?? null;
+        }
+
+        const originPos = isDriving
+          ? (this.roverSystem?.rover.getWorldPosition(new THREE.Vector3()) ?? this.camera.position)
+          : this.camera.position;
+        const showBeam = isDriving || currentTaskId === "SOL03_TASK_07" || currentTaskId === "SOL03_TASK_08";
+        this.navigationBeamSystem?.update(dt, originPos, targetObj, showBeam);
+      }
     }
 
     if (this.cameraPresentationManager.isPresentationActive()) {
@@ -3650,6 +3985,21 @@ export class Game {
         this.state.restFeedback ||
         this.state.showCinematicOverlay ||
         this.state.showOSDesktop ||
+        this.state.showSol01MissionOS ||
+        this.state.showSol01EnvironmentModal ||
+        this.state.showSol01ToolModal ||
+        this.state.showSol01ResourceModal ||
+        this.state.showSol02MissionOS ||
+        this.state.showSol02EnvironmentModal ||
+        this.state.showSol02ToolModal ||
+        this.state.showBotanCheckModal ||
+        this.state.showSoilInvestigationModal ||
+        this.state.showSol03MissionOS ||
+        this.state.showSol03WaterModal ||
+        this.state.showSol03EnvironmentModal ||
+        this.state.showSol03ToolModal ||
+        this.state.showEVACameraModal ||
+        this.state.showFinalVideoModal ||
         this.cameraPresentationManager.isPresentationActive();
 
       if (!isModalOpen) {
@@ -3671,8 +4021,9 @@ export class Game {
           }
         }
         const terrainEVAActive = this.active === "Terrain" && this.evaSuitActive && playerControlled;
+        const indoorActive = (this.active !== "Terrain" || this.playerInsideInterior) && playerControlled;
         this.audioManager.setIndoorMovement(resolveIndoorMovementAudioState({
-          indoor: this.active !== "Terrain",
+          indoor: indoorActive,
           playerControlled,
           grounded: this.player.grounded,
           horizontalSpeed,
@@ -3723,6 +4074,8 @@ export class Game {
     this.interiorSystem?.dispose();
     this.navigationBeamSystem?.dispose();
     this.roverScreenRenderer?.dispose();
+    this.sol02RoverScreenRenderer?.dispose();
+    this.sol03RoverScreenRenderer?.dispose();
     this.roverKeys.clear();
     this.disposed = true;
     this.clearSol11DepartureRoute();
@@ -3747,8 +4100,6 @@ export class Game {
     }
 
     this.habitatScreenRenderer.dispose();
-    this.laptopScreenRenderer.dispose();
-    this.laptopPositionalAudio.dispose();
     this.engineeringScreenRenderer.dispose();
     this.researchScreenRenderer.dispose();
     this.missionControlScreenRenderer.dispose();

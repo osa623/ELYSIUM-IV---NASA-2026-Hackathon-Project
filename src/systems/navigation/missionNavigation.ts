@@ -5,6 +5,8 @@ import sol01Navigation from "../../jsons/Instructions/sol-01-navigation.json";
 import sol02Navigation from "../../jsons/Instructions/sol-02-navigation.json";
 import sol03Navigation from "../../jsons/Instructions/sol-03-navigation.json";
 import { Sol01MissionManager } from "../../missions/SOL_01/Sol01MissionManager";
+import { Sol02MissionManager } from "../../missions/SOL_02/Sol02MissionManager";
+import { Sol03MissionManager } from "../../missions/SOL_03/Sol03MissionManager";
 
 type NavigationFile = typeof sol01Navigation | typeof sol02Navigation | typeof sol03Navigation;
 type NavigationTask = NavigationFile["instructions"][number];
@@ -166,6 +168,62 @@ export function resolveNextMissionNavigation(sol: number, validatedRuntimeTaskId
     };
   }
 
+  if (sol === 2) {
+    const sol02Mgr = Sol02MissionManager.getInstance();
+    const completed = new Set<string>(validatedRuntimeTaskIds);
+    sol02Mgr.completedTaskIds.forEach(id => completed.add(id));
+    const instruction = sol02Navigation.instructions.find(item => !completed.has(item.taskId));
+    if (!instruction) {
+      return {
+        title: sol02Navigation.completion.title,
+        notification: sol02Navigation.completion.message,
+        isCompletion: true,
+        hasInstruction: true
+      };
+    }
+    return {
+      taskId: instruction.taskId,
+      title: instruction.title,
+      notification: `${instruction.title} · ${instruction.destination.name}. ${instruction.message} ${instruction.guidance} ${instruction.activity}`,
+      message: instruction.message,
+      destinationName: instruction.destination.name,
+      destinationModule: instruction.destination.module,
+      destinationSection: instruction.destination.section,
+      guidance: instruction.guidance,
+      activity: instruction.activity,
+      isCompletion: false,
+      hasInstruction: true
+    };
+  }
+
+  if (sol === 3) {
+    const sol03Mgr = Sol03MissionManager.getInstance();
+    const completed = new Set<string>(validatedRuntimeTaskIds);
+    sol03Mgr.completedTaskIds.forEach(id => completed.add(id));
+    const instruction = sol03Navigation.instructions.find(item => !completed.has(item.taskId));
+    if (!instruction) {
+      return {
+        title: sol03Navigation.completion.title,
+        notification: sol03Navigation.completion.message,
+        isCompletion: true,
+        hasInstruction: true
+      };
+    }
+    return {
+      taskId: instruction.taskId,
+      title: instruction.title,
+      notification: `${instruction.title} · ${instruction.destination.name}. ${instruction.message} ${instruction.guidance} ${instruction.activity}`,
+      message: instruction.message,
+      destinationName: instruction.destination.name,
+      destinationModule: instruction.destination.module,
+      destinationSection: instruction.destination.section,
+      guidance: instruction.guidance,
+      activity: instruction.activity,
+      isCompletion: false,
+      hasInstruction: true
+    };
+  }
+
   const source = FILES[sol];
   if (!source) return null;
   const mission: any = source.mission;
@@ -175,7 +233,7 @@ export function resolveNextMissionNavigation(sol: number, validatedRuntimeTaskId
   const tasks = mission.tasks.filter((task: any) => task.mandatory && requiredIds.has(task.taskId));
   const available = tasks.find((task: any) =>
     !completed.has(task.taskId) &&
-    ((("requiresCompletedTasks" in task ? task.requiresCompletedTasks : undefined) ?? source.navigation.instructions.find(item => item.taskId === task.taskId)?.requiresCompletedTasks) ?? []).every((required: string) => completed.has(required))
+    ((("requiresCompletedTasks" in task ? task.requiresCompletedTasks : undefined) ?? (source.navigation.instructions.find(item => item.taskId === task.taskId) as any)?.requiresCompletedTasks) ?? []).every((required: string) => completed.has(required))
   );
 
   if (!available) {

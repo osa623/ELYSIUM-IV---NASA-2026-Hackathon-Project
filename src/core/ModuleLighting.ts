@@ -300,6 +300,17 @@ export function configureModuleLighting(
   additions.updateWorldMatrix(true, false);
 
   if (module === "Terrain") {
+    // Some compressed terrain exports include a Blender directional sun at
+    // physical intensity 1366. The game adds its own tuned sun below; leaving
+    // the imported one active blows out the SOL 02 terrain and cabin.
+    moduleRoot.traverse(object => {
+      const light = object as THREE.Light;
+      if (light.isLight && light.intensity > 100) {
+        light.intensity = 0;
+        light.castShadow = false;
+      }
+    });
+
     let sunReference = moduleRoot.getObjectByName("Mars_Sunlight") ??
       moduleRoot.getObjectByName("Sun_Object") ??
       moduleRoot.getObjectByName("MarsSun_DirectionalLight");
@@ -353,7 +364,7 @@ export function configureModuleLighting(
       const existing = moduleRoot.getObjectByName("MarsSun_DirectionalLight");
       if (existing?.type === "DirectionalLight") sun = existing as THREE.DirectionalLight;
     }
-    if (!sun) sun = new THREE.DirectionalLight(0xffe2c2, 2.8);
+    if (!sun) sun = new THREE.DirectionalLight(0xffe2c2, 3.6);
     sun.name = "MarsSun_DirectionalLight";
     if (sun.parent !== sunReference) sunReference.attach(sun);
     sun.position.set(0, 0, 0);
@@ -736,7 +747,7 @@ export function getModuleHemisphereConfig(module: ModuleName): {
     return {
       skyColor: 0xd48858,
       groundColor: 0x3a2215,
-      intensity: 0.75
+      intensity: 1.25
     };
   }
 

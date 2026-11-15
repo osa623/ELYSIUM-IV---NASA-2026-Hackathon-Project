@@ -1,0 +1,102 @@
+{
+  "sol": 3,
+  "mission_id": "SOL_03",
+  "screens": {
+    "Computer_Screen_01": {
+      "id": "Computer_Screen_01",
+      "type": "MISSION_OVERVIEW",
+      "width": 512,
+      "height": 256
+    },
+    "Computer_Screen_02": {
+      "id": "Computer_Screen_02",
+      "type": "DAYTIME_TELEMETRY",
+      "width": 512,
+      "height": 256
+    },
+    "Computer_Screen_03": {
+      "id": "Computer_Screen_03",
+      "type": "EXPEDITION_AUDIT",
+      "width": 512,
+      "height": 256
+    },
+    "O2_Screen": {
+      "id": "O2_Screen",
+      "type": "RESOURCE_LEVEL",
+      "label": "CABIN OXYGEN",
+      "unit": "%",
+      "width": 256,
+      "height": 256
+    },
+    "Water_and_Nut_Screen": {
+      "id": "Water_and_Nut_Screen",
+      "type": "RESOURCE_MONITOR",
+      "label": "LIFE SUPPORT RESERVES",
+      "width": 256,
+      "height": 256
+    },
+    "Water_and_Nut_Screen_02": {
+      "id": "Water_and_Nut_Screen_02",
+      "type": "RESOURCE_STATUS",
+      "label": "RESOURCE STATUS",
+      "width": 256,
+      "height": 128
+    },
+    "sm_Air_filter_screen": {
+      "id": "sm_Air_filter_screen",
+      "label": "AIR FILTER",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_battery_Screen": {
+      "id": "sm_battery_Screen",
+      "label": "BATTERY",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_cabin_pressure": {
+      "id": "sm_cabin_pressure",
+      "label": "CABIN PRESS",
+      "unit": "kPa",
+      "width": 128,
+      "height": 128
+    },
+    "sm_co2_screen": {
+      "id": "sm_co2_screen",
+      "label": "CABIN CO2",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_environment_screen": {
+      "id": "sm_environment_screen",
+      "label": "EXT PRESS",
+      "unit": "mbar",
+      "width": 128,
+      "height": 128
+    },
+    "sm_o2_Screen": {
+      "id": "sm_o2_Screen",
+      "label": "CABIN O2",
+      "unit": "%",
+      "width": 128,
+      "height": 128
+    },
+    "sm_status_screen": {
+      "id": "sm_status_screen",
+      "label": "SYS STATUS",
+      "unit": "",
+      "width": 128,
+      "height": 128
+    },
+    "sm_temperature_screen": {
+      "id": "sm_temperature_screen",
+      "label": "CABIN TEMP",
+      "unit": "°C",
+      "width": 128,
+      "height": 128
+    }
+  }
+}

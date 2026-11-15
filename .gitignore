@@ -1,11 +1,14 @@
 node_modules/
 dist/
 /tests
+!/tests/
+/tests/*
+!/tests/menu_transition_tests.js
+!/tests/three_sol_scope_tests.js
+!/tests/register-source-alias.js
 public/assets/models.zip
 public/assets/shots
 public/assets/temp
-public/assets/exr
-public/assets/
 public/assets/assets.zip
 .next/
 .env

@@ -1,12 +1,13 @@
 import * as THREE from "three";
-import { DAY1_TASKS } from "./Day1Config";
-import { DAYS_CONFIG, type MissionProgressState } from "./MissionManager";
+import type { MissionProgressState } from "./MissionManager";
 
 export const DAYTIME_EXR_URL = "/assets/exr/mars-dunes-day-light_2K_fc2ff73b-6eed-4836-92ed-f94e0d2d649f.exr";
 export const NIGHTTIME_EXR_URL = "/assets/exr/NightSkyHDRI008_4K_HDR.exr";
 export const NIGHTTIME_DURATION_SECONDS = 6 * 60 * 60;
-export const NIGHTTIME_SPOT_INTENSITY = 800;
-export const NIGHTTIME_FILL_INTENSITY = 65;
+// Keep night fixtures bright enough to read the outpost while preserving the
+// terrain albedo. The previous values clipped nearby ground to near-white.
+export const NIGHTTIME_SPOT_INTENSITY = 90;
+export const NIGHTTIME_FILL_INTENSITY = 8;
 export const NIGHTTIME_SHADOW_MAP_SIZE = 1024;
 // User-selected faster apparent night-sky rotation: one revolution per 18 active hours.
 export const NIGHTTIME_SKY_ROTATION_RADIANS_PER_SECOND = (Math.PI * 2) / (18 * 60 * 60);
@@ -26,22 +27,7 @@ export function isMasterTerrainNighttimeEligible(
   state: Readonly<MissionProgressState>,
   missionTransitioning: boolean
 ): boolean {
-  if (missionTransitioning || !["completed", "waiting_for_rest"].includes(state.objectiveState) || state.sol5.attemptStatus === "active") return false;
-  const requiredIds = state.currentDay === 1
-    ? DAY1_TASKS.filter(task => task.required).map(task => task.taskId)
-    : DAYS_CONFIG[state.currentDay]?.steps.map(step => step.stepId);
-  if (!requiredIds?.length) return false;
-  const completed = new Set(state.completedStepIds);
-  if (!requiredIds.every(id => completed.has(id))) return false;
-
-  // These days also have authoritative records/state beyond the task checklist.
-  if (state.currentDay === 2 && !state.investigationRecords.some(record => record.taskId === "SOL02_READINESS_ASSESSMENT")) return false;
-  if (state.currentDay === 3 && !state.investigationRecords.some(record => record.taskId === "SOL03_SUBMIT_TARGET_RECORD")) return false;
-  if (state.currentDay === 4 && !state.investigationRecords.some(record => record.taskId === "SOL04_SUBMIT_PREPARATION_REPORT")) return false;
-  if (state.currentDay === 7 && (!state.sol7.report?.validated || !state.sol7.stormEnded)) return false;
-  if (state.currentDay === 8 && !state.sol8.report?.validated) return false;
-  if (state.currentDay === 9 && !state.sol9.report?.validated) return false;
-  return true;
+  return !missionTransitioning && state.currentDay === 2;
 }
 
 export interface TerrainLightAudit {
@@ -138,7 +124,7 @@ export function createMasterTerrainLightClusters(terrain: THREE.Object3D, owner:
     const aimDirection = markerTarget.clone().sub(position).normalize();
     const downAngle = Math.acos(THREE.MathUtils.clamp(-aimDirection.y, -1, 1));
     const coneAngle = Math.min(Math.PI / 2 - 0.015, downAngle + 0.04);
-    const spot = new THREE.SpotLight(0xffc98f, shadowNames.has(name) ? NIGHTTIME_SPOT_INTENSITY : NIGHTTIME_FILL_INTENSITY, Math.max(18, position.distanceTo(markerTarget) * 1.55), coneAngle, 0.65, 1.4);
+    const spot = new THREE.SpotLight(0xffe1c2, shadowNames.has(name) ? NIGHTTIME_SPOT_INTENSITY : NIGHTTIME_FILL_INTENSITY, Math.max(18, position.distanceTo(markerTarget) * 1.55), coneAngle, 0.65, 1.4);
     spot.name = `${name}_NightSpot`;
     spot.position.set(0, 0, 0);
     spot.target = target;

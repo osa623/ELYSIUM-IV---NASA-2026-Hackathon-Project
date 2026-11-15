@@ -5,7 +5,7 @@ import "@/app/game-fonts.css";
 import "@/components/menu/MainMenu.css";
 import { MainMenu } from "@/components/menu/MainMenu";
 import { GameViewport } from "@/components/game/GameViewport";
-import { areRequiredAssetsReady, beginGameplayInitialization, completeGameplayInitialization, getAssetLoadingSnapshot, prepareRequiredAssets, startLoadingMusic, stopLoadingMusic, subscribeToAssetLoading, type AssetLoadingSnapshot } from "@/core/AssetLoading";
+import { areRequiredAssetsReady, beginGameplayInitialization, completeGameplayInitialization, getAssetLoadingSnapshot, prepareRequiredAssets, subscribeToAssetLoading, type AssetLoadingSnapshot } from "@/core/AssetLoading";
 import { LoadingScreen } from "./LoadingScreen";
 import type { MissionProgressState } from "@/core/MissionManager";
 
@@ -27,12 +27,6 @@ export function LaunchExperience() {
     });
     return () => { mounted = false; };
   }, []);
-
-  useEffect(() => {
-    if (view === "loading") startLoadingMusic();
-    else stopLoadingMusic();
-    return () => stopLoadingMusic();
-  }, [view]);
 
   const startGame = useCallback(async (mode: "new" | "continue" | "replay", replay?: MissionProgressState) => {
     setGameMode(mode);
@@ -69,7 +63,7 @@ export function LaunchExperience() {
 
   if (view === "loading") return <LoadingScreen snapshot={snapshot} onRetry={() => { void retry(); }} />;
   if (view === "game") return <>
-    <GameViewport key={`${gameMode}-${replayState?.currentDay ?? "campaign"}`} replayState={gameMode === "replay" ? replayState : undefined} onReturnToMenu={returnToMenu} onReady={gameInitialized} />
+    <GameViewport key={`${gameMode}-${replayState?.currentDay ?? "campaign"}`} startMode={gameMode} replayState={gameMode === "replay" ? replayState : undefined} onReturnToMenu={returnToMenu} onReady={gameInitialized} />
     {!gameReady && <LoadingScreen snapshot={snapshot} onRetry={() => { void retry(); }} />}
   </>;
   if (!areRequiredAssetsReady()) return <LoadingScreen snapshot={snapshot} onRetry={() => { void retry(); }} />;

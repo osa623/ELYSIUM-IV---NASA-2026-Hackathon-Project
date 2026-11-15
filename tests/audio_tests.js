@@ -25,7 +25,7 @@ const audio = new GameAudioManager(src => {
 const byName = name => sounds.find(sound => sound.src.endsWith(name));
 const allByName = name => sounds.filter(sound => sound.src.endsWith(name));
 
-assert.equal(sounds.length, 6, "indoor and Mars contexts own separate movement sources plus shared ambient/drone sources");
+assert.equal(sounds.length, 5, "indoor and Mars contexts own separate movement sources plus one ambient source");
 assert.equal(allByName("terrainWalkSound.MP3").length, 1, "Mars walking uses the dedicated new terrain asset");
 assert.equal(allByName("terrainRunningSound.MP3").length, 1, "Mars running uses the dedicated new terrain asset");
 assert.equal(resolveIndoorMovementAudioState({ indoor: false, playerControlled: true, grounded: true, horizontalSpeed: 2, running: false }), "idle");
@@ -73,23 +73,8 @@ audio.setMarsTerrain(false);
 audio.update(0.2);
 assert.equal(byName("marsSound.MP3").active, false, "Mars ambience stops on return indoors");
 
-audio.setSol5DroneActive(true);
-audio.update(0.2);
-assert.equal(byName("droneSound.MP3").playCount, 1);
-assert.equal(byName("marsSound.MP3").playCount, 2, "one ambience playback is used for the outdoor EVA phase and a second for drone operation after the first fades out");
-audio.setSol5DroneActive(true);
-audio.update(0.2);
-assert.equal(byName("droneSound.MP3").playCount, 1, "repeated activation does not create duplicate playback");
-assert.equal(byName("walkSound.MP3").volume, 0, "drone operation suppresses indoor footstep audio");
-assert.equal(byName("terrainWalkSound.MP3").volume, 0, "drone operation suppresses Mars terrain footsteps");
-
-audio.setSol5DroneActive(false);
-audio.update(0.2);
-assert.equal(byName("droneSound.MP3").pauseCount, 1);
-assert.equal(byName("marsSound.MP3").pauseCount, 2, "each independent ambience phase stops cleanly");
-
 audio.setIndoorMovement("walking");
 audio.update(0.2);
-assert.equal(byName("walkSound.MP3").playCount, 2, "indoor movement audio resumes after drone operation");
+assert.equal(byName("walkSound.MP3").playCount, 2, "indoor movement audio resumes after the EVA phase");
 audio.dispose();
 console.log("Audio state tests passed.");

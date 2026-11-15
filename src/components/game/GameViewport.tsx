@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Game } from "@/core/Game";
 import type { GameState } from "@/core/EventBus";
-import { PhobosiaOS } from "./PhobosiaOS";
+import { MissionOperatingSystem } from "./MissionOperatingSystem";
 import { SpeedTravelBar } from "./SpeedTravelBar";
 import {
   MASTER_TERRAIN_TARGETS,
@@ -11,8 +11,6 @@ import {
   type MissionProgressState,
   type TerrainRouteTarget
 } from "@/core/MissionManager";
-import { PersonalLaptopOS } from "@/systems/personal-laptop/PersonalLaptopOS";
-import { LaptopAudioController, type LaptopAudioSnapshot } from "@/systems/personal-laptop/LaptopAudioController";
 import { areRequiredAssetsReady, getPreparedAssetUrl } from "@/core/AssetLoading";
 import { TransitionLoadingScreen } from "@/components/loading/TransitionLoadingScreen";
 import { MobileControls } from "./MobileControls";
@@ -20,6 +18,18 @@ import { EnvironmentCheckModal } from "@/missions/SOL_01/components/EnvironmentC
 import { ToolChecklistModal } from "@/missions/SOL_01/components/ToolChecklistModal";
 import { ResourceCheckModal } from "@/missions/SOL_01/components/ResourceCheckModal";
 import { Sol01MissionOSModal } from "@/missions/SOL_01/components/Sol01MissionOSModal";
+import { SoilInvestigationModal } from "@/missions/SOL_02/components/SoilInvestigationModal";
+import { BotanCheckModal } from "@/missions/SOL_02/components/BotanCheckModal";
+import { Sol02EnvironmentModal } from "@/missions/SOL_02/components/Sol02EnvironmentModal";
+import { Sol02ToolRackModal } from "@/missions/SOL_02/components/Sol02ToolRackModal";
+import { Sol02MissionOSModal } from "@/missions/SOL_02/components/Sol02MissionOSModal";
+import { EVACameraModal } from "@/missions/SOL_03/components/EVACameraModal";
+import { Sol03MissionOSModal } from "@/missions/SOL_03/components/Sol03MissionOSModal";
+import { Sol03WaterModal } from "@/missions/SOL_03/components/Sol03WaterModal";
+import { Sol03EnvironmentModal } from "@/missions/SOL_03/components/Sol03EnvironmentModal";
+import { Sol03ToolModal } from "@/missions/SOL_03/components/Sol03ToolModal";
+import { MissionCompletionScreen } from "@/missions/SOL_03/components/MissionCompletionScreen";
+import { ENABLE_DEV_FAST_TRAVEL } from "@/systems/devFastTravel";
 
 const initialState: GameState = {
   ready: false,
@@ -33,16 +43,16 @@ const initialState: GameState = {
   transitionProgress: null,
 
   missionDay: 1,
-  missionTitle: "Outpost Orientation",
-  objectiveTitle: "Complete base orientation checklist",
+  missionTitle: "ELYSIUM PLAIN TRAVERSE",
+  objectiveTitle: "Enter the Terrain Rover",
   objectiveState: "in_progress",
   completedStepCount: 0,
-  totalStepCount: 19,
-  dayBriefingSeen: false,
-  showBriefingModal: true,
+  totalStepCount: 8,
+  dayBriefingSeen: true,
+  showBriefingModal: false,
   briefingText:
-    "Welcome to Mars Outpost PHOBOSIA. Before commencing scientific field observations, explore the base, inspect each operational zone and system console, and complete the Day 1 orientation checklist.",
-  primaryObjective: "Explore the outpost, inspect the required systems and consoles across all modules, and complete the 19-task orientation checklist.",
+    "Welcome to ELYSIUM IV. Board the Terrain Rover via the ladder, explore the Martian surface, and navigate to the Sol 01 finishing point.",
+  primaryObjective: "Enter the Terrain Rover, initiate the mission in the rover interior, perform system checks, traverse to the checkpoint, and proceed to the finishing point.",
   controlHint: "W A S D move · Shift jog · Space jump · E interact · Esc unlock",
   isOutdoorTerrain: false,
   evaSuitActive: false,
@@ -79,34 +89,44 @@ const initialState: GameState = {
   sol5Images: [],
   sol5Flight: null,
   sol5Message: null,
-  finalDepartureVideo: false,
 
   showCinematicOverlay: false,
   showOSDesktop: false,
-  showPersonalLaptop: false,
   osInitialApp: undefined,
   cameraPresentation: null,
 
   showSol01MissionOS: false,
   showSol01EnvironmentModal: false,
   showSol01ToolModal: false,
-  showSol01ResourceModal: false
+  showSol01ResourceModal: false,
+
+  showSol02MissionOS: false,
+  showSol02EnvironmentModal: false,
+  showSol02ToolModal: false,
+  showBotanCheckModal: false,
+  showSoilInvestigationModal: false,
+
+  showSol03MissionOS: false,
+  showSol03WaterModal: false,
+  showSol03EnvironmentModal: false,
+  showSol03ToolModal: false,
+  showEVACameraModal: false,
+  showFinalVideoModal: false
 };
 
 type GameViewportProps = {
   onReturnToMenu?: () => void;
   onReady?: () => void;
   replayState?: MissionProgressState;
+  startMode?: "new" | "continue" | "replay";
 };
 
-export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewportProps = {}) {
+export function GameViewport({ onReturnToMenu, onReady, replayState, startMode = "continue" }: GameViewportProps = {}) {
   const host = useRef<HTMLDivElement>(null);
   const game = useRef<Game | null>(null);
-  const video = useRef<HTMLVideoElement>(null);
   const [state, setState] = useState<GameState>(initialState);
-  const [laptopAudio, setLaptopAudio] = useState<LaptopAudioController | null>(null);
-  const [laptopAudioSnapshot, setLaptopAudioSnapshot] = useState<Readonly<LaptopAudioSnapshot> | null>(null);
-  const [finalVideoError, setFinalVideoError] = useState(false);
+  const [devTravelOpen, setDevTravelOpen] = useState(false);
+  const [devTravelMessage, setDevTravelMessage] = useState("");
 
   useEffect(() => { if (state.ready) onReady?.(); }, [state.ready, onReady]);
 
@@ -132,36 +152,27 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
 
   useEffect(() => {
     if (!areRequiredAssetsReady() || !host.current) return;
-    const instance = new Game(host.current, setState, replayState);
+    const instance = new Game(host.current, setState, replayState, startMode);
     game.current = instance;
     void instance.start();
     return () => instance.dispose();
-  }, [replayState]);
+  }, [replayState, startMode]);
 
   useEffect(() => {
     if (game.current?.missionManager.isReplayComplete) onReturnToMenu?.();
   }, [state.notification, state.objectiveState, onReturnToMenu]);
 
   useEffect(() => {
-    const controller = new LaptopAudioController();
-    setLaptopAudio(controller);
-    const unsubscribe = controller.subscribe(setLaptopAudioSnapshot);
-    game.current?.connectLaptopAudio(controller);
-    return () => {
-      unsubscribe();
-      controller.dispose();
+    if (!ENABLE_DEV_FAST_TRAVEL || !state.ready || state.module !== "Mars Terrain") return;
+    const toggle = (event: KeyboardEvent) => {
+      if (event.code !== "KeyT" || event.repeat) return;
+      event.preventDefault();
+      setDevTravelOpen(value => !value);
+      setDevTravelMessage("");
     };
-  }, []);
-
-  useEffect(() => {
-    laptopAudio?.setHabitatAudible(state.module === "Habitat");
-  }, [laptopAudio, state.module]);
-
-  useEffect(() => {
-    if (!state.finalDepartureVideo || !video.current) return;
-    const element = video.current;
-    void element.play().then(() => setFinalVideoError(false)).catch(() => setFinalVideoError(true));
-  }, [state.finalDepartureVideo]);
+    window.addEventListener("keydown", toggle);
+    return () => window.removeEventListener("keydown", toggle);
+  }, [state.module, state.ready]);
 
   const canClickToLock =
     !state.panel &&
@@ -176,7 +187,6 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
     !state.restFeedback &&
     !state.showCinematicOverlay &&
     !state.showOSDesktop &&
-    !state.showPersonalLaptop &&
     !state.cameraPresentation;
   const compassPoints = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   const compassIndex = Math.round(state.evaHeadingDegrees / 45) % compassPoints.length;
@@ -184,15 +194,11 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
   const mobileMode = state.sol5DroneActive ? "sol5" : state.droneModeActive ? "drone" : state.roverActive ? "rover" : "walk";
   const mobileControlsBlocked = Boolean(state.panel || state.transition || state.showBriefingModal || state.showRoutePlanning ||
     state.showGeologicalForm || state.showSurfaceObservationForm || state.showScienceAnalysisModal || state.showDroneConsoleModal ||
-    state.restFeedback || state.restTransition || state.showCinematicOverlay || state.showOSDesktop || state.showPersonalLaptop ||
-    state.cameraPresentation || state.finalDepartureVideo);
+    state.restFeedback || state.restTransition || state.showCinematicOverlay || state.showOSDesktop ||
+    state.cameraPresentation);
 
   return (
     <div id="game" className="mobile-game relative h-screen w-screen bg-black" ref={host} onClick={() => canClickToLock && game.current?.lock()}>
-      {state.finalDepartureVideo && <div role="dialog" aria-label="Final departure cinematic" onKeyDown={event => event.preventDefault()} style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh", zIndex: 10000, background: "#000", overflow: "hidden" }}>
-        <video ref={video} src="/assets/videos/finalVideo/finalVideo.mp4" autoPlay playsInline preload="auto" disablePictureInPicture onCanPlay={() => setFinalVideoError(false)} onError={() => setFinalVideoError(true)} onEnded={() => { if (game.current?.finishSol11FinalVideo()) onReturnToMenu?.(); }} aria-label="Final PHOBOSIA departure" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", background: "#000" }} />
-        {finalVideoError && <div style={{ position: "absolute", inset: 0, display: "grid", placeContent: "center", gap: 12, color: "#fff", background: "rgba(0,0,0,.88)", fontFamily: "monospace", textAlign: "center" }}><p>Final cinematic could not start. The campaign remains incomplete.</p><button onClick={() => { setFinalVideoError(false); void video.current?.play().catch(() => setFinalVideoError(true)); }} style={{ justifySelf: "center", padding: "10px 16px", border: "1px solid #7ca9b5", background: "#14242b", color: "white", cursor: "pointer" }}>RETRY PLAYBACK</button></div>}
-      </div>}
       {onReturnToMenu && <button
         type="button"
         className="[position:fixed] [top:16px] [left:16px] [z-index:60] [border:1px_solid_rgba(85,205,232,0.45)] [background:rgba(5,14,20,0.88)] [padding:8px_12px] [color:#c9e3e9] [font:10px_var(--font-mono,monospace)] [letter-spacing:0.1em] hover:[background:rgba(20,42,52,0.96)]"
@@ -203,8 +209,13 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
         activeModule={state.module}
         onTravel={(targetModule) => void game.current?.speedTravel(targetModule)}
       />  */}
+      {ENABLE_DEV_FAST_TRAVEL && state.module === "Mars Terrain" && state.ready && (
+        <DevFastTravelPanel game={game.current} open={devTravelOpen} message={devTravelMessage}
+          onToggle={() => { setDevTravelOpen(value => !value); setDevTravelMessage(""); }}
+          onTravel={destination => { const error = game.current?.devFastTravel(destination) ?? "Game is not ready."; setDevTravelMessage(error || "Travel complete."); setDevTravelOpen(false); }} />
+      )}
       {/* EVA visor frame and edge-positioned telemetry, based on the supplied Mars helmet reference. */}
-      {state.evaSuitActive && !state.transition && !state.droneModeActive && !state.sol5DroneActive && !state.panel && !state.showOSDesktop && !state.showPersonalLaptop && !state.showCinematicOverlay && (
+      {state.evaSuitActive && !state.transition && !state.droneModeActive && !state.sol5DroneActive && !state.panel && !state.showOSDesktop && !state.showCinematicOverlay && (
         <div className="[position:fixed] [inset:0] [pointer-events:none] [z-index:20] [overflow:hidden]" aria-label="EVA helmet visor and suit HUD">
           <div className="[position:absolute] [inset:0] [background:radial-gradient(ellipse_at_center,_transparent_59%,_rgba(4,_7,_10,_0.12)_76%,_rgba(2,_4,_6,_0.48)_100%)]" />
           {state.isOutdoorTerrain && <div className="[position:absolute] [inset:0] [background:radial-gradient(ellipse_at_center,_rgba(151,_78,_42,_0.035)_22%,_rgba(129,_69,_42,_0.08)_72%,_rgba(93,_48,_30,_0.17)_100%)] [mix-blend-mode:soft-light]" />}
@@ -268,7 +279,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
           </section>
 
           <div className="[position:absolute] [bottom:1.8%] [left:50%] [transform:translateX(-50%)] [text-align:center] [text-shadow:0_1px_5px_#000]">
-            <div className="font-kdam-thmor-pro [font-size:16px] [font-weight:bold] [letter-spacing:0.14em] [color:#9deeff]">PHOBOSIA</div>
+            <div className="font-kdam-thmor-pro [font-size:16px] [font-weight:bold] [letter-spacing:0.14em] [color:#9deeff]">ELYSIUM IV</div>
             <div className="[font-size:8px] [letter-spacing:0.24em] [color:#b9eaf3]">MARS EXPLORATION</div>
           </div>
         </div>
@@ -276,12 +287,20 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
 
       {/* 2. PERSISTENT IN-GAME HUD */}
       <div data-mobile-hud="true" className="[position:fixed] [inset:0] [pointer-events:none] [color:#dce8ec] [font-size:13px] [text-shadow:0_1px_3px_rgba(0,_0,_0,_0.9)] [z-index:30]">
-        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && <div className="[position:absolute] [top:0px] [left:10px] [letter-spacing:0.22em] [font-size:14px] [font-weight:bold] [color:#e88747]">  <img className="[width:min(200px,_74vw)] top-0 [height:auto] [object-fit:contain]" src={getPreparedAssetUrl("/assets/images/PHOBOSIA_Martian_Modern_Logo_4K.png")} alt="PHOBOSIA" /></div>}
-        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && <div className="[position:absolute] [top:42px] [left:24px] [font-size:12px] [letter-spacing:0.1em] [color:#8da6b2]">ACTIVE MODULE · {state.module}</div>}
+        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && (
+          <div className="[position:absolute] [top:14px] [left:152px] [z-index:60]">
+            <img className="[height:34px] [width:auto] [object-fit:contain]" src={getPreparedAssetUrl("/assets/images/elysium_iv_official_logo_4k_transparent.png")} alt="ELYSIUM IV" />
+          </div>
+        )}
+        {!state.droneModeActive && !state.sol5DroneActive && !state.evaSuitActive && (
+          <div className="[position:absolute] [top:56px] [left:24px] [font-size:11px] [letter-spacing:0.1em] [color:#8da6b2]">
+            ACTIVE MODULE · {state.module}
+          </div>
+        )}
 
         {/* Mission Status Badge */}
         {!state.droneModeActive && !state.sol5DroneActive && (
-          <div data-mobile-task="true" className="[position:absolute] rounded-2xl [top:72px] [left:24px] [width:min(500px,_86vw)] bg-gradient-to-r from-[rgba(0,10,50,0.85)] via-[rgba(4,79,129,0.85)] to-[rgba(0,10,50,0.85)] [border:1px_solid_rgba(63,_105,_123,_0.6)] [border-left:3px_solid_#e88747] [padding:10px_14px] [backdrop-filter:blur(4px)]">
+          <div data-mobile-task="true" className="[position:absolute] rounded-2xl [top:84px] [left:24px] [width:min(500px,_86vw)] bg-gradient-to-r from-[rgba(0,10,50,0.85)] via-[rgba(4,79,129,0.85)] to-[rgba(0,10,50,0.85)] [border:1px_solid_rgba(63,_105,_123,_0.6)] [border-left:3px_solid_#e88747] [padding:10px_14px] [backdrop-filter:blur(4px)]">
             <div className="[display:flex] [align-items:center] [gap:6px] text-[15px] font-kdam-thmor-pro font-bold [letter-spacing:0.12em] [color:#e88747]">
               <span className="[width:6px] [height:6px] [border-radius:50%] [background:#55cde8] [box-shadow:0_0_6px_#55cde8] [animation:pulse_2s_infinite_ease-in-out]" />
               SOL {state.missionDay} · {state.missionTitle.toUpperCase()}
@@ -298,7 +317,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
             <div className="[margin-top:6px] text-[11px] font-mono [color:#87a4af]">
               {state.completedStepCount} / {state.totalStepCount} {"TASKS COMPLETED"}
               {state.objectiveState === "completed" && state.totalStepCount > 0 && state.completedStepCount >= state.totalStepCount && (
-                <span className="[color:#44d788] [font-weight:bold]"> — OBJECTIVE VALIDATED (REST IN HABITAT)</span>
+                <span className="[color:#44d788] [font-weight:bold]"> — SOL OBJECTIVE COMPLETE</span>
               )}
             </div>
           </div>
@@ -384,7 +403,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
 
         {/* 3B. PHOBOSIA OS FULLSCREEN DESKTOP */}
         {state.showOSDesktop && (
-          <PhobosiaOS
+          <MissionOperatingSystem
             game={game.current}
             state={state}
             onClose={() => game.current?.closeOSDesktop()}
@@ -392,14 +411,6 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
           />
         )}
 
-        {laptopAudio && laptopAudioSnapshot && (
-          <PersonalLaptopOS
-            open={state.showPersonalLaptop}
-            onClose={() => game.current?.closePersonalLaptop()}
-            audio={laptopAudio}
-            audioSnapshot={laptopAudioSnapshot}
-          />
-        )}
 
         {/* ELYSIUM IV · SOL 01 MODALS */}
         {state.showSol01EnvironmentModal && (
@@ -440,6 +451,115 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
               game.current?.syncRoverScreens();
             }}
           />
+        )}
+
+        {/* ELYSIUM IV · SOL 02 MODALS */}
+        {state.showSoilInvestigationModal && (
+          <SoilInvestigationModal
+            onClose={() => game.current?.closeSol02Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+        {state.showBotanCheckModal && (
+          <BotanCheckModal
+            onClose={() => game.current?.closeSol02Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+        {state.showSol02EnvironmentModal && (
+          <Sol02EnvironmentModal
+            onClose={() => game.current?.closeSol02Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+        {state.showSol02ToolModal && (
+          <Sol02ToolRackModal
+            onClose={() => game.current?.closeSol02Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+        {state.showSol02MissionOS && (
+          <Sol02MissionOSModal
+            onClose={() => game.current?.closeSol02Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+
+        {/* ELYSIUM IV · SOL 03 MODALS */}
+        {state.showEVACameraModal && (
+          <EVACameraModal
+            onClose={(savedCount) => {
+              const activeGame = game.current;
+              if (!activeGame) return;
+              activeGame.sol03MissionManager.onExitCameraCheckPhotos(savedCount ?? activeGame.sol03MissionManager.cachedPhotos.length);
+              activeGame.closeSol03Modals();
+              activeGame.syncMissionState();
+              activeGame.syncRoverScreens();
+            }}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+            getCanvas={() => host.current?.querySelector("canvas") ?? null}
+          />
+        )}
+        {state.showSol03WaterModal && (
+          <Sol03WaterModal
+            onClose={() => game.current?.closeSol03Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+        {state.showSol03EnvironmentModal && (
+          <Sol03EnvironmentModal
+            onClose={() => game.current?.closeSol03Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+        {state.showSol03ToolModal && (
+          <Sol03ToolModal
+            onClose={() => game.current?.closeSol03Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+          />
+        )}
+        {state.showSol03MissionOS && (
+          <Sol03MissionOSModal
+            onClose={() => game.current?.closeSol03Modals()}
+            onSaveSuccess={() => {
+              game.current?.syncMissionState();
+              game.current?.syncRoverScreens();
+            }}
+            onCompleteJourney={() => {
+              game.current?.closeSol03Modals();
+              setState(prev => ({ ...prev, showFinalVideoModal: true }));
+            }}
+          />
+        )}
+        {state.showFinalVideoModal && (
+          <MissionCompletionScreen onFinish={() => onReturnToMenu?.()} />
         )}
 
         {/* Legacy 2D Panel Fallback */}
@@ -1087,7 +1207,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
         {/* 14. TRANSITION ERROR */}
         {state.transition === "error" && (
           <section className="[position:fixed] [z-index:50] [inset:0] [pointer-events:auto] [background:#000] [color:#eaf2f4] [display:flex] [align-items:center] [justify-content:center] [flex-direction:column] [text-align:center] [text-shadow:none] failure">
-            <img className="[width:min(440px,_74vw)] [height:auto] [object-fit:contain]" src={getPreparedAssetUrl("/assets/images/PHOBOSIA_Martian_Modern_Logo_4K.png")} alt="PHOBOSIA" />
+            <img className="[width:min(440px,_74vw)] [height:auto] [object-fit:contain]" src={getPreparedAssetUrl("/assets/images/elysium_iv_official_logo_4k_transparent.png")} alt="ELYSIUM IV" />
             <p className="[margin:20px_0_8px] [letter-spacing:0.08em] [font-size:14px] [max-width:min(520px,_85vw)] [line-height:1.5]">{state.error}</p>
             <div className="[display:flex] [gap:10px] [margin-top:14px]">
               <button className="[border:1px_solid_#d8763b] [background:#d8763b] [color:#071016] [padding:9px_16px] [font-weight:bold] [cursor:pointer]" onClick={() => game.current?.retryTransition()}>Retry</button>
@@ -1115,4 +1235,23 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
       />}
     </div>
   );
+}
+
+function DevFastTravelPanel({ game, open, message, onToggle, onTravel }: {
+  game: Game | null;
+  open: boolean;
+  message: string;
+  onToggle: () => void;
+  onTravel: (destination: string) => void;
+}) {
+  const destinations = game?.getDevFastTravelDestinations() ?? [];
+  return <div className="[position:fixed] [top:16px] [right:18px] [z-index:65] [font:12px_var(--font-mono,monospace)]" onClick={event => event.stopPropagation()}>
+    <button type="button" onClick={onToggle} className="[border:1px_solid_rgba(85,205,232,0.55)] [background:rgba(4,15,22,0.92)] [padding:9px_13px] [color:#83e6ff] [letter-spacing:0.12em]">DEV FAST TRAVEL · T</button>
+    {open && <section className="[margin-top:8px] [width:270px] [max-height:65vh] [overflow:auto] [border:1px_solid_rgba(85,205,232,0.35)] [background:rgba(4,13,20,0.96)] [padding:12px] [color:#d8e8ee] [box-shadow:0_10px_32px_rgba(0,0,0,0.45)]">
+      <header className="[margin-bottom:8px] [color:#55cde8]">CURRENT SOL DESTINATIONS</header>
+      {destinations.length ? destinations.map(destination => <button key={destination.name} type="button" onClick={() => onTravel(destination.name)} className="[mb:6px] [block] [w-full] [border:1px_solid_#294857] [bg:#10232e] [px:9px] [py:8px] text-left [color:#e2edf0] hover:[border-color:#55cde8]">Travel to {destination.label}</button>) : <p className="[color:#90a8b2]">No loaded mission destinations found.</p>}
+      {message && <p role="status" className="[mt:8px] [color:#e2bb7f]">{message}</p>}
+      <button type="button" onClick={onToggle} className="[mt:6px] [color:#9bb7c1]">CLOSE</button>
+    </section>}
+  </div>;
 }

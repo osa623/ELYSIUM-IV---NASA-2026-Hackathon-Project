@@ -26,16 +26,15 @@ export function resolveIndoorMovementAudioState(input: {
 export class GameAudioManager {
   private readonly loops: Record<AudioKey, AudioLoop>;
   private desired: Record<AudioKey, number> = {
-    walking: 0, running: 0, terrainWalking: 0, terrainRunning: 0, drone: 0, mars: 0
+    walking: 0, running: 0, terrainWalking: 0, terrainRunning: 0, mars: 0
   };
   private current: Record<AudioKey, number> = {
-    walking: 0, running: 0, terrainWalking: 0, terrainRunning: 0, drone: 0, mars: 0
+    walking: 0, running: 0, terrainWalking: 0, terrainRunning: 0, mars: 0
   };
   private playing = new Set<AudioKey>();
   private blocked = new Set<AudioKey>();
   private movementState: IndoorMovementAudioState = "idle";
   private marsMovementState: IndoorMovementAudioState = "idle";
-  private droneActive = false;
   private marsTerrainActive = false;
 
   constructor(createAudio: (src: string) => AudioLoop = src => getPreparedAudioElement(src) ?? new Audio(getPreparedAssetUrl(src))) {
@@ -50,7 +49,6 @@ export class GameAudioManager {
     this.loops = {
       walking: makeLoop("walking", "walkSound.MP3", 0.2),
       running: makeLoop("running", "runningSound.MP3", 0.23),
-      drone: makeLoop("drone", "droneSound.MP3", 0.25),
       mars: makeLoop("mars", "marsSound.MP3", 0.14),
       terrainWalking: makeLoop("terrainWalking", "terrainWalkSound.MP3", 0.16),
       terrainRunning: makeLoop("terrainRunning", "terrainRunningSound.MP3", 0.18)
@@ -78,19 +76,6 @@ export class GameAudioManager {
       this.movementState = "idle";
       this.desired.walking = 0;
       this.desired.running = 0;
-    }
-    this.syncMarsAmbient();
-  }
-
-  setSol5DroneActive(active: boolean): void {
-    this.droneActive = active;
-    this.desired.drone = active ? 0.25 : 0;
-    if (active) {
-      this.marsTerrainActive = false;
-      this.marsMovementState = "idle";
-      this.desired.terrainWalking = 0;
-      this.desired.terrainRunning = 0;
-      this.setIndoorMovement("idle");
     }
     this.syncMarsAmbient();
   }
@@ -128,7 +113,7 @@ export class GameAudioManager {
   }
 
   private syncMarsAmbient() {
-    this.desired.mars = this.marsTerrainActive || this.droneActive ? 0.14 : 0;
+    this.desired.mars = this.marsTerrainActive ? 0.14 : 0;
   }
 
   private start(key: AudioKey): void {
@@ -156,5 +141,5 @@ export class GameAudioManager {
   }
 }
 
-type AudioKey = "walking" | "running" | "terrainWalking" | "terrainRunning" | "drone" | "mars";
+type AudioKey = "walking" | "running" | "terrainWalking" | "terrainRunning" | "mars";
 const MOVEMENT_AUDIO_KEYS: readonly AudioKey[] = ["walking", "running", "terrainWalking", "terrainRunning"];

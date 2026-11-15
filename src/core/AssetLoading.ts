@@ -7,23 +7,9 @@ import { assetPaths, type ModuleName } from "./Discovery";
 import { DAYTIME_EXR_URL, NIGHTTIME_EXR_URL } from "./MasterTerrainEnvironment";
 const SOL5_EVIDENCE_ASSETS: Record<string, { id: string; assetPath: string; targetId: string; fileName: string }[]> = {};
 import sol3 from "../jsons/Missions/sol-03.json";
-import laptopManifest from "../systems/personal-laptop/assets.generated.json";
-
-interface LaptopManifestFile {
-  id: string;
-  url: string;
-  title: string;
-}
-
-const laptopAssets = laptopManifest as unknown as {
-  songs: LaptopManifestFile[];
-  images: LaptopManifestFile[];
-  wallpapers: LaptopManifestFile[];
-  documents: LaptopManifestFile[];
-};
 
 export type AssetKind = "gltf" | "exr" | "image" | "audio" | "video" | "document";
-export type AssetCategory = "Branding" | "Habitat" | "Mission Control" | "Research Laboratory" | "Engineering Unit" | "Central Hub" | "Airlock" | "Mars Terrain" | "Drone Area" | "Gameplay Audio" | "Mission Imagery" | "Transition Video" | "Cinematic Video" | "Personal Laptop Media";
+export type AssetCategory = "Branding" | "Habitat" | "Mission Control" | "Research Laboratory" | "Engineering Unit" | "Central Hub" | "Airlock" | "Mars Terrain" | "Drone Area" | "Gameplay Audio" | "Mission Imagery" | "Transition Video" | "Cinematic Video";
 export type AssetStatus = "pending" | "downloading" | "processing" | "ready" | "failed";
 export type AssetPhase = "idle" | "loading" | "processing" | "verifying" | "ready" | "error";
 
@@ -84,38 +70,18 @@ const uniqueModuleAssets: AssetDefinition[] = [
   asset("model.RoverVehicle", "/assets/models/terrainVehicle.glb", "Terrain Rover", "Mars Terrain", "gltf"),
 ];
 
-const sol3Images = sol3.targetCatalogue.flatMap((target, targetIndex) =>
-  Object.entries(target.images).map(([view, path]) => asset(
-    `sol3.${target.targetId}.${view}`,
-    path,
-    `Sol 3 Site ${String(targetIndex + 1).padStart(2, "0")} ${view}`,
-    "Mission Imagery",
-    "image",
-    false
-  ))
-);
-
-const sol5Images = Object.values(SOL5_EVIDENCE_ASSETS).flatMap(items => items.map(item =>
-  asset(`sol5.${item.id}`, item.assetPath, `Sol 5 ${item.targetId.replace("TARGET_", "").replaceAll("_", " ")} ${item.fileName}`, "Mission Imagery", "image", false)
-));
-
 export const REQUIRED_ASSETS: readonly AssetDefinition[] = [
-  asset("branding.loading-logo", "/assets/images/PHOBOSIA_Martian_Modern_Logo_4K.png", "ELYSIUM IV Logo", "Branding", "image"),
-  asset("branding.menu-logo", "/assets/images/PHOBOSIA_Metallic_Logo_4K.png", "Main Menu Logo", "Branding", "image"),
-  asset("branding.menu-artwork", "/assets/images/mainMenuImage.png", "Main Menu Artwork", "Branding", "image"),
+  asset("branding.loading-logo", "/assets/images/elysium_iv_official_logo_4k_transparent.png", "ELYSIUM IV Logo", "Branding", "image"),
+  asset("model.transition-mars", "/assets/models/mars.glb", "Mars Transition Globe", "Mars Terrain", "gltf"),
   asset("environment.menu-night-sky", "/assets/exr/NightSkyHDRI008_4K_HDR_1.exr", "Menu Environment Map", "Branding", "exr"),
   asset("environment.day", DAYTIME_EXR_URL, "Daytime Environment Map", "Mars Terrain", "exr"),
   asset("environment.night", NIGHTTIME_EXR_URL, "Nighttime Environment Map", "Mars Terrain", "exr"),
   ...uniqueModuleAssets,
-  asset("audio.menu-music", "/assets/sounds/PHOBOSIA.mp3", "Menu Music", "Gameplay Audio", "audio"),
   asset("audio.walk", "/assets/sounds/walkSound.MP3", "Indoor Walking Audio", "Gameplay Audio", "audio"),
   asset("audio.run", "/assets/sounds/runningSound.MP3", "Indoor Running Audio", "Gameplay Audio", "audio"),
   asset("audio.terrain-walk", "/assets/sounds/terrainWalkSound.MP3", "Terrain Walking Audio", "Gameplay Audio", "audio"),
   asset("audio.terrain-run", "/assets/sounds/terrainRunningSound.MP3", "Terrain Running Audio", "Gameplay Audio", "audio"),
-  asset("audio.drone", "/assets/sounds/droneSound.MP3", "Drone Audio", "Gameplay Audio", "audio"),
-  asset("audio.mars", "/assets/sounds/marsSound.MP3", "Mars Ambient Audio", "Gameplay Audio", "audio"),
-  asset("audio.sol7-warning", "/assets/sounds/sol7Sounds/warningBeepTone.MP3", "Warning Tone", "Gameplay Audio", "audio"),
-  asset("audio.sol7-storm", "/assets/sounds/sol7Sounds/sandStormSound.MP3", "Storm Audio", "Gameplay Audio", "audio")
+  asset("audio.mars", "/assets/sounds/marsSound.MP3", "Mars Ambient Audio", "Gameplay Audio", "audio")
 ];
 
 const solOnDemandModels = [
@@ -124,20 +90,8 @@ const solOnDemandModels = [
 ];
 
 export const ON_DEMAND_ASSETS: readonly AssetDefinition[] = [
-  ...solOnDemandModels,
-  ...sol3Images,
-  ...sol5Images,
-  ...laptopAssets.songs.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "audio", false)),
-  ...laptopAssets.images.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "image", false)),
-  ...laptopAssets.wallpapers.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "image", false)),
-  ...laptopAssets.documents.map(item => asset(`laptop.${item.id}`, item.url, item.title, "Personal Laptop Media", "document", false))
+  ...solOnDemandModels
 ];
-
-const LOADING_TRACKS: readonly AssetDefinition[] = [
-  asset("internal.loading-track.1", "/assets/loadingSong/Built From the Ground.mp3", "Loading background audio", "Gameplay Audio", "audio", false),
-  asset("internal.loading-track.2", "/assets/loadingSong/BEYOND THE RED HORIZON (1).mp3", "Loading background audio", "Gameplay Audio", "audio", false)
-];
-const loadingTrackIds = new Set(LOADING_TRACKS.map(item => item.id));
 
 type PreparedResource = GLTF | THREE.DataTexture | string;
 const dracoLoader = new DRACOLoader();
@@ -153,7 +107,7 @@ let activeRun: Promise<void> | null = null;
 let currentId: string | null = null;
 let phase: AssetPhase = "idle";
 let message = "Awaiting mission initialization";
-let runtime = new Map<string, AssetProgress>([...REQUIRED_ASSETS, ...LOADING_TRACKS].map(item => [item.id, {
+let runtime = new Map<string, AssetProgress>(REQUIRED_ASSETS.map(item => [item.id, {
   ...item, status: "pending", loadedBytes: 0, totalBytes: null
 }] as [string, AssetProgress]));
 let lastSnapshot = makeSnapshot();
@@ -199,11 +153,6 @@ function updateAsset(id: string, patch: Partial<AssetProgress>) {
   if (!current) return;
   const next = { ...current, ...patch };
   runtime.set(id, next);
-  if (loadingTrackIds.has(id)) {
-    phase = patch.status === "processing" ? "processing" : "loading";
-    publish(patch.status === "failed" ? "Background audio unavailable; continuing without it" : "Preparing background audio");
-    return;
-  }
   if (patch.status === "downloading") {
     phase = "loading";
     publish(`Downloading ${next.name}`);
@@ -295,12 +244,76 @@ function validateAudio(blobUrl: string): Promise<HTMLAudioElement> {
   });
 }
 
+/**
+ * GLTFLoader turns GLB bufferView images into blob URLs. Some browser/runtime
+ * combinations reject those URLs even though the model binary loaded correctly.
+ * Inlining the small embedded image payloads as data URIs avoids that second
+ * fetch path and keeps the original image bytes and MIME types intact.
+ */
+function inlineEmbeddedGlbImages(source: ArrayBuffer): ArrayBuffer {
+  const view = new DataView(source);
+  if (view.byteLength < 20 || view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2) return source;
+
+  let jsonChunk: Record<string, any> | undefined;
+  let binaryChunk: Uint8Array | undefined;
+  for (let offset = 12; offset + 8 <= view.byteLength;) {
+    const length = view.getUint32(offset, true);
+    const type = view.getUint32(offset + 4, true);
+    const start = offset + 8;
+    if (start + length > view.byteLength) return source;
+    if (type === 0x4e4f534a) jsonChunk = JSON.parse(new TextDecoder().decode(new Uint8Array(source, start, length)));
+    else if (type === 0x004e4942) binaryChunk = new Uint8Array(source, start, length);
+    offset = start + length;
+  }
+  if (!jsonChunk || !binaryChunk || !Array.isArray(jsonChunk.images)) return source;
+
+  let changed = false;
+  for (const image of jsonChunk.images) {
+    if (image.uri || image.bufferView === undefined) continue;
+    const bufferView = jsonChunk.bufferViews?.[image.bufferView];
+    if (!bufferView || (bufferView.buffer ?? 0) !== 0) continue;
+    const start = bufferView.byteOffset ?? 0;
+    const end = start + bufferView.byteLength;
+    if (start < 0 || end > binaryChunk.byteLength) continue;
+    const bytes = binaryChunk.subarray(start, end);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let index = 0; index < bytes.length; index += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(index, Math.min(index + chunkSize, bytes.length)));
+    }
+    image.uri = `data:${image.mimeType || "application/octet-stream"};base64,${btoa(binary)}`;
+    delete image.bufferView;
+    changed = true;
+  }
+  if (!changed) return source;
+
+  const encoder = new TextEncoder();
+  const jsonBytes = encoder.encode(JSON.stringify(jsonChunk));
+  const paddedJsonLength = (jsonBytes.byteLength + 3) & ~3;
+  const binaryLength = (binaryChunk.byteLength + 3) & ~3;
+  const totalLength = 12 + 8 + paddedJsonLength + 8 + binaryLength;
+  const output = new ArrayBuffer(totalLength);
+  const outputView = new DataView(output);
+  outputView.setUint32(0, 0x46546c67, true);
+  outputView.setUint32(4, 2, true);
+  outputView.setUint32(8, totalLength, true);
+  outputView.setUint32(12, paddedJsonLength, true);
+  outputView.setUint32(16, 0x4e4f534a, true);
+  new Uint8Array(output, 20, jsonBytes.byteLength).set(jsonBytes);
+  new Uint8Array(output, 20 + jsonBytes.byteLength, paddedJsonLength - jsonBytes.byteLength).fill(0x20);
+  const binaryHeader = 20 + paddedJsonLength;
+  outputView.setUint32(binaryHeader, binaryLength, true);
+  outputView.setUint32(binaryHeader + 4, 0x004e4942, true);
+  new Uint8Array(output, binaryHeader + 8, binaryChunk.byteLength).set(binaryChunk);
+  return output;
+}
+
 async function processAsset(definition: AssetDefinition, bytes: ArrayBuffer): Promise<void> {
   if (definition.kind === "gltf") {
     const basePath = new URL(definition.path, window.location.href).href.replace(/[^/]*$/, "");
     const loader = new GLTFLoader();
     loader.setDRACOLoader(dracoLoader);
-    const gltf = await loader.parseAsync(bytes, basePath);
+    const gltf = await loader.parseAsync(inlineEmbeddedGlbImages(bytes), basePath);
     let meshes = 0;
     gltf.scene.traverse(object => {
       const mesh = object as THREE.Mesh;
@@ -375,75 +388,6 @@ async function prepareOne(definition: AssetDefinition): Promise<void> {
   }
 }
 
-let loadingMusicRequested = false;
-let loadingPlaylist: HTMLAudioElement[] = [];
-let loadingTrackIndex = 0;
-let activeLoadingTrack: HTMLAudioElement | null = null;
-let resumeLoadingMusic: (() => void) | null = null;
-
-function clearLoadingMusicResumeListeners() {
-  if (!resumeLoadingMusic || typeof document === "undefined") return;
-  document.removeEventListener("pointerdown", resumeLoadingMusic);
-  document.removeEventListener("keydown", resumeLoadingMusic);
-  resumeLoadingMusic = null;
-}
-
-function playLoadingTrack() {
-  if (!loadingMusicRequested || !loadingPlaylist.length) return;
-  const track = loadingPlaylist[loadingTrackIndex];
-  if (activeLoadingTrack !== track) {
-    if (activeLoadingTrack) {
-      activeLoadingTrack.onended = null;
-      activeLoadingTrack.onerror = null;
-    }
-    activeLoadingTrack = track;
-    track.loop = false;
-    track.volume = 0.35;
-    track.currentTime = 0;
-    track.onended = () => {
-      loadingTrackIndex = (loadingTrackIndex + 1) % loadingPlaylist.length;
-      activeLoadingTrack = null;
-      playLoadingTrack();
-    };
-    track.onerror = () => {
-      loadingPlaylist = loadingPlaylist.filter(item => item !== track);
-      loadingTrackIndex = loadingPlaylist.length ? loadingTrackIndex % loadingPlaylist.length : 0;
-      activeLoadingTrack = null;
-      playLoadingTrack();
-    };
-  }
-  void track.play().then(clearLoadingMusicResumeListeners).catch(() => {
-    if (resumeLoadingMusic || typeof document === "undefined") return;
-    resumeLoadingMusic = () => {
-      clearLoadingMusicResumeListeners();
-      playLoadingTrack();
-    };
-    document.addEventListener("pointerdown", resumeLoadingMusic, { once: true });
-    document.addEventListener("keydown", resumeLoadingMusic, { once: true });
-  });
-}
-
-export function startLoadingMusic(): void {
-  loadingMusicRequested = true;
-  loadingPlaylist = LOADING_TRACKS
-    .map(track => audioElements.get(track.path))
-    .filter((track): track is HTMLAudioElement => Boolean(track));
-  if (loadingTrackIndex >= loadingPlaylist.length) loadingTrackIndex = 0;
-  playLoadingTrack();
-}
-
-export function stopLoadingMusic(): void {
-  loadingMusicRequested = false;
-  clearLoadingMusicResumeListeners();
-  if (activeLoadingTrack) {
-    activeLoadingTrack.pause();
-    activeLoadingTrack.currentTime = 0;
-    activeLoadingTrack.onended = null;
-    activeLoadingTrack.onerror = null;
-    activeLoadingTrack = null;
-  }
-}
-
 async function discoverExpectedSize(definition: AssetDefinition): Promise<boolean> {
   const current = runtime.get(definition.id)!;
   if (prepared.has(definition.path)) return false;
@@ -475,9 +419,6 @@ export async function prepareRequiredAssets(): Promise<void> {
     }
     phase = "loading";
     currentId = null;
-    publish("Preparing background audio");
-    for (const track of LOADING_TRACKS) await prepareOne(track);
-    startLoadingMusic();
     phase = "verifying";
     currentId = null;
     publish("Checking required assets and transfer sizes");

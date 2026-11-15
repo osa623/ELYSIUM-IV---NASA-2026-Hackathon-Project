@@ -92,12 +92,10 @@ export interface GameState {
   sol5Images: Sol5ImageRecord[];
   sol5Flight: Sol5FlightSnapshot | null;
   sol5Message: string | null;
-  finalDepartureVideo: boolean;
 
-  // Cinematic screen interaction + PHOBOSIA OS Desktop
+  // Cinematic screen interaction + OS Desktop
   showCinematicOverlay: boolean;
   showOSDesktop: boolean;
-  showPersonalLaptop: boolean;
   osInitialApp?: string;
 
   // Elysium IV SOL 01
@@ -105,6 +103,21 @@ export interface GameState {
   showSol01EnvironmentModal: boolean;
   showSol01ToolModal: boolean;
   showSol01ResourceModal: boolean;
+
+  // Elysium IV SOL 02
+  showSol02MissionOS: boolean;
+  showSol02EnvironmentModal: boolean;
+  showSol02ToolModal: boolean;
+  showBotanCheckModal: boolean;
+  showSoilInvestigationModal: boolean;
+
+  // Elysium IV SOL 03
+  showSol03MissionOS: boolean;
+  showSol03WaterModal: boolean;
+  showSol03EnvironmentModal: boolean;
+  showSol03ToolModal: boolean;
+  showEVACameraModal: boolean;
+  showFinalVideoModal: boolean;
 
   // Day 1 Camera Presentation Banner
   cameraPresentation: {

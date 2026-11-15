@@ -42,9 +42,6 @@ function displayGroups(snapshot: AssetLoadingSnapshot): DisplayGroup[] {
     { key: "environment", label: "ENVIRONMENT MAPS", assets: required.filter(asset => asset.kind === "exr") },
     { key: "images", label: "IMAGES", assets: required.filter(asset => asset.kind === "image") },
     { key: "sounds", label: "SOUNDS", assets: required.filter(asset => asset.kind === "audio") },
-    { key: "songs", label: "LAPTOP SONGS", assets: optional.filter(asset => asset.kind === "audio"), deferred: true },
-    { key: "laptop-images", label: "LAPTOP IMAGES", assets: optional.filter(asset => asset.kind === "image" && !asset.path.toLowerCase().includes("wallpaper")), deferred: true },
-    { key: "wallpapers", label: "WALLPAPERS", assets: optional.filter(asset => asset.path.toLowerCase().includes("wallpaper")), deferred: true },
     { key: "videos", label: "VIDEOS", assets: optional.filter(asset => asset.kind === "video"), deferred: true }
   ];
   for (const group of definitions) if (group.assets.length) groups.push(group);
@@ -80,10 +77,9 @@ export function LoadingScreen({ snapshot, onRetry }: { snapshot: AssetLoadingSna
       <div className={styles.readout}><span>PIPELINE</span><b>{snapshot.phase.toUpperCase()}</b></div>
     </section>
 
-    <section className={styles.details} aria-label="PHOBOSIA mission assets">
+    <section className={styles.details} aria-label="ELYSIUM IV mission assets">
       <div className={styles.brandSlot}>
-        {logo?.status === "ready" && <img className={styles.logo} src={getPreparedAssetUrl(logo.path)} alt="PHOBOSIA" />}
-        {logo?.status !== "ready" && <span className={styles.logoPending}>PHOBOSIA SYSTEMS INITIALIZING</span>}
+        <img className={styles.logo} src="/assets/images/elysium_iv_official_logo_4k_transparent.png" alt="ELYSIUM IV" />
       </div>
       <p className={styles.eyebrow}>PRE-LAUNCH CHECK</p>
       <h1>INITIALIZING MISSION ENVIRONMENT</h1>
@@ -114,7 +110,7 @@ export function LoadingScreen({ snapshot, onRetry }: { snapshot: AssetLoadingSna
           </div>)}
         </section>)}
       </div>
-      <footer className={styles.footer}><span>PHOBOSIA · FIELD OBSERVATION PROGRAM</span><span>GAMEPLAY REMAINS LOCKED UNTIL VERIFICATION</span></footer>
+      <footer className={styles.footer}><span>ELYSIUM IV · FIELD OBSERVATION PROGRAM</span><span>GAMEPLAY REMAINS LOCKED UNTIL VERIFICATION</span></footer>
     </section>
   </main>;
 }
