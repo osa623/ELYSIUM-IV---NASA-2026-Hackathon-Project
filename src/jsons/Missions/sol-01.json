@@ -1,0 +1,557 @@
+{
+  "project": "ELYSIUM_IV",
+  "configuration_version": "1.0",
+  "mission_id": "SOL_01",
+  "mission_title": "SOL 01 - Initial Surface Assessment",
+  "mission_type": "DAYTIME_OBSERVATION",
+  "mission_status": "NOT_STARTED",
+  "persistence": {
+    "enabled": true,
+    "storage": "localStorage",
+    "namespace": "elysium_iv",
+    "save_key": "elysium_iv_sol_01_progress",
+    "save_completed_tasks": true,
+    "save_mission_logs": true,
+    "save_telemetry_state": true,
+    "save_current_phase": true,
+    "save_current_location": true
+  },
+  "terrain": {
+    "asset": "ELYSIUM_IV_SOL_01_Terrain",
+    "starting_point": "Spawning_Point",
+    "vehicle_spawn_point": "Vehicle_Spwaning_Point",
+    "checkpoint_01": "2ndCheckpoint",
+    "finishing_point": "Finishing_Point"
+  },
+  "gameplay_modes": {
+    "outside_rover": {
+      "camera": "FIRST_PERSON",
+      "eva_suit": true,
+      "helmet_overlay": true,
+      "oxygen_hud": true
+    },
+    "inside_rover": {
+      "camera": "FIRST_PERSON",
+      "eva_suit": false,
+      "helmet_overlay": false,
+      "oxygen_hud": false,
+      "walkable_object": "Floor_Walkable"
+    },
+    "rover_driving": {
+      "camera": "THIRD_PERSON",
+      "controller": "EXISTING_ROVER_CONTROLLER",
+      "preserve_wheel_rotation": true,
+      "preserve_steering": true
+    }
+  },
+  "interface": {
+    "task_panel": {
+      "enabled": true,
+      "show_all_tasks": true,
+      "show_completed_tasks": true,
+      "show_current_task": true,
+      "show_progress": true
+    },
+    "navigation_panel": {
+      "enabled": true,
+      "show_current_objective": true,
+      "show_next_objective": true,
+      "show_target_distance": true,
+      "show_target_direction": true,
+      "show_waypoint_marker": true,
+      "show_only_relevant_next_destination": true
+    },
+    "interaction": {
+      "key": "E",
+      "show_prompt_when_near": true
+    }
+  },
+  "screens": {
+    "main_computers": {
+      "Computer_Screen_01": {
+        "type": "MISSION_OVERVIEW",
+        "interaction": false,
+        "profiles": {
+          "initial": {
+            "title": "SOL 01 MISSION OVERVIEW",
+            "mission": "INITIAL SURFACE ASSESSMENT",
+            "mission_status": "READY",
+            "current_location": "LANDING ZONE",
+            "next_destination": "2ndCheckpoint"
+          },
+          "checkpoint_02": {
+            "title": "SOL 01 SECOND OBSERVATION",
+            "mission": "TERRAIN AND ENVIRONMENTAL REVIEW",
+            "mission_status": "IN_PROGRESS",
+            "current_location": "SECOND CHECKPOINT",
+            "next_destination": "Finishing_Point"
+          }
+        }
+      },
+      "Computer_Screen_02": {
+        "type": "ENVIRONMENTAL_CHARTS",
+        "interaction": false,
+        "profiles": {
+          "initial": {
+            "title": "ENVIRONMENTAL DATA",
+            "charts": [
+              "SURFACE_TEMPERATURE",
+              "ATMOSPHERIC_PRESSURE",
+              "WIND_SPEED",
+              "CO2_CONCENTRATION"
+            ],
+            "telemetry_profile": "initial"
+          },
+          "checkpoint_02": {
+            "title": "SECOND ENVIRONMENTAL READING",
+            "charts": [
+              "SURFACE_TEMPERATURE",
+              "ATMOSPHERIC_PRESSURE",
+              "WIND_SPEED",
+              "CO2_CONCENTRATION"
+            ],
+            "telemetry_profile": "checkpoint_02"
+          }
+        }
+      },
+      "Computer_Screen_03": {
+        "type": "SYSTEM_AND_MISSION_LOG",
+        "interaction": false,
+        "profiles": {
+          "initial": {
+            "title": "MISSION SYSTEM STATUS",
+            "mission_log_status": "PENDING",
+            "environment_check": "PENDING",
+            "tool_inventory": "PENDING",
+            "resource_check": "PENDING"
+          },
+          "checkpoint_02": {
+            "title": "SECOND OBSERVATION STATUS",
+            "mission_log_status": "PENDING",
+            "environment_check": "COMPLETED",
+            "second_observation": "PENDING"
+          }
+        }
+      }
+    },
+    "resource_screens": {
+      "O2_Screen": {
+        "type": "RESOURCE_LEVEL",
+        "label": "CABIN OXYGEN",
+        "unit": "%",
+        "display": "SINGLE_VALUE",
+        "source": "telemetry.cabin.oxygen_percentage"
+      },
+      "Water_and_Nut_Screen": {
+        "type": "RESOURCE_MONITOR",
+        "label": "WATER AND NUTRIENT SUPPLY",
+        "display": "DUAL_VALUE",
+        "source": "telemetry.resources"
+      },
+      "Water_and_Nut_Screen_02(small)": {
+        "type": "RESOURCE_STATUS",
+        "label": "RESOURCE STATUS",
+        "display": "COMPACT_VALUE",
+        "source": "telemetry.resources.status"
+      }
+    },
+    "small_screens": {
+      "sm_Air_filter_screen": {
+        "label": "AIR FILTER",
+        "unit": "%",
+        "source": "telemetry.cabin.air_filter_percentage"
+      },
+      "sm_battery_Screen": {
+        "label": "BATTERY",
+        "unit": "%",
+        "source": "telemetry.cabin.battery_percentage"
+      },
+      "sm_cabin_pressure": {
+        "label": "CABIN PRESSURE",
+        "unit": "kPa",
+        "source": "telemetry.cabin.pressure_kpa"
+      },
+      "sm_co2_screen": {
+        "label": "CABIN CO2",
+        "unit": "%",
+        "source": "telemetry.cabin.co2_percentage"
+      },
+      "sm_environment_screen": {
+        "label": "EXTERNAL PRESSURE",
+        "unit": "mbar",
+        "source": "telemetry.environment.external_pressure_mbar"
+      },
+      "sm_o2_Screen": {
+        "label": "CABIN OXYGEN",
+        "unit": "%",
+        "source": "telemetry.cabin.oxygen_percentage"
+      },
+      "sm_status_screen": {
+        "label": "SYSTEM STATUS",
+        "unit": "",
+        "source": "telemetry.cabin.system_status"
+      },
+      "sm_temperature_screen": {
+        "label": "CABIN TEMPERATURE",
+        "unit": "°C",
+        "source": "telemetry.cabin.temperature_celsius"
+      }
+    }
+  },
+  "interior_lighting": {
+    "main_lights": [
+      "main_light_01",
+      "main_light_02",
+      "main_light_03"
+    ],
+    "secondary_lights": [
+      "2_light_01",
+      "2_light_02",
+      "2_light_03",
+      "2_light_04"
+    ],
+    "direction": "DOWNWARD",
+    "color": "WHITE",
+    "shadows": true
+  },
+  "exterior_lighting": {
+    "main": [
+      "Main_Light_01",
+      "Main_Light_02",
+      "Main_Light_03",
+      "Main_Light_04"
+    ],
+    "back": [
+      "Back_Light_01",
+      "Back_Light_02",
+      "Back_Light_03",
+      "Back_Light_04"
+    ],
+    "upper": [
+      "Upper_Light_01",
+      "Upper_Light_02"
+    ],
+    "side": [
+      "Side_Light_01",
+      "Side_Light_02"
+    ],
+    "control_key": "L",
+    "states": [
+      "OFF",
+      "MAIN_HEADLIGHTS",
+      "FULL_LIGHTING"
+    ]
+  },
+  "triggers": {
+    "Driving_Section_Trigger": {
+      "action": "ENTER_ROVER_DRIVING_MODE",
+      "interaction_key": "E"
+    },
+    "Environment_Checking_Trigger": {
+      "action": "OPEN_ENVIRONMENT_CHECK",
+      "interaction_key": "E"
+    },
+    "Main_Screen_Trigger": {
+      "action": "OPEN_MISSION_OPERATING_SYSTEM",
+      "interaction_key": "E"
+    },
+    "Outdoor_Navigation_Trigger": {
+      "action": "EXIT_ROVER_TO_OUTSIDE",
+      "interaction_key": "E"
+    },
+    "Tool_Section_Trigger": {
+      "action": "OPEN_TOOL_INVENTORY",
+      "interaction_key": "E"
+    },
+    "Water_and_nut_Trigger": {
+      "action": "OPEN_RESOURCE_CHECK",
+      "interaction_key": "E"
+    }
+  },
+  "telemetry_profiles": {
+    "initial": {
+      "environment": {
+        "surface_temperature_celsius": -58,
+        "external_pressure_mbar": 6.4,
+        "wind_speed_mps": 4.2,
+        "co2_percentage": 95.1
+      },
+      "cabin": {
+        "oxygen_percentage": 98,
+        "air_filter_percentage": 96,
+        "battery_percentage": 100,
+        "pressure_kpa": 70.0,
+        "co2_percentage": 0.08,
+        "temperature_celsius": 21.5,
+        "system_status": "GOOD"
+      },
+      "resources": {
+        "water_liters": 85,
+        "nutrient_supply_percentage": 92,
+        "status": "STABLE"
+      }
+    },
+    "checkpoint_02": {
+      "environment": {
+        "surface_temperature_celsius": -66,
+        "external_pressure_mbar": 6.2,
+        "wind_speed_mps": 6.1,
+        "co2_percentage": 95.1
+      },
+      "cabin": {
+        "oxygen_percentage": 94,
+        "air_filter_percentage": 94,
+        "battery_percentage": 91,
+        "pressure_kpa": 70.0,
+        "co2_percentage": 0.12,
+        "temperature_celsius": 20.8,
+        "system_status": "GOOD"
+      },
+      "resources": {
+        "water_liters": 82,
+        "nutrient_supply_percentage": 89,
+        "status": "STABLE"
+      }
+    }
+  },
+  "mission_tasks": [
+    {
+      "id": "SOL01_TASK_01",
+      "order": 1,
+      "title": "Enter the Terrain Rover",
+      "description": "Approach the rover ladder and enter the vehicle.",
+      "trigger": "ladder",
+      "interaction_key": "E",
+      "completion_condition": "PLAYER_INSIDE_ROVER",
+      "next_task": "SOL01_TASK_02"
+    },
+    {
+      "id": "SOL01_TASK_02",
+      "order": 2,
+      "title": "Initiate the Mission",
+      "description": "Access the main computer and create the initial mission log.",
+      "trigger": "Main_Screen_Trigger",
+      "interaction_key": "E",
+      "requirements": [
+        "OPEN_MISSION_OS",
+        "ENTER_MISSION_LOG",
+        "SAVE_MISSION_LOG"
+      ],
+      "completion_condition": "INITIAL_MISSION_LOG_SAVED",
+      "next_task": "SOL01_TASK_03"
+    },
+    {
+      "id": "SOL01_TASK_03",
+      "order": 3,
+      "title": "Check Environmental Conditions",
+      "description": "Review external pressure, temperature, wind and atmospheric composition.",
+      "trigger": "Environment_Checking_Trigger",
+      "interaction_key": "E",
+      "requirements": [
+        "VIEW_ENVIRONMENT_DATA",
+        "RECORD_ENVIRONMENT_READINGS",
+        "SAVE_ENVIRONMENT_LOG"
+      ],
+      "completion_condition": "ENVIRONMENT_LOG_SAVED",
+      "next_task": "SOL01_TASK_04"
+    },
+    {
+      "id": "SOL01_TASK_04",
+      "order": 4,
+      "title": "Inspect Available Tools",
+      "description": "Inspect the rover equipment and confirm the tools available for surface investigation.",
+      "trigger": "Tool_Section_Trigger",
+      "interaction_key": "E",
+      "available_tools": [
+        {
+          "id": "SOIL_SAMPLING_TOOL",
+          "label": "Soil Sampling Tool"
+        },
+        {
+          "id": "SOIL_COLLECTION_CONTAINER",
+          "label": "Soil Collection Container"
+        },
+        {
+          "id": "ENVIRONMENTAL_SENSOR",
+          "label": "Environmental Sensor"
+        },
+        {
+          "id": "SAMPLE_STORAGE_CONTAINER",
+          "label": "Sample Storage Container"
+        }
+      ],
+      "requirements": [
+        "DISPLAY_TOOL_INVENTORY",
+        "ALLOW_TOOL_CONFIRMATION",
+        "SAVE_TOOL_CHECKLIST"
+      ],
+      "completion_condition": "TOOL_CHECKLIST_CONFIRMED",
+      "next_task": "SOL01_TASK_05"
+    },
+    {
+      "id": "SOL01_TASK_05",
+      "order": 5,
+      "title": "Check Water and Nutrient Supplies",
+      "description": "Inspect available water and nutrient resources and record their current levels.",
+      "trigger": "Water_and_nut_Trigger",
+      "interaction_key": "E",
+      "requirements": [
+        "VIEW_WATER_LEVEL",
+        "VIEW_NUTRIENT_LEVEL",
+        "RECORD_RESOURCE_READINGS",
+        "SAVE_RESOURCE_LOG"
+      ],
+      "completion_condition": "RESOURCE_LOG_SAVED",
+      "next_task": "SOL01_TASK_06"
+    },
+    {
+      "id": "SOL01_TASK_06",
+      "order": 6,
+      "title": "Travel to the Second Checkpoint",
+      "description": "Return to the driving station and navigate to the second observation checkpoint.",
+      "trigger": "Driving_Section_Trigger",
+      "interaction_key": "E",
+      "destination": "2ndCheckpoint",
+      "requirements": [
+        "ENTER_DRIVING_MODE",
+        "DRIVE_TO_CHECKPOINT",
+        "STOP_AT_CHECKPOINT"
+      ],
+      "completion_condition": "ROVER_REACHED_2ND_CHECKPOINT",
+      "on_complete": [
+        "SET_TELEMETRY_PROFILE_checkpoint_02",
+        "UPDATE_COMPUTER_SCREENS",
+        "UNLOCK_SECOND_OBSERVATION"
+      ],
+      "next_task": "SOL01_TASK_07"
+    },
+    {
+      "id": "SOL01_TASK_07",
+      "order": 7,
+      "title": "Record the Second Observation",
+      "description": "Inspect the updated environmental readings and record the second observation in the mission operating system.",
+      "trigger": "Main_Screen_Trigger",
+      "interaction_key": "E",
+      "requirements": [
+        "VIEW_UPDATED_COMPUTER_SCREENS",
+        "REVIEW_UPDATED_TEMPERATURE",
+        "REVIEW_UPDATED_PRESSURE",
+        "ENTER_SECOND_OBSERVATION_LOG",
+        "SAVE_SECOND_OBSERVATION_LOG"
+      ],
+      "completion_condition": "SECOND_OBSERVATION_LOG_SAVED",
+      "next_task": "SOL01_TASK_08"
+    },
+    {
+      "id": "SOL01_TASK_08",
+      "order": 8,
+      "title": "Proceed to the SOL 01 Destination",
+      "description": "Return to driving mode and navigate to the final destination of SOL 01.",
+      "trigger": "Driving_Section_Trigger",
+      "interaction_key": "E",
+      "destination": "Finishing_Point",
+      "requirements": [
+        "ENTER_DRIVING_MODE",
+        "DRIVE_TO_FINISHING_POINT",
+        "STOP_AT_FINISHING_POINT"
+      ],
+      "completion_condition": "ROVER_REACHED_FINISHING_POINT",
+      "on_complete": [
+        "MARK_SOL_01_COMPLETED",
+        "SAVE_SOL_01_PROGRESS",
+        "UNLOCK_SOL_02"
+      ],
+      "next_task": null
+    }
+  ],
+  "mission_logs": {
+    "enabled": true,
+    "storage": "localStorage",
+    "log_types": [
+      "INITIAL_MISSION_LOG",
+      "ENVIRONMENT_LOG",
+      "TOOL_CHECKLIST",
+      "RESOURCE_LOG",
+      "SECOND_OBSERVATION_LOG"
+    ],
+    "fields": [
+      "log_id",
+      "mission_id",
+      "log_type",
+      "timestamp",
+      "sol_number",
+      "location",
+      "telemetry_snapshot",
+      "user_entry",
+      "saved"
+    ],
+    "allow_user_text": true,
+    "require_save_before_task_completion": true
+  },
+  "navigation": {
+    "initial_destination": "ladder",
+    "waypoints": [
+      {
+        "id": "NAV_01",
+        "destination": "ladder",
+        "task_id": "SOL01_TASK_01"
+      },
+      {
+        "id": "NAV_02",
+        "destination": "Main_Screen_Trigger",
+        "task_id": "SOL01_TASK_02"
+      },
+      {
+        "id": "NAV_03",
+        "destination": "Environment_Checking_Trigger",
+        "task_id": "SOL01_TASK_03"
+      },
+      {
+        "id": "NAV_04",
+        "destination": "Tool_Section_Trigger",
+        "task_id": "SOL01_TASK_04"
+      },
+      {
+        "id": "NAV_05",
+        "destination": "Water_and_nut_Trigger",
+        "task_id": "SOL01_TASK_05"
+      },
+      {
+        "id": "NAV_06",
+        "destination": "Driving_Section_Trigger",
+        "task_id": "SOL01_TASK_06"
+      },
+      {
+        "id": "NAV_07",
+        "destination": "2ndCheckpoint",
+        "task_id": "SOL01_TASK_06"
+      },
+      {
+        "id": "NAV_08",
+        "destination": "Main_Screen_Trigger",
+        "task_id": "SOL01_TASK_07"
+      },
+      {
+        "id": "NAV_09",
+        "destination": "Driving_Section_Trigger",
+        "task_id": "SOL01_TASK_08"
+      },
+      {
+        "id": "NAV_10",
+        "destination": "Finishing_Point",
+        "task_id": "SOL01_TASK_08"
+      }
+    ],
+    "advance_only_after_task_completion": true,
+    "show_destination_distance": true
+  },
+  "completion": {
+    "required_tasks": 8,
+    "completion_condition": "ALL_REQUIRED_TASKS_COMPLETED",
+    "on_complete": [
+      "SAVE_SOL_01_PROGRESS",
+      "MARK_SOL_01_COMPLETED",
+      "UNLOCK_SOL_02"
+    ]
+  }
+}

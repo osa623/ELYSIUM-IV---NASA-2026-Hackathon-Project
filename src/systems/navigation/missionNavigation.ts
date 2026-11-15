@@ -1,0 +1,242 @@
+import sol01Mission from "../../jsons/Missions/sol-01.json";
+import sol02Mission from "../../jsons/Missions/sol-02.json";
+import sol03Mission from "../../jsons/Missions/sol-03.json";
+import sol01Navigation from "../../jsons/Instructions/sol-01-navigation.json";
+import sol02Navigation from "../../jsons/Instructions/sol-02-navigation.json";
+import sol03Navigation from "../../jsons/Instructions/sol-03-navigation.json";
+import { Sol01MissionManager } from "../../missions/SOL_01/Sol01MissionManager";
+
+type NavigationFile = typeof sol01Navigation | typeof sol02Navigation | typeof sol03Navigation;
+type NavigationTask = NavigationFile["instructions"][number];
+
+const FILES: Partial<Record<number, { mission: any; navigation: NavigationFile }>> = {
+  1: { mission: sol01Mission, navigation: sol01Navigation },
+  2: { mission: sol02Mission, navigation: sol02Navigation },
+  3: { mission: sol03Mission, navigation: sol03Navigation }
+};
+
+// Runtime validator IDs that differ from the corresponding mission JSON task IDs.
+// This adapter reports only a matching validated activity; it never synthesizes progress.
+const RUNTIME_TASK_TO_MISSION_TASK: Record<number, Record<string, string>> = {
+  2: {
+    SOL02_HABITAT_STATUS: "SOL02_HABITAT_MAIN_STATUS",
+    SOL02_POWER_REVIEW: "SOL02_POWER_INVESTIGATION"
+  },
+  3: {
+    SOL03_SELECT_DATASET: "SOL03_DATASET_ANALYSIS",
+    SOL03_SUBMIT_TARGET_RECORD: "SOL03_SUBMIT_TARGET_PROPOSAL"
+  },
+  // Sol 4 runtime task IDs already match the mission JSON. Keep them intact;
+  // physical trigger resolution lives in TASK_TO_EXISTING_TRIGGER below.
+};
+
+// Private physical interaction resolver. These identifiers are never included in
+// instruction JSON or rendered guidance; the existing game still owns interaction.
+const TASK_TO_EXISTING_TRIGGER: Record<string, string> = {
+  SOL01_TASK_01: "ladder",
+  SOL01_TASK_02: "Main_Screen_Trigger",
+  SOL01_TASK_03: "Environment_Checking_Trigger",
+  SOL01_TASK_04: "Tool_Section_Trigger",
+  SOL01_TASK_05: "Water_and_nut_Trigger",
+  SOL01_TASK_06: "2ndCheckpoint",
+  SOL01_TASK_07: "Main_Screen_Trigger",
+  SOL01_TASK_08: "Finishing_Point",
+  SOL02_HABITAT_MAIN_STATUS: "HAB_MONITOR_01",
+  SOL02_HABITAT_LIFE_SUPPORT: "HAB_MONITOR_01",
+  SOL02_HABITAT_EMERGENCY: "HAB_MONITOR_01",
+  SOL02_WATER_NUTRITION: "HAB_WATER_NUTRITION_01",
+  SOL02_ENGINEERING_MONITORING: "Engineering_Monitoring_Trigger",
+  SOL02_POWER_INVESTIGATION: "Engineering_PowerUnit_Trigger",
+  SOL02_ENGINEERING_LIFESUPPORT: "Engineering_LifeSupport_Trigger",
+  SOL02_DIAGNOSTICS: "Engineering_Diagnostics_Trigger",
+  SOL02_READINESS_ASSESSMENT: "Engineering_Monitoring_Trigger",
+  SOL03_MISSION_CONTEXT: "MC_MAIN_01",
+  SOL03_OBSERVATION_SITE_REVIEW: "MC_NAVIGATION_01",
+  SOL03_SYSTEM_CONSTRAINTS: "MC_SYSTEMS_01",
+  SOL03_SELECT_TARGET: "MC_NAVIGATION_01",
+  SOL03_DATASET_ANALYSIS: "LAB_RESEARCH_ANALYSIS_01",
+  SOL03_SUBMIT_TARGET_PROPOSAL: "MC_MAIN_01",
+  SOL04_MISSION_CONTEXT: "MC_MAIN_01",
+  SOL04_SELECTED_TARGET_INVESTIGATION: "MC_NAVIGATION_01",
+  SOL04_TERRAIN_DATA_REVIEW: "LAB_RESEARCH_ANALYSIS_01",
+  SOL04_DRONE_MISSION_PLAN: "MC_NAVIGATION_01",
+  SOL04_SUBMIT_PREPARATION_REPORT: "MC_MAIN_01",
+  SOL05_PREFLIGHT_BRIEFING: "MC_NAVIGATION_01",
+  SOL05_ACTIVATE_SIMULATION: "MC_NAVIGATION_01",
+  SOL05_REVIEW_IMAGES: "MC_NAVIGATION_01",
+  SOL05_SUBMIT_REPORT: "MC_NAVIGATION_01"
+  ,SOL06_REVIEW_MISSION_BRIEFING: "MC_NAVIGATION_01",
+  SOL06_PREPARE_FIELD_EQUIPMENT: "LAB_RESEARCH_ANALYSIS_01",
+  SOL06_ACTIVATE_EVA_SESSION: "Mars_Observation_Preparation_Trigger",
+  SOL06_REACH_SELECTED_TARGET: "TARGET_SCENE_OBJECT",
+  SOL06_COMPLETE_FIELD_OBSERVATIONS: "TARGET_SCENE_OBJECT",
+  SOL06_COLLECT_SOIL_SAMPLE: "TARGET_SCENE_OBJECT",
+  SOL06_RETURN_TO_AIRLOCK: "Spwaning_Position",
+  SOL06_REMOVE_EVA_SUIT: "Mars_Observation_Preparation_Trigger",
+  SOL06_TRANSFER_SAMPLE: "LAB_RESEARCH_ANALYSIS_01",
+  SOL06_ANALYSE_SAMPLE: "LAB_RESEARCH_ANALYSIS_01",
+  SOL06_START_CULTIVATION_EXPERIMENT: "LAB_CULTIVATION_01",
+  SOL06_SUBMIT_INVESTIGATION_REPORT: "MC_NAVIGATION_01",
+  SOL07_HABITAT_STORM_ALERT: "HAB_MONITOR_01",
+  SOL07_MISSION_CONTROL_SYSTEMS: "MC_SYSTEMS_01",
+  SOL07_CENTRAL_HUB_STATUS: "Module_Status_Display",
+  SOL07_VERIFY_EVA_LOCKDOWN: "Airlock_Control_Console_Trigger",
+  SOL07_RESEARCH_POWER: "LAB_RESEARCH_MONITORING_01",
+  SOL07_ENGINEERING_POWER: "Engineering_PowerUnit_Trigger",
+  SOL07_SUBMIT_STORM_REPORT: "MC_NAVIGATION_01",
+  SOL08_REVIEW_POWER_FAILURE_ALERT: "HAB_MONITOR_01",
+  SOL08_INSPECT_ENGINEERING_POWER_UNIT: "Engineering_PowerUnit_Trigger",
+  SOL08_INSPECT_COMMUNICATION_FAILURE: "MC_SYSTEMS_01",
+  SOL08_PREPARE_EVA: "Mars_Observation_Preparation_Trigger",
+  SOL08_REPAIR_SOLAR_PANEL_A: "PowerUnit_A",
+  SOL08_REPAIR_SOLAR_PANEL_B: "PowerUnit_B",
+  SOL08_REPAIR_MAIN_SOLAR_CONNECTION: "PowerUnit_AB_Main",
+  SOL08_RESTORE_MAIN_POWER_SUPPLY: "Engineering_PowerUnit_Trigger",
+  SOL08_VERIFY_POWER_RECOVERY: "Engineering_PowerUnit_Trigger",
+  SOL08_REPAIR_OUTDOOR_COMMUNICATION: "Commuication_fix_Trigger",
+  SOL08_VERIFY_AND_REPORT_RECOVERY: "MC_MAIN_01",
+  SOL09_TASK_01: "HAB_WATER_NUTRITION_01",
+  SOL09_TASK_02: "LAB_CULTIVATION_01",
+  SOL09_TASK_03: "LAB_CULTIVATION_01",
+  SOL09_TASK_04: "LAB_CULTIVATION_01",
+  SOL09_TASK_05: "Engineering_LifeSupport_Trigger",
+  SOL09_TASK_06: "Engineering_LifeSupport_Trigger",
+  SOL09_TASK_07: "LAB_CULTIVATION_01",
+  SOL09_TASK_08: "LAB_CULTIVATION_01",
+  SOL09_TASK_09: "LAB_CULTIVATION_01",
+  SOL09_TASK_10: "MC_MAIN_01",
+  SOL10_TASK_01: "MC_MAIN_01",
+  SOL10_TASK_02: "MC_MAIN_01",
+  SOL10_TASK_03: "MC_MAIN_01",
+  SOL10_TASK_04: "LAB_RESEARCH_ANALYSIS_01",
+  SOL10_TASK_05: "LAB_CULTIVATION_01",
+  SOL10_TASK_06: "Engineering_LifeSupport_Trigger",
+  SOL10_TASK_07: "MC_MAIN_01",
+  SOL10_TASK_08: "MC_MAIN_01",
+  SOL10_TASK_09: "MC_MAIN_01",
+  SOL10_TASK_10: "MC_MAIN_01",
+  SOL10_TASK_11: "MC_MAIN_01"
+};
+
+export interface ResolvedMissionNavigation {
+  taskId?: string;
+  title: string;
+  notification: string;
+  message?: string;
+  destinationName?: string;
+  destinationModule?: string;
+  destinationSection?: string;
+  guidance?: string;
+  activity?: string;
+  isCompletion: boolean;
+  hasInstruction: boolean;
+}
+
+export function normalizeValidatedTaskIds(sol: number, runtimeTaskIds: readonly string[]): string[] {
+  const aliases = RUNTIME_TASK_TO_MISSION_TASK[sol] ?? {};
+  return [...new Set(runtimeTaskIds.map(id => aliases[id] ?? id))];
+}
+
+export function resolveNextMissionNavigation(sol: number, validatedRuntimeTaskIds: readonly string[]): ResolvedMissionNavigation | null {
+  if (sol === 1) {
+    const sol01Mgr = Sol01MissionManager.getInstance();
+    const completed = new Set<string>(validatedRuntimeTaskIds);
+    sol01Mgr.completedTaskIds.forEach(id => completed.add(id));
+    const instruction = sol01Navigation.instructions.find(item => !completed.has(item.taskId));
+    if (!instruction) {
+      return {
+        title: sol01Navigation.completion.title,
+        notification: sol01Navigation.completion.message,
+        isCompletion: true,
+        hasInstruction: true
+      };
+    }
+    return {
+      taskId: instruction.taskId,
+      title: instruction.title,
+      notification: `${instruction.title} · ${instruction.destination.name}. ${instruction.message} ${instruction.guidance} ${instruction.activity}`,
+      message: instruction.message,
+      destinationName: instruction.destination.name,
+      destinationModule: instruction.destination.module,
+      destinationSection: instruction.destination.section,
+      guidance: instruction.guidance,
+      activity: instruction.activity,
+      isCompletion: false,
+      hasInstruction: true
+    };
+  }
+
+  const source = FILES[sol];
+  if (!source) return null;
+  const mission: any = source.mission;
+
+  const completed = new Set(normalizeValidatedTaskIds(sol, validatedRuntimeTaskIds));
+  const requiredIds = new Set(mission.missionCompletion?.requiredTasks ?? mission.tasks.filter((task: any) => task.mandatory).map((task: any) => task.taskId));
+  const tasks = mission.tasks.filter((task: any) => task.mandatory && requiredIds.has(task.taskId));
+  const available = tasks.find((task: any) =>
+    !completed.has(task.taskId) &&
+    ((("requiresCompletedTasks" in task ? task.requiresCompletedTasks : undefined) ?? source.navigation.instructions.find(item => item.taskId === task.taskId)?.requiresCompletedTasks) ?? []).every((required: string) => completed.has(required))
+  );
+
+  if (!available) {
+    const allComplete = tasks.length > 0 && tasks.every((task: any) => completed.has(task.taskId));
+    if (!allComplete) return null;
+    return {
+      title: source.navigation.completion.title,
+      notification: source.navigation.completion.message,
+      isCompletion: true,
+      hasInstruction: true
+    };
+  }
+
+  const instruction: NavigationTask | undefined = source.navigation.instructions.find(item => item.taskId === available.taskId);
+  if (!instruction) {
+    const location = mission.interfaces?.find((item: any) => item.interfaceId === available.interfaceId)?.location;
+    return {
+      taskId: available.taskId,
+      title: available.title,
+      notification: `Next activity: ${available.title}${location ? ` — ${location}` : ""}. Open the assigned interface and complete the required activity.`,
+      message: `Proceed to ${location ?? "the assigned module"} and continue the required activity.`,
+      destinationName: location,
+      destinationModule: location,
+      activity: available.objective,
+      guidance: available.objective,
+      isCompletion: false,
+      hasInstruction: false
+    };
+  }
+
+  // Resolve once internally to validate that guidance has a known existing interaction.
+  // Do not expose or use this ID to open the interface remotely.
+  const resolvedTrigger = TASK_TO_EXISTING_TRIGGER[instruction.taskId];
+  const destinationIsMapped = Boolean(resolvedTrigger && mission.interfaces?.some((item: any) => item.triggerId === resolvedTrigger));
+  if (!destinationIsMapped) {
+    return {
+      taskId: instruction.taskId,
+      title: instruction.title,
+      notification: `${instruction.title} — ${instruction.destination.module}. ${instruction.message} ${instruction.guidance}`,
+      message: instruction.message,
+      destinationName: instruction.destination.name,
+      destinationModule: instruction.destination.module,
+      destinationSection: instruction.destination.section,
+      guidance: instruction.guidance,
+      activity: instruction.activity,
+      isCompletion: false,
+      hasInstruction: true
+    };
+  }
+
+  return {
+    taskId: instruction.taskId,
+    title: instruction.title,
+    notification: `${instruction.title} · ${instruction.destination.name}. ${instruction.message} ${instruction.activity}`,
+    message: instruction.message,
+    destinationName: instruction.destination.name,
+    destinationModule: instruction.destination.module,
+    destinationSection: instruction.destination.section,
+    guidance: instruction.guidance,
+    activity: instruction.activity,
+    isCompletion: false,
+    hasInstruction: true
+  };
+}

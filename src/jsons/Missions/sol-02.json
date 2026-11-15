@@ -1,0 +1,689 @@
+
+{
+  "project": "ELYSIUM_IV",
+  "configuration_version": "1.0",
+  "mission_id": "SOL_02",
+  "mission_title": "SOL 02 - Night-time Soil Investigation",
+  "mission_type": "NIGHT_TIME_SCIENTIFIC_INVESTIGATION",
+  "mission_status": "LOCKED_UNTIL_SOL_01_COMPLETION",
+
+  "terrain": {
+    "asset": "ELYSIUM_IV_SOL_02_Terrain",
+    "time_of_day": "NIGHT",
+    "environment_profile": "MARS_NIGHT",
+    "starting_point": "Sol2_starting_Point",
+    "vehicle_spawn_reference": "Vehicle_Spwaning_Point",
+    "checkpoint": "Sol2_Checkpoint",
+    "investigation_location": "Sol2_Mission_investigation",
+    "finishing_point": "Sol2_Finishing_Point",
+    "spawn_player_near_vehicle": true,
+    "spawn_player_at_named_starting_point": true,
+    "spawn_vehicle_at_existing_terrain_vehicle_location": true,
+    "preserve_glb_object_names": true
+  },
+
+  "dependencies": {
+    "requires_completed_mission": "SOL_01",
+    "requires_unlocked_mission": "SOL_02",
+    "previous_mission_logs": {
+      "enabled": true,
+      "source_mission": "SOL_01",
+      "source_storage_namespace": "elysium_iv",
+      "read_completed_tasks": true,
+      "read_saved_observation_logs": true,
+      "read_environment_logs": true,
+      "read_resource_logs": true,
+      "read_previous_telemetry": true,
+      "read_only": true
+    }
+  },
+
+  "persistence": {
+    "storage": "localStorage",
+    "namespace": "elysium_iv",
+    "key": "elysium_iv_sol_02_progress",
+    "persist": [
+      "mission_status",
+      "completed_tasks",
+      "current_task",
+      "current_phase",
+      "active_checkpoint",
+      "active_navigation_destination",
+      "soil_sample",
+      "soil_analysis",
+      "tool_inventory",
+      "mission_logs",
+      "telemetry",
+      "screen_state",
+      "sample_images_unlocked",
+      "mission_completion"
+    ],
+    "restore_progress_on_reload": true,
+    "preserve_sol_01_data": true,
+    "never_overwrite_previous_sol_logs": true
+  },
+
+  "gameplay_modes": {
+    "outside": {
+      "camera": "FIRST_PERSON",
+      "character_mode": "EVA_SUIT",
+      "helmet_overlay": true,
+      "oxygen_hud": true,
+      "oxygen_consumption": true
+    },
+    "inside_rover": {
+      "camera": "FIRST_PERSON",
+      "character_mode": "NORMAL",
+      "eva_suit_visible": false,
+      "helmet_overlay": false,
+      "walkable_object": "Floor_Walkable"
+    },
+    "driving": {
+      "camera": "THIRD_PERSON",
+      "controller": "EXISTING_ROVER_CONTROLLER",
+      "preserve_existing_physics": true,
+      "preserve_steering": true,
+      "preserve_wheel_animation": true,
+      "preserve_vehicle_lighting": true
+    }
+  },
+
+  "mission_environment": {
+    "time_of_day": "NIGHT",
+    "lighting_profile": "MARS_NIGHT",
+    "environmental_mood": "DARK_COLD_MARTIAN_SURFACE",
+    "terrain_visibility": "LOW_TO_MODERATE",
+    "rover_headlights_required": true,
+    "navigation_beam_required": true,
+    "environment_data": {
+      "data_type": "SIMULATED_GAMEPLAY_TELEMETRY",
+      "temperature_celsius": -78,
+      "surface_pressure_mbar": 6.1,
+      "wind_speed_m_s": 7.4,
+      "wind_direction": "NORTH_EAST",
+      "atmospheric_co2_percent": 95.1,
+      "dust_visibility": "MODERATE",
+      "visibility_km": 1.8
+    },
+    "data_label": "SIMULATED ENVIRONMENTAL CONDITIONS",
+    "do_not_present_as_live_nasa_measurements": true
+  },
+
+  "telemetry_profiles": {
+    "arrival": {
+      "environment": {
+        "temperature_celsius": -78,
+        "pressure_mbar": 6.1,
+        "wind_speed_m_s": 7.4,
+        "wind_direction": "NORTH_EAST",
+        "co2_percent": 95.1,
+        "dust_visibility": "MODERATE"
+      },
+      "cabin": {
+        "oxygen_percent": 98,
+        "air_filter_percent": 95,
+        "battery_percent": 91,
+        "cabin_pressure_kpa": 70.0,
+        "cabin_co2_percent": 0.09,
+        "cabin_temperature_celsius": 21.0,
+        "system_status": "GOOD"
+      },
+      "resources": {
+        "water_liters": 82,
+        "nutrient_percent": 89,
+        "botan_system_status": "OPERATIONAL"
+      }
+    },
+    "investigation_complete": {
+      "environment": {
+        "temperature_celsius": -79,
+        "pressure_mbar": 6.0,
+        "wind_speed_m_s": 8.1,
+        "wind_direction": "NORTH_EAST",
+        "co2_percent": 95.1,
+        "dust_visibility": "MODERATE"
+      },
+      "cabin": {
+        "oxygen_percent": 94,
+        "air_filter_percent": 93,
+        "battery_percent": 84,
+        "cabin_pressure_kpa": 70.0,
+        "cabin_co2_percent": 0.11,
+        "cabin_temperature_celsius": 20.6,
+        "system_status": "GOOD"
+      },
+      "resources": {
+        "water_liters": 79,
+        "nutrient_percent": 87,
+        "botan_system_status": "OPERATIONAL"
+      }
+    }
+  },
+
+  "mission_phases": [
+    "SOL_02_ARRIVAL",
+    "ROVER_ENTRY",
+    "PRE_DEPARTURE_INSPECTION",
+    "MISSION_LOG_REVIEW",
+    "BOTAN_SYSTEM_INSPECTION",
+    "ENVIRONMENT_INSPECTION",
+    "TOOL_INVENTORY_INSPECTION",
+    "DRIVE_TO_CHECKPOINT",
+    "SOIL_INVESTIGATION",
+    "RETURN_TO_ROVER",
+    "SAMPLE_RACK_TRANSFER",
+    "AUTOMATIC_SOIL_ANALYSIS",
+    "SCIENTIFIC_REPORT",
+    "DRIVE_TO_FINISH",
+    "SOL_02_COMPLETION"
+  ],
+
+  "tasks": [
+    {
+      "id": "SOL02_TASK_01",
+      "title": "Enter the Terrain Rover",
+      "description": "Locate the rover near the SOL 02 starting point and enter through the ladder.",
+      "type": "INTERACTION",
+      "target": "ladder",
+      "completion": {
+        "required_action": "PRESS_E",
+        "condition": "PLAYER_ENTERED_ROVER"
+      },
+      "next_task": "SOL02_TASK_02"
+    },
+    {
+      "id": "SOL02_TASK_02",
+      "title": "Review Previous Mission Records",
+      "description": "Open the Mission OS and inspect the saved SOL 01 mission logs, completed tasks, observations and resource records.",
+      "type": "MISSION_OS",
+      "target": "Main_Screen_Trigger",
+      "completion": {
+        "required_action": "REVIEW_SOL_01_LOGS",
+        "condition": "PREVIOUS_MISSION_RECORDS_REVIEWED"
+      },
+      "data_source": "SOL_01_PERSISTED_LOGS",
+      "next_task": "SOL02_TASK_03"
+    },
+    {
+      "id": "SOL02_TASK_03",
+      "title": "Inspect BOTAN Nutrition System",
+      "description": "Inspect the BOTAN nutrition system and verify its operational condition, nutrient availability and system status.",
+      "type": "SYSTEM_INSPECTION",
+      "target": "Water_and_nut_Trigger",
+      "completion": {
+        "required_action": "INSPECT_AND_CONFIRM",
+        "condition": "BOTAN_SYSTEM_CONFIRMED"
+      },
+      "next_task": "SOL02_TASK_04"
+    },
+    {
+      "id": "SOL02_TASK_04",
+      "title": "Inspect Night-time Environment",
+      "description": "Inspect the external Martian night environment, including temperature, surface pressure, wind speed, wind direction and visibility.",
+      "type": "ENVIRONMENT_INSPECTION",
+      "target": "Environment_Checking_Trigger",
+      "completion": {
+        "required_action": "INSPECT_ENVIRONMENT_AND_SAVE",
+        "condition": "ENVIRONMENT_REPORT_SAVED"
+      },
+      "next_task": "SOL02_TASK_05"
+    },
+    {
+      "id": "SOL02_TASK_05",
+      "title": "Check Scientific Tools",
+      "description": "Inspect the available soil sampling and environmental investigation tools and confirm the required equipment.",
+      "type": "TOOL_CHECKLIST",
+      "target": "Tool_Section_Trigger",
+      "completion": {
+        "required_action": "CHECK_REQUIRED_TOOLS_AND_CONFIRM",
+        "condition": "REQUIRED_TOOLS_CONFIRMED"
+      },
+      "next_task": "SOL02_TASK_06"
+    },
+    {
+      "id": "SOL02_TASK_06",
+      "title": "Drive to Soil Investigation Checkpoint",
+      "description": "Activate rover driving mode and follow the navigation beams to SOL 02 checkpoint.",
+      "type": "DRIVING",
+      "target": "Sol2_Checkpoint",
+      "completion": {
+        "required_action": "REACH_CHECKPOINT",
+        "condition": "ROVER_REACHED_CHECKPOINT"
+      },
+      "next_task": "SOL02_TASK_07"
+    },
+    {
+      "id": "SOL02_TASK_07",
+      "title": "Collect Martian Soil Sample",
+      "description": "Park the rover, exit wearing the EVA suit and travel to the soil investigation location. Collect a soil sample and record the soil observations.",
+      "type": "OUTDOOR_SCIENTIFIC_INVESTIGATION",
+      "target": "Sol2_Mission_investigation",
+      "completion": {
+        "required_action": "COLLECT_AND_SAVE_SOIL_SAMPLE",
+        "condition": "SOIL_SAMPLE_COLLECTED_AND_OBSERVATIONS_SAVED"
+      },
+      "requires": [
+        "SOL02_TASK_06"
+      ],
+      "next_task": "SOL02_TASK_08"
+    },
+    {
+      "id": "SOL02_TASK_08",
+      "title": "Return to the Terrain Rover",
+      "description": "Return to the rover with the collected soil sample and re-enter the vehicle.",
+      "type": "ROVER_ENTRY",
+      "target": "ladder",
+      "completion": {
+        "required_action": "PRESS_E",
+        "condition": "PLAYER_RETURNED_TO_ROVER_WITH_SAMPLE"
+      },
+      "next_task": "SOL02_TASK_09"
+    },
+    {
+      "id": "SOL02_TASK_09",
+      "title": "Place Soil Sample in the Tools Rack",
+      "description": "Place the collected soil sample in the designated rack and confirm the sample transfer.",
+      "type": "SAMPLE_TRANSFER",
+      "target": "Tool_Section_Trigger",
+      "completion": {
+        "required_action": "PLACE_SAMPLE_AND_CONFIRM",
+        "condition": "SAMPLE_RACK_TRANSFER_CONFIRMED"
+      },
+      "next_task": "SOL02_TASK_10"
+    },
+    {
+      "id": "SOL02_TASK_10",
+      "title": "Analyze Soil Sample in Mission OS",
+      "description": "Open the Mission OS and inspect the automatically generated soil analysis results, scientific images and sample suitability assessment.",
+      "type": "SCIENTIFIC_ANALYSIS",
+      "target": "Main_Screen_Trigger",
+      "completion": {
+        "required_action": "REVIEW_ANALYSIS_AND_SAVE_REPORT",
+        "condition": "SOIL_ANALYSIS_REVIEWED_AND_REPORT_SAVED"
+      },
+      "requires": [
+        "SOL02_TASK_09"
+      ],
+      "next_task": "SOL02_TASK_11"
+    },
+    {
+      "id": "SOL02_TASK_11",
+      "title": "Drive to SOL 02 Final Destination",
+      "description": "Follow the active navigation beams toward the SOL 02 finishing point.",
+      "type": "DRIVING",
+      "target": "Sol2_Finishing_Point",
+      "completion": {
+        "required_action": "REACH_FINISHING_POINT",
+        "condition": "ROVER_REACHED_FINISHING_POINT"
+      },
+      "requires": [
+        "SOL02_TASK_10"
+      ],
+      "next_task": "SOL02_TASK_12"
+    },
+    {
+      "id": "SOL02_TASK_12",
+      "title": "Complete SOL 02",
+      "description": "Exit the rover at the final destination and confirm mission completion.",
+      "type": "MISSION_COMPLETION",
+      "target": "Sol2_Finishing_Point",
+      "completion": {
+        "required_action": "EXIT_ROVER_AND_PRESS_E",
+        "condition": "SOL_02_ALL_TASKS_COMPLETED"
+      },
+      "next_mission": "SOL_03"
+    }
+  ],
+
+  "soil_investigation": {
+    "investigation_waypoint": "Sol2_Mission_investigation",
+    "interaction_key": "E",
+    "requires_eva_suit": true,
+    "requires_rover_parked": true,
+    "sample_collection": {
+      "sample_id": "SOL02_SOIL_SAMPLE_01",
+      "sample_type": "MARTIAN_SURFACE_SOIL",
+      "collection_status": "NOT_COLLECTED",
+      "fields": [
+        {
+          "id": "soil_color",
+          "label": "Soil Color",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Reddish Brown",
+            "Dark Brown",
+            "Rust Red",
+            "Grey Brown",
+            "Other"
+          ]
+        },
+        {
+          "id": "soil_texture",
+          "label": "Soil Texture",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Fine Dust",
+            "Granular",
+            "Sandy",
+            "Compact",
+            "Rocky",
+            "Mixed"
+          ]
+        },
+        {
+          "id": "soil_moisture_observation",
+          "label": "Observed Moisture Condition",
+          "type": "select",
+          "required": false,
+          "options": [
+            "Very Dry",
+            "Dry",
+            "Slightly Moist",
+            "Moist",
+            "Unknown"
+          ]
+        },
+        {
+          "id": "soil_temperature_celsius",
+          "label": "Sample Temperature",
+          "type": "number",
+          "unit": "°C",
+          "required": false
+        },
+        {
+          "id": "sample_depth_cm",
+          "label": "Collection Depth",
+          "type": "number",
+          "unit": "cm",
+          "required": false
+        },
+        {
+          "id": "visible_particles",
+          "label": "Visible Particles",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "researcher_notes",
+          "label": "Researcher Notes",
+          "type": "textarea",
+          "required": false
+        }
+      ],
+      "save_required": true,
+      "allow_optional_fields_to_be_empty": true
+    }
+  },
+
+  "sample_rack": {
+    "target": "Tool_Section_Trigger",
+    "sample_id": "SOL02_SOIL_SAMPLE_01",
+    "require_sample_collected": true,
+    "require_sample_placement": true,
+    "require_confirmation_button": true,
+    "on_confirmation": [
+      "MARK_SAMPLE_TRANSFERRED",
+      "START_AUTOMATIC_ANALYSIS",
+      "UNLOCK_SAMPLE_ANALYSIS_IN_MISSION_OS",
+      "UNLOCK_SAMPLE_IMAGES",
+      "UPDATE_SAMPLE_STATUS"
+    ]
+  },
+
+  "automatic_soil_analysis": {
+    "enabled": true,
+    "analysis_trigger": "SAMPLE_RACK_TRANSFER_CONFIRMED",
+    "analysis_mode": "PREDEFINED_SIMULATED_SCIENTIFIC_ANALYSIS",
+    "data_label": "SIMULATED SAMPLE ANALYSIS - GAME DATA",
+    "do_not_claim_laboratory_or_live_nasa_measurement": true,
+    "results": {
+      "sample_moisture_percent": 2.4,
+      "sample_temperature_celsius": -76.5,
+      "estimated_particle_size_mm": 0.35,
+      "soil_compaction": "LOW_TO_MODERATE",
+      "organic_material_indicator": "NOT_DETECTED_IN_SIMULATION",
+      "sample_condition": "DRY_MARTIAN_REGOLITH",
+      "sample_suitability": "POTENTIALLY_SUITABLE_FOR_CONTROLLED_FUTURE_TESTING",
+      "habitat_growing_suitability": {
+        "status": "REQUIRES_PROCESSING",
+        "suitable_for_unprocessed_direct_planting": false,
+        "suitable_for_future_experimental_soil_processing": true,
+        "recommended_habitat_count": 2,
+        "recommendation": "Use the sample for controlled soil-processing experiments in two designated habitat test units. Do not treat the raw sample as immediately suitable for growing plants."
+      }
+    },
+    "analysis_output": [
+      "sample_moisture_percent",
+      "sample_temperature_celsius",
+      "estimated_particle_size_mm",
+      "soil_compaction",
+      "organic_material_indicator",
+      "sample_condition",
+      "sample_suitability",
+      "habitat_growing_suitability"
+    ],
+    "require_manual_user_confirmation": false,
+    "require_user_to_write_researcher_report": true
+  },
+
+  "sample_images": {
+    "enabled": true,
+    "image_unlock_condition": "SAMPLE_RACK_TRANSFER_CONFIRMED",
+    "mission_os_visibility": true,
+    "main_mission_control_visibility": true,
+    "screen_rendering_visibility": true,
+    "display_only_after_sample_transfer": true,
+    "images": [
+      {
+        "id": "SOL02_SOIL_IMAGE_01",
+        "path": "REPLACE_WITH_ACTUAL_IMAGE_01_PATH",
+        "caption": "Collected Martian Soil Sample - Overview"
+      },
+      {
+        "id": "SOL02_SOIL_IMAGE_02",
+        "path": "REPLACE_WITH_ACTUAL_IMAGE_02_PATH",
+        "caption": "Soil Surface and Particle Details"
+      },
+      {
+        "id": "SOL02_SOIL_IMAGE_03",
+        "path": "REPLACE_WITH_ACTUAL_IMAGE_03_PATH",
+        "caption": "Soil Sample Investigation Reference"
+      }
+    ],
+    "fallback": "SHOW_IMAGE_PLACEHOLDER_IF_ASSET_UNAVAILABLE"
+  },
+
+  "mission_report": {
+    "enabled": true,
+    "target": "Main_Screen_Trigger",
+    "unlock_condition": "SAMPLE_RACK_TRANSFER_CONFIRMED",
+    "require_analysis_review": true,
+    "require_user_notes": true,
+    "fields": [
+      "environment_conditions",
+      "soil_color",
+      "soil_texture",
+      "soil_moisture_observation",
+      "sample_temperature_celsius",
+      "sample_depth_cm",
+      "automatic_analysis_results",
+      "sample_suitability",
+      "habitat_recommendation",
+      "researcher_notes"
+    ],
+    "save_to_mission_logs": true
+  },
+
+  "navigation": {
+    "navigation_file": "src/jsons/Instructions/sol-02-navigation.json",
+    "navigation_mode": "MISSION_STATE_DRIVEN",
+    "dynamic_beam": true,
+    "beam_origin": "CURRENT_ROVER_WORLD_POSITION",
+    "beam_updates_every_frame": true,
+    "show_destination_marker": true,
+    "show_directional_beam": true,
+    "only_one_active_destination": true,
+    "destinations": [
+      {
+        "id": "SOL02_DESTINATION_01",
+        "waypoint": "Sol2_Checkpoint",
+        "activate_after_task": "SOL02_TASK_05",
+        "deactivate_after_task": "SOL02_TASK_06"
+      },
+      {
+        "id": "SOL02_DESTINATION_02",
+        "waypoint": "Sol2_Finishing_Point",
+        "activate_after_task": "SOL02_TASK_10",
+        "deactivate_after_task": "SOL02_TASK_12"
+      }
+    ],
+    "checkpoint_investigation": {
+      "waypoint": "Sol2_Mission_investigation",
+      "activate_after_task": "SOL02_TASK_06",
+      "requires_checkpoint_reached": true,
+      "requires_rover_parked": true,
+      "requires_player_exit": true,
+      "beam_target_after_checkpoint": "Sol2_Mission_investigation"
+    },
+    "hide_beam_when_mission_completed": true,
+    "restore_active_destination_on_reload": true
+  },
+
+  "triggers": {
+    "rover_entry": "ladder",
+    "main_screen": "Main_Screen_Trigger",
+    "environment": "Environment_Checking_Trigger",
+    "botan_nutrition": "Water_and_nut_Trigger",
+    "tools": "Tool_Section_Trigger",
+    "driving": "Driving_Section_Trigger",
+    "outdoor_navigation": "Outdoor_Navigation_Trigger",
+    "checkpoint": "Sol2_Checkpoint",
+    "investigation": "Sol2_Mission_investigation",
+    "finishing": "Sol2_Finishing_Point"
+  },
+
+  "screen_rendering": {
+    "configuration_directory": "src/jsons/Screens/SOL_02",
+    "mission_os": {
+      "reuse_existing_sol_01_os": true,
+      "use_sol_02_data": true,
+      "show_sol_01_previous_logs": true,
+      "show_night_environment_report": true,
+      "show_soil_sample_report_after_transfer": true,
+      "show_automatic_analysis": true,
+      "show_sample_images_after_transfer": true,
+      "show_researcher_notes": true
+    },
+    "computer_screens": {
+      "Computer_Screen_01": "SOL02_MISSION_OVERVIEW",
+      "Computer_Screen_02": "SOL02_NIGHT_ENVIRONMENT",
+      "Computer_Screen_03": "SOL02_SOIL_ANALYSIS_STATUS"
+    },
+    "resource_screens": {
+      "O2_Screen": "OXYGEN_STATUS",
+      "Water_and_Nut_Screen": "WATER_AND_NUTRIENT_STATUS",
+      "Water_and_Nut_Screen_02(small)": "BOTAN_SYSTEM_STATUS"
+    },
+    "small_screens": {
+      "sm_Air_filter_screen": "AIR_FILTER_PERCENT",
+      "sm_battery_Screen": "BATTERY_PERCENT",
+      "sm_cabin_pressure": "CABIN_PRESSURE_KPA",
+      "sm_co2_screen": "CABIN_CO2_PERCENT",
+      "sm_environment_screen": "EXTERNAL_ENVIRONMENT_STATUS",
+      "sm_o2_Screen": "CABIN_OXYGEN_PERCENT",
+      "sm_status_screen": "SYSTEM_STATUS",
+      "sm_temperature_screen": "CABIN_TEMPERATURE_CELSIUS"
+    },
+    "screen_data_source": "CENTRAL_SOL_02_TELEMETRY_STATE",
+    "do_not_use_independent_hardcoded_screen_values": true
+  },
+
+  "tool_inventory": {
+    "required_items": [
+      {
+        "id": "soil_sampling_tool",
+        "label": "Soil Sampling Tool",
+        "required": true
+      },
+      {
+        "id": "soil_collection_container",
+        "label": "Soil Collection Container",
+        "required": true
+      },
+      {
+        "id": "environmental_sensor",
+        "label": "Environmental Sensor",
+        "required": true
+      },
+      {
+        "id": "sample_storage_container",
+        "label": "Sample Storage Container",
+        "required": true
+      }
+    ],
+    "confirmation_required": true
+  },
+
+  "mission_logs": {
+    "storage": "localStorage",
+    "namespace": "elysium_iv",
+    "key": "elysium_iv_sol_02_logs",
+    "log_types": [
+      "SOL_01_PREVIOUS_MISSION_REVIEW",
+      "SOL_02_BOTAN_SYSTEM_INSPECTION",
+      "SOL_02_NIGHT_ENVIRONMENT",
+      "SOL_02_TOOL_INVENTORY",
+      "SOL_02_SOIL_COLLECTION",
+      "SOL_02_SOIL_ANALYSIS",
+      "SOL_02_FINAL_REPORT"
+    ],
+    "log_fields": [
+      "log_id",
+      "mission_id",
+      "timestamp",
+      "location",
+      "log_type",
+      "telemetry_snapshot",
+      "soil_sample_id",
+      "user_entry",
+      "analysis_snapshot",
+      "saved"
+    ],
+    "preserve_user_entries": true
+  },
+
+  "interior_lighting": {
+    "preserve_existing_lights": true,
+    "use_existing_interior_light_objects": true
+  },
+
+  "exterior_lighting": {
+    "night_scene": true,
+    "require_rover_headlights": true,
+    "use_existing_vehicle_lights": true,
+    "preserve_existing_light_controls": true,
+    "navigation_beam_visible_at_night": true
+  },
+
+  "completion": {
+    "required_tasks": 12,
+    "require_all_tasks_completed": true,
+    "require_soil_sample_collected": true,
+    "require_sample_rack_confirmation": true,
+    "require_analysis_report_saved": true,
+    "require_finishing_point_interaction": true,
+    "finishing_point": "Sol2_Finishing_Point",
+    "interaction": "EXIT_ROVER_AND_PRESS_E",
+    "on_complete": [
+      "MARK_SOL_02_COMPLETED",
+      "SAVE_ALL_SOL_02_LOGS",
+      "SAVE_SOIL_SAMPLE_AND_ANALYSIS",
+      "HIDE_NAVIGATION_BEAM",
+      "UNLOCK_SOL_03",
+      "UPDATE_SOL_SELECTION_SCREEN"
+    ],
+    "next_mission": "SOL_03"
+  }
+}

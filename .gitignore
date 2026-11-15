@@ -1,0 +1,11 @@
+node_modules/
+dist/
+/tests
+public/assets/models.zip
+public/assets/shots
+public/assets/temp
+public/assets/exr
+public/assets/
+public/assets/assets.zip
+.next/
+.env

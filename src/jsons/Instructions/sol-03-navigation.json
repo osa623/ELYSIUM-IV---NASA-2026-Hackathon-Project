@@ -1,0 +1,203 @@
+{
+  "sol": 3,
+  "missionId": "ELYSIUM_IV_SOL_03",
+  "version": 3,
+  "instructions": [
+    {
+      "taskId": "SOL03_TASK_01",
+      "title": "Enter the Terrain Rover",
+      "message": "Climb into the rover through the ladder at the highland starting position.",
+      "guidance": "Approach the rover ladder and press E to enter the vehicle cabin.",
+      "destination": {
+        "name": "Rover Entrance Ladder",
+        "module": "Terrain",
+        "section": "Exterior"
+      },
+      "activity": "Approach the rover ladder and press E to enter the vehicle."
+    },
+    {
+      "taskId": "SOL03_TASK_02",
+      "title": "Initiate Highland Ascent Mission",
+      "message": "Access the main console and log the start of the final daytime ascent.",
+      "guidance": "Open Mission OS and record initial mission telemetry.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Approach Main_Screen_Trigger and press E to initiate the mission."
+    },
+    {
+      "taskId": "SOL03_TASK_03",
+      "title": "Check Highland Environmental Conditions",
+      "message": "Verify daytime highland atmospheric temperature, pressure and UV exposure.",
+      "guidance": "Approach the environmental console and save current readings.",
+      "destination": {
+        "name": "Environment Sensor Station",
+        "module": "Rover Interior",
+        "section": "Port Workstation"
+      },
+      "activity": "Approach Environment_Checking_Trigger and press E to record conditions."
+    },
+    {
+      "taskId": "SOL03_TASK_04",
+      "title": "Inspect Optical and LiDAR Tools",
+      "message": "Inspect camera optics, calibration targets and LiDAR survey tools.",
+      "guidance": "Verify all survey and imaging instruments are ready in the tool bay.",
+      "destination": {
+        "name": "Tool Storage Locker",
+        "module": "Rover Interior",
+        "section": "Starboard Bay"
+      },
+      "activity": "Approach Tool_Section_Trigger and press E to verify equipment."
+    },
+    {
+      "taskId": "SOL03_TASK_05",
+      "title": "Check Water and Nutrient Supplies",
+      "message": "Check remaining life-support water and nutrient levels (40% initial reserve).",
+      "guidance": "Examine the resource dispenser and document consumption rates.",
+      "destination": {
+        "name": "Resource Dispenser Console",
+        "module": "Rover Interior",
+        "section": "Aft Cabin"
+      },
+      "activity": "Approach Water_and_nut_Trigger and press E to inspect supplies."
+    },
+    {
+      "taskId": "SOL03_TASK_06",
+      "title": "Drive to Sol3_Checkpoint",
+      "message": "Follow the glowing navigation beam across the highland terrain toward the checkpoint.",
+      "guidance": "Navigate the vehicle along the ridgeline to Sol3_Checkpoint.",
+      "destination": {
+        "name": "Sol3_Checkpoint Outlook",
+        "module": "Terrain",
+        "section": "Highland Ridge"
+      },
+      "activity": "Drive the rover to within 50 meters of Sol3_Checkpoint."
+    },
+    {
+      "taskId": "SOL03_TASK_07",
+      "title": "EVA Mountain Photography",
+      "message": "Exit the rover, approach the checkpoint viewpoint, and capture 4 to 6 photographs.",
+      "guidance": "Walk to Sol3_Checkpoint, press E to activate the camera, and save at least 4 photos.",
+      "destination": {
+        "name": "Sol3_Checkpoint Outlook",
+        "module": "Terrain",
+        "section": "Exterior Viewpoint"
+      },
+      "activity": "Press E at Sol3_Checkpoint to open EVA camera and capture/save photos."
+    },
+    {
+      "taskId": "SOL03_TASK_08",
+      "title": "Return to Rover and Secure Photographs",
+      "message": "Return to the vehicle and secure your photographs in the onboard database.",
+      "guidance": "Approach the rover ladder and press E to climb inside.",
+      "destination": {
+        "name": "Rover Entrance Ladder",
+        "module": "Terrain",
+        "section": "Exterior"
+      },
+      "activity": "Approach the rover ladder and press E to re-enter."
+    },
+    {
+      "taskId": "SOL03_TASK_09",
+      "title": "Review Mountain Photo Gallery",
+      "message": "Open the Mission OS to review your captured mountain photographs.",
+      "guidance": "Examine the photo gallery tab in Mission OS to confirm image quality and quota.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Approach Main_Screen_Trigger and press E to review the photo gallery."
+    },
+    {
+      "taskId": "SOL03_TASK_10",
+      "title": "Compile and Save Research Log",
+      "message": "Document geological observations and photographic findings into the research log.",
+      "guidance": "Complete the research log in Mission OS with observations from the ascent.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Approach Main_Screen_Trigger and press E to save the research log."
+    },
+    {
+      "taskId": "SOL03_TASK_11",
+      "title": "Drive to SOL3_Finishing_Point",
+      "message": "Follow the final navigation beam to the mission culmination terminus.",
+      "guidance": "Drive the rover across the highland plateaus to the final destination.",
+      "destination": {
+        "name": "SOL3_Finishing_Point Terminus",
+        "module": "Terrain",
+        "section": "Final Plateau"
+      },
+      "activity": "Drive the rover to within 50 meters of SOL3_Finishing_Point."
+    },
+    {
+      "taskId": "SOL03_TASK_12",
+      "title": "Final Environmental Verification",
+      "message": "Perform final environmental telemetry check at the mission terminus.",
+      "guidance": "Record final external conditions and verify atmospheric stability.",
+      "destination": {
+        "name": "Environment Sensor Station",
+        "module": "Rover Interior",
+        "section": "Port Workstation"
+      },
+      "activity": "Approach Environment_Checking_Trigger and press E to complete final check."
+    },
+    {
+      "taskId": "SOL03_TASK_13",
+      "title": "Final Tool Inventory Check",
+      "message": "Confirm all tools and sensors are accounted for and secured.",
+      "guidance": "Perform final inventory count and confirm all equipment is locked down.",
+      "destination": {
+        "name": "Tool Storage Locker",
+        "module": "Rover Interior",
+        "section": "Starboard Bay"
+      },
+      "activity": "Approach Tool_Section_Trigger and press E to verify final tool status."
+    },
+    {
+      "taskId": "SOL03_TASK_14",
+      "title": "Final Water and Nutrient Level Check",
+      "message": "Record final life-support resource telemetry (36% final water level).",
+      "guidance": "Verify end-of-mission life-support reserves and document total consumption.",
+      "destination": {
+        "name": "Resource Dispenser Console",
+        "module": "Rover Interior",
+        "section": "Aft Cabin"
+      },
+      "activity": "Approach Water_and_nut_Trigger and press E to record final resource status."
+    },
+    {
+      "taskId": "SOL03_TASK_15",
+      "title": "Generate Consolidated Final Report",
+      "message": "Generate the comprehensive mission report spanning SOL 01, SOL 02, and SOL 03.",
+      "guidance": "Open Mission OS, review the consolidated dossier, and generate the final report.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Approach Main_Screen_Trigger and press E to compile the final report."
+    },
+    {
+      "taskId": "SOL03_TASK_16",
+      "title": "Complete Journey & Final Departure",
+      "message": "All mission objectives complete. Initiate final departure sequence.",
+      "guidance": "Open Mission OS and click COMPLETE JOURNEY to conclude the expedition.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Click COMPLETE JOURNEY in Mission OS to view the departure sequence."
+    }
+  ],
+  "completion": {
+    "title": "EXPEDITION COMPLETE",
+    "message": "All ELYSIUM IV mission objectives validated across SOL 01, SOL 02, and SOL 03."
+  }
+}

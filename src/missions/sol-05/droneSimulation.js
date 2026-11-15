@@ -1,0 +1,396 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SOL5_LIMITS = void 0;
+exports.droneControlsFromKeys = droneControlsFromKeys;
+exports.attachDroneCamera = attachDroneCamera;
+exports.createDroneCameraRig = createDroneCameraRig;
+exports.orientDroneCameraRig = orientDroneCameraRig;
+exports.detachDroneCamera = detachDroneCamera;
+exports.detachDroneCameraRig = detachDroneCameraRig;
+exports.createDroneFlightState = createDroneFlightState;
+exports.getSol5TakeoffPosition = getSol5TakeoffPosition;
+exports.isInsideSol5LandingTrigger = isInsideSol5LandingTrigger;
+exports.altitudeAgl = altitudeAgl;
+exports.stepDroneFlight = stepDroneFlight;
+exports.canLand = canLand;
+exports.resolveSol5EAction = resolveSol5EAction;
+exports.createSol5LandingBeacon = createSol5LandingBeacon;
+exports.setSol5LandingBeaconVisible = setSol5LandingBeaconVisible;
+exports.disposeSol5LandingBeacon = disposeSol5LandingBeacon;
+exports.createSol5TargetBeacon = createSol5TargetBeacon;
+exports.updateSol5TargetBeacon = updateSol5TargetBeacon;
+exports.setSol5TargetBeaconVisible = setSol5TargetBeaconVisible;
+exports.disposeSol5TargetBeacon = disposeSol5TargetBeacon;
+exports.createSol5Guidance = createSol5Guidance;
+exports.updateSol5Guidance = updateSol5Guidance;
+exports.disposeSol5Guidance = disposeSol5Guidance;
+const THREE = __importStar(require("three"));
+exports.SOL5_LIMITS = {
+    maxAltitudeAglM: 10,
+    minAltitudeAglM: 0.45,
+    operationalBoundaryM: 1500,
+    targetInspectionRadiusM: 12,
+    landingInteractionRadiusM: 4,
+    maxSpeedMps: 20,
+    speedBoostMultiplier: 1.6,
+    accelerationMps2: 5.5,
+    configuredBatteryPercent: 100,
+    simulatedBatteryDrainPercentPerMinute: 1.2,
+    landingRadiusM: 1.25,
+    landingMaxAglM: 1.25,
+    landingMaxSpeedMps: 0.4
+};
+/** Read the held Sol 5 keys once per simulation frame; camera look is deliberately excluded. */
+function droneControlsFromKeys(keys, bodyYaw) {
+    return {
+        forward: Number(keys.has("KeyW")) - Number(keys.has("KeyS")),
+        lateral: Number(keys.has("KeyD")) - Number(keys.has("KeyA")),
+        vertical: Number(keys.has("KeyE")) - Number(keys.has("KeyQ")),
+        bodyYaw,
+        speedBoost: keys.has("ShiftLeft") || keys.has("ShiftRight")
+    };
+}
+/** Place the first-person camera at the controlled object's origin so it inherits its world transform. */
+function attachDroneCamera(anchor, camera) {
+    anchor.add(camera);
+    camera.position.set(0, 0, 0);
+    camera.rotation.set(0, 0, 0);
+    camera.updateMatrix();
+}
+/** Create the five Sol 5 viewpoints as actual cameras mounted at the Drone_Object origin. */
+function createDroneCameraRig(anchor, primary) {
+    const makeCamera = (view) => {
+        const camera = view === "front" ? primary : new THREE.PerspectiveCamera(primary.fov, primary.aspect, primary.near, primary.far);
+        camera.name = `Drone_Object_Camera_${view.toUpperCase()}`;
+        camera.zoom = primary.zoom;
+        camera.filmGauge = primary.filmGauge;
+        camera.filmOffset = primary.filmOffset;
+        attachDroneCamera(anchor, camera);
+        return camera;
+    };
+    return { front: makeCamera("front"), rear: makeCamera("rear"), left: makeCamera("left"), right: makeCamera("right"), down: makeCamera("down") };
+}
+/** Orient each mounted view independently; none of these camera changes translate the drone. */
+function orientDroneCameraRig(rig, lookYaw, lookPitch) {
+    const offsets = {
+        front: { yaw: 0, pitch: 0 }, rear: { yaw: Math.PI, pitch: 0 }, left: { yaw: -Math.PI / 2, pitch: 0 },
+        right: { yaw: Math.PI / 2, pitch: 0 }, down: { yaw: 0, pitch: -Math.PI / 2 }
+    };
+    for (const view of Object.keys(offsets)) {
+        const offset = offsets[view];
+        const pitch = view === "down"
+            ? Math.max(-Math.PI / 2, offset.pitch + lookPitch)
+            : THREE.MathUtils.clamp(offset.pitch + lookPitch, -1.45, 1.45);
+        rig[view].position.set(0, 0, 0);
+        rig[view].rotation.set(pitch, offset.yaw + lookYaw, 0, "YXZ");
+        rig[view].updateMatrix();
+    }
+}
+/** Return the camera to the scene while preserving its world pose. */
+function detachDroneCamera(scene, camera) {
+    scene.attach(camera);
+}
+/** Restore the primary game camera and remove auxiliary Sol 5 views from the drone. */
+function detachDroneCameraRig(anchor, scene, rig, primary) {
+    for (const camera of Object.values(rig)) {
+        if (camera.parent !== anchor)
+            continue;
+        if (camera === primary)
+            detachDroneCamera(scene, camera);
+        else
+            camera.removeFromParent();
+    }
+}
+/** The 1.5 km square is centered on the midpoint of the verified takeoff and target scene references. */
+function createDroneFlightState(takeoff, target) {
+    const center = new THREE.Vector3((takeoff.x + target.x) / 2, 0, (takeoff.z + target.z) / 2);
+    return {
+        position: takeoff.clone().add(new THREE.Vector3(0, 1, 0)), velocity: new THREE.Vector3(),
+        takeoff: takeoff.clone(), target: target.clone(), boundaryCenter: center, cameraView: "front",
+        elapsedSeconds: 0, totalDistanceM: 0, maxAltitudeAglM: 1, batteryPercent: exports.SOL5_LIMITS.configuredBatteryPercent,
+        landed: false, warning: null
+    };
+}
+/** Resolve the existing landing pad transform without snapping it to a terrain raycast. */
+function getSol5TakeoffPosition(takeoffPoint) {
+    takeoffPoint.updateWorldMatrix(true, false);
+    const bounds = new THREE.Box3().setFromObject(takeoffPoint);
+    if (!bounds.isEmpty() && [bounds.min.x, bounds.min.y, bounds.min.z, bounds.max.x, bounds.max.y, bounds.max.z].every(Number.isFinite)) {
+        // Authored GLB mesh origins can be offset from the visible pad; use its transformed surface bounds.
+        return new THREE.Vector3((bounds.min.x + bounds.max.x) / 2, bounds.max.y, (bounds.min.z + bounds.max.z) / 2);
+    }
+    return takeoffPoint.getWorldPosition(new THREE.Vector3());
+}
+/** Test the drone against the transformed X/Z footprint and authored landing height of the existing pad. */
+function isInsideSol5LandingTrigger(position, trigger) {
+    trigger.updateWorldMatrix(true, true);
+    const bounds = new THREE.Box3().setFromObject(trigger);
+    if (bounds.isEmpty() || ![bounds.min.x, bounds.min.y, bounds.min.z, bounds.max.x, bounds.max.y, bounds.max.z].every(Number.isFinite))
+        return false;
+    const surface = getSol5TakeoffPosition(trigger);
+    return position.x >= bounds.min.x && position.x <= bounds.max.x &&
+        position.z >= bounds.min.z && position.z <= bounds.max.z &&
+        Math.abs(position.y - surface.y) <= exports.SOL5_LIMITS.landingMaxAglM;
+}
+function altitudeAgl(position, groundY) { return Math.max(0, position.y - groundY); }
+function stepDroneFlight(state, controls, dtSeconds, groundYAt, isBlocked = () => false) {
+    if (state.landed)
+        return state;
+    const dt = Math.max(0, Math.min(0.05, dtSeconds));
+    const before = state.position.clone();
+    state.elapsedSeconds += dt;
+    state.batteryPercent = Math.max(0, state.batteryPercent - dt * exports.SOL5_LIMITS.simulatedBatteryDrainPercentPerMinute / 60);
+    const yaw = controls.bodyYaw ?? 0;
+    const desired = new THREE.Vector3(-Math.sin(yaw) * controls.forward + Math.cos(yaw) * controls.lateral, controls.vertical, -Math.cos(yaw) * controls.forward - Math.sin(yaw) * controls.lateral);
+    if (desired.lengthSq() > 1)
+        desired.normalize();
+    desired.multiplyScalar(exports.SOL5_LIMITS.maxSpeedMps * (controls.speedBoost ? exports.SOL5_LIMITS.speedBoostMultiplier : 1));
+    state.velocity.lerp(desired, Math.min(1, exports.SOL5_LIMITS.accelerationMps2 * dt));
+    if (desired.lengthSq() === 0 && state.velocity.length() < 0.08)
+        state.velocity.set(0, 0, 0);
+    const next = state.position.clone().addScaledVector(state.velocity, dt);
+    const half = exports.SOL5_LIMITS.operationalBoundaryM / 2;
+    const minX = state.boundaryCenter.x - half, maxX = state.boundaryCenter.x + half;
+    const minZ = state.boundaryCenter.z - half, maxZ = state.boundaryCenter.z + half;
+    let boundaryHit = false;
+    if (next.x < minX || next.x > maxX) {
+        next.x = THREE.MathUtils.clamp(next.x, minX, maxX);
+        state.velocity.x = 0;
+        boundaryHit = true;
+    }
+    if (next.z < minZ || next.z > maxZ) {
+        next.z = THREE.MathUtils.clamp(next.z, minZ, maxZ);
+        state.velocity.z = 0;
+        boundaryHit = true;
+    }
+    const groundY = groundYAt(next.x, next.z);
+    if (groundY === null || !Number.isFinite(groundY)) {
+        state.velocity.set(0, 0, 0);
+        state.warning = "Terrain height unavailable; movement paused for safety.";
+        return state;
+    }
+    next.y = Math.max(groundY + exports.SOL5_LIMITS.minAltitudeAglM, Math.min(groundY + exports.SOL5_LIMITS.maxAltitudeAglM, next.y));
+    const blocked = isBlocked(state.position, next);
+    if (blocked) {
+        state.velocity.set(0, 0, 0);
+        state.warning = "Obstacle proximity: movement blocked.";
+    }
+    else {
+        state.position.copy(next);
+        state.totalDistanceM += state.position.distanceTo(before);
+        state.warning = boundaryHit ? "Operational boundary reached; turn back." : state.batteryPercent <= 15 ? "Critical simulated battery; return to takeoff point." : state.batteryPercent <= 30 ? "Low simulated battery." : null;
+    }
+    const agl = altitudeAgl(state.position, groundY);
+    state.maxAltitudeAglM = Math.max(state.maxAltitudeAglM, agl);
+    return state;
+}
+function canLand(state, groundY, targetInspected) {
+    const horizontalDistance = Math.hypot(state.position.x - state.takeoff.x, state.position.z - state.takeoff.z);
+    const agl = altitudeAgl(state.position, groundY);
+    if (!targetInspected)
+        return { ok: false, reason: "Inspect the selected target before returning to the landing point." };
+    if (horizontalDistance > exports.SOL5_LIMITS.landingRadiusM)
+        return { ok: false, reason: "Return directly above the designated Drone_TakeoffPoint." };
+    if (agl > exports.SOL5_LIMITS.landingMaxAglM)
+        return { ok: false, reason: "Descend to the landing surface before initiating landing." };
+    if (state.velocity.length() > exports.SOL5_LIMITS.landingMaxSpeedMps)
+        return { ok: false, reason: "Stabilize the drone before initiating landing." };
+    state.position.y = groundY;
+    state.velocity.set(0, 0, 0);
+    state.landed = true;
+    return { ok: true, reason: "Landing validated at Drone_TakeoffPoint." };
+}
+function resolveSol5EAction(position, target, takeoff, targetInspected) {
+    if (!targetInspected && position.distanceTo(target) <= exports.SOL5_LIMITS.targetInspectionRadiusM)
+        return "inspect_target";
+    if (targetInspected && Math.hypot(position.x - takeoff.x, position.z - takeoff.z) <= exports.SOL5_LIMITS.landingInteractionRadiusM)
+        return "confirm_landing";
+    return "ascend";
+}
+/** A scene-only, non-colliding beacon anchored once to the transformed landing-pad surface. */
+function createSol5LandingBeacon(scene, landingTrigger) {
+    const group = new THREE.Group();
+    group.name = "SOL5_Runtime_Landing_Beacon";
+    group.position.copy(getSol5TakeoffPosition(landingTrigger));
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.9, 64, 12, 1, true), new THREE.MeshStandardMaterial({ color: 0xff321d, emissive: 0xff210f, emissiveIntensity: 2.2, transparent: true, opacity: 0.76, depthTest: false, depthWrite: false, side: THREE.DoubleSide }));
+    beam.name = "SOL5_Landing_Beacon_Beam";
+    beam.position.y = 32;
+    beam.renderOrder = 1000;
+    group.add(beam);
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(2.2, 14, 10), new THREE.MeshStandardMaterial({ color: 0xff5a28, emissive: 0xff3c16, emissiveIntensity: 2.8, depthTest: false, depthWrite: false }));
+    crown.name = "SOL5_Landing_Beacon_Crown";
+    crown.position.y = 64;
+    crown.renderOrder = 1001;
+    group.add(crown);
+    const padRing = new THREE.Mesh(new THREE.RingGeometry(3.2, 4.2, 32), new THREE.MeshBasicMaterial({ color: 0xff5a28, transparent: true, opacity: 0.9, depthTest: false, depthWrite: false, side: THREE.DoubleSide }));
+    padRing.name = "SOL5_Landing_Beacon_Pad_Ring";
+    padRing.rotation.x = -Math.PI / 2;
+    padRing.position.y = 0.06;
+    padRing.renderOrder = 1002;
+    group.add(padRing);
+    const light = new THREE.PointLight(0xff3b20, 85, 220, 1.35);
+    light.name = "SOL5_Landing_Beacon_Light";
+    light.position.y = 64;
+    group.add(light);
+    group.visible = false;
+    scene.add(group);
+    return { group, beam, crown, padRing, light };
+}
+function setSol5LandingBeaconVisible(beacon, visible) {
+    if (beacon)
+        beacon.group.visible = visible;
+}
+function disposeSol5LandingBeacon(beacon) {
+    if (!beacon)
+        return;
+    beacon.group.removeFromParent();
+    beacon.beam.geometry.dispose();
+    beacon.beam.material.dispose();
+    beacon.crown.geometry.dispose();
+    beacon.crown.material.dispose();
+    beacon.padRing.geometry.dispose();
+    beacon.padRing.material.dispose();
+}
+/** A lightweight, non-colliding visual beacon positioned from the selected scene object's world bounds. */
+function createSol5TargetBeacon(scene, target) {
+    const height = 48;
+    const group = new THREE.Group();
+    group.name = "SOL5_Runtime_Selected_Target_Red_Beacon";
+    updateSol5TargetBeaconPosition(group, target);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 1.05, height, 10, 1, true), new THREE.MeshBasicMaterial({ color: 0xff1028, transparent: true, opacity: 0.78, depthTest: false, depthWrite: false, side: THREE.DoubleSide }));
+    beam.name = "SOL5_Selected_Target_Red_Beam";
+    beam.position.y = height / 2;
+    beam.renderOrder = 1000;
+    group.add(beam);
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(1.65, 12, 8), new THREE.MeshBasicMaterial({ color: 0xff3447, depthTest: false, depthWrite: false }));
+    crown.name = "SOL5_Selected_Target_Red_Beacon_Crown";
+    crown.position.y = height;
+    crown.renderOrder = 1001;
+    group.add(crown);
+    const light = new THREE.PointLight(0xff172c, 60, 180, 1.5);
+    light.position.copy(crown.position);
+    light.name = "SOL5_Selected_Target_Red_Beacon_Light";
+    group.add(light);
+    scene.add(group);
+    return { group, beam, crown, light };
+}
+function updateSol5TargetBeacon(beacon, target, visible) {
+    if (!beacon)
+        return;
+    updateSol5TargetBeaconPosition(beacon.group, target);
+    beacon.group.visible = visible;
+}
+function updateSol5TargetBeaconPosition(group, target) {
+    target.updateWorldMatrix(true, true);
+    const targetWorld = target.getWorldPosition(new THREE.Vector3());
+    const bounds = new THREE.Box3().setFromObject(target);
+    const baseY = bounds.isEmpty() ? targetWorld.y : Math.max(targetWorld.y, bounds.max.y) + 2;
+    group.position.set(targetWorld.x, baseY, targetWorld.z);
+}
+function setSol5TargetBeaconVisible(beacon, visible) {
+    if (beacon)
+        beacon.group.visible = visible;
+}
+function disposeSol5TargetBeacon(beacon) {
+    if (!beacon)
+        return;
+    beacon.group.removeFromParent();
+    beacon.beam.geometry.dispose();
+    beacon.beam.material.dispose();
+    beacon.crown.geometry.dispose();
+    beacon.crown.material.dispose();
+}
+/** Lightweight visual-only destination marker and two-point direct guidance line. */
+function createSol5Guidance(scene) {
+    const group = new THREE.Group();
+    group.name = "SOL5_Runtime_Target_Guidance";
+    const positions = new Float32Array(6);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const path = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x55dff4, transparent: true, opacity: 0.78, depthTest: true }));
+    path.name = "SOL5_Runtime_Direct_Guidance_Path";
+    path.frustumCulled = false;
+    group.add(path);
+    const targetMarker = new THREE.Group();
+    targetMarker.name = "SOL5_Runtime_Selected_Target_Highlight";
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(4, 0.12, 6, 36), new THREE.MeshBasicMaterial({ color: 0x42e5ff, transparent: true, opacity: 0.85, depthTest: true }));
+    ring.name = "SOL5_Target_Holographic_Perimeter";
+    ring.rotation.x = Math.PI / 2;
+    targetMarker.add(ring);
+    const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.42, 12, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0x35d9fa, transparent: true, opacity: 0.22, depthTest: true, side: THREE.DoubleSide }));
+    beacon.name = "SOL5_Target_Holographic_Beacon";
+    beacon.position.y = 6;
+    targetMarker.add(beacon);
+    const endpoint = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8), new THREE.MeshBasicMaterial({ color: 0xa4f7ff, transparent: true, opacity: 0.9, depthTest: true }));
+    endpoint.name = "SOL5_Target_Guidance_Endpoint";
+    endpoint.position.y = 12;
+    targetMarker.add(endpoint);
+    group.add(targetMarker);
+    scene.add(group);
+    return { group, path, targetMarker, pathPositions: positions, dronePosition: new THREE.Vector3(), targetPosition: new THREE.Vector3(), takeoffPosition: new THREE.Vector3() };
+}
+/** Updates reusable vertices from live world transforms; the guide never moves the drone. */
+function updateSol5Guidance(rig, drone, target, returnPoint, returning) {
+    drone.updateWorldMatrix(true, false);
+    target.updateWorldMatrix(true, false);
+    returnPoint.updateWorldMatrix(true, false);
+    const start = drone.getWorldPosition(rig.dronePosition);
+    const targetWorld = target.getWorldPosition(rig.targetPosition);
+    const destination = (returning ? returnPoint : target).getWorldPosition(rig.takeoffPosition);
+    rig.pathPositions[0] = start.x;
+    rig.pathPositions[1] = start.y;
+    rig.pathPositions[2] = start.z;
+    rig.pathPositions[3] = destination.x;
+    rig.pathPositions[4] = destination.y;
+    rig.pathPositions[5] = destination.z;
+    const attribute = rig.path.geometry.getAttribute("position");
+    attribute.needsUpdate = true;
+    rig.targetMarker.position.copy(targetWorld);
+    rig.targetMarker.visible = true;
+    rig.path.material.color.set(returning ? 0x8decb4 : 0x55dff4);
+}
+function disposeSol5Guidance(rig) {
+    rig.group.removeFromParent();
+    rig.group.traverse(object => {
+        const mesh = object;
+        if (mesh.geometry)
+            mesh.geometry.dispose();
+        if (Array.isArray(mesh.material))
+            mesh.material.forEach(material => material.dispose());
+        else if (mesh.material)
+            mesh.material.dispose();
+    });
+}

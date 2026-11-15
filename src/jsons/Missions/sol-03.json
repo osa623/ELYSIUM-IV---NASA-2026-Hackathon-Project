@@ -1,0 +1,220 @@
+{
+  "project": "ELYSIUM_IV",
+  "configuration_version": "1.0",
+  "mission_id": "SOL_03",
+  "mission_title": "SOL 03 - Highland Traverse & Mountain Photography",
+  "mission_type": "GEOLOGICAL_PHOTOGRAPHIC_SURVEY",
+  "mission_status": "LOCKED_UNTIL_SOL_02_COMPLETION",
+
+  "terrain": {
+    "asset": "ELYSIUM_IV_SOL_03_Terrain",
+    "time_of_day": "DAY",
+    "environment_profile": "MARS_DAY",
+    "starting_point": "SOL3_starting_Point",
+    "vehicle_spawn_reference": "Terrain_Rover",
+    "checkpoint": "Sol3_Checkpoint",
+    "finishing_point": "SOL3_Finishing_Point",
+    "environment_map": "/assets/exr/mars-dunes-day-light_2K_fc2ff73b-6eed-4836-92ed-f94e0d2d649f.exr"
+  },
+
+  "telemetry_profiles": {
+    "initial": {
+      "environment": {
+        "temperature_celsius": -52,
+        "pressure_mbar": 6.8,
+        "wind_speed_m_s": 5.2,
+        "wind_direction": "WEST_NORTH_WEST",
+        "co2_percent": 95.3,
+        "dust_visibility": "CLEAR_TO_MODERATE",
+        "visibility_km": 4.5
+      },
+      "cabin": {
+        "oxygen_percent": 96,
+        "air_filter_percent": 91,
+        "battery_percent": 88,
+        "cabin_pressure_kpa": 70.2,
+        "cabin_co2_percent": 0.08,
+        "cabin_temperature_celsius": 21.4,
+        "system_status": "OPTIMAL"
+      },
+      "resources": {
+        "water_percent": 40,
+        "water_liters": 40,
+        "nutrient_percent": 68,
+        "status": "OPERATIONAL"
+      }
+    },
+    "checkpoint_mountain": {
+      "environment": {
+        "temperature_celsius": -56,
+        "pressure_mbar": 6.6,
+        "wind_speed_m_s": 7.8,
+        "wind_direction": "NORTH_WEST",
+        "co2_percent": 95.3,
+        "dust_visibility": "CLEAR",
+        "visibility_km": 6.0
+      },
+      "cabin": {
+        "oxygen_percent": 94,
+        "air_filter_percent": 89,
+        "battery_percent": 79,
+        "cabin_pressure_kpa": 70.1,
+        "cabin_co2_percent": 0.10,
+        "cabin_temperature_celsius": 21.0,
+        "system_status": "OPTIMAL"
+      },
+      "resources": {
+        "water_percent": 38,
+        "water_liters": 38,
+        "nutrient_percent": 65,
+        "status": "OPERATIONAL"
+      }
+    },
+    "final_destination": {
+      "environment": {
+        "temperature_celsius": -58,
+        "pressure_mbar": 6.5,
+        "wind_speed_m_s": 8.4,
+        "wind_direction": "NORTH_WEST",
+        "co2_percent": 95.4,
+        "dust_visibility": "CLEAR",
+        "visibility_km": 5.8
+      },
+      "cabin": {
+        "oxygen_percent": 92,
+        "air_filter_percent": 87,
+        "battery_percent": 72,
+        "cabin_pressure_kpa": 70.0,
+        "cabin_co2_percent": 0.12,
+        "cabin_temperature_celsius": 20.8,
+        "system_status": "OPTIMAL"
+      },
+      "resources": {
+        "water_percent": 36,
+        "water_liters": 36,
+        "nutrient_percent": 62,
+        "status": "OPERATIONAL"
+      }
+    }
+  },
+
+  "tasks": [
+    {
+      "id": "SOL03_TASK_01",
+      "title": "Enter the Terrain Rover",
+      "description": "Locate the vehicle near the SOL 03 starting point and enter through the ladder.",
+      "type": "INTERACTION",
+      "target": "ladder"
+    },
+    {
+      "id": "SOL03_TASK_02",
+      "title": "Review Previous Mission Records",
+      "description": "Access Mission OS to review persisted SOL 01 and SOL 02 reconnaissance, resource baselines, and soil investigation logs.",
+      "type": "MISSION_OS",
+      "target": "Main_Screen_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_03",
+      "title": "Inspect Water and Nutrition Supplies",
+      "description": "Verify current life support reserves (SOL 03 reference water: 40%). Save inspection confirmation.",
+      "type": "RESOURCE_INSPECTION",
+      "target": "Water_and_nut_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_04",
+      "title": "Inspect Environment and Oxygen Systems",
+      "description": "Inspect external daytime Martian telemetry and cabin atmospheric life support. Save inspection record.",
+      "type": "ENVIRONMENT_INSPECTION",
+      "target": "Environment_Checking_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_05",
+      "title": "Inspect Mission Equipment & Tools",
+      "description": "Verify the EVA high-resolution imaging and geological equipment inventory.",
+      "type": "TOOL_CHECKLIST",
+      "target": "Tool_Section_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_06",
+      "title": "Drive to Highland Photography Checkpoint",
+      "description": "Follow the navigation beam to Sol3_Checkpoint atop the highland overlook.",
+      "type": "DRIVING",
+      "target": "Sol3_Checkpoint"
+    },
+    {
+      "id": "SOL03_TASK_07",
+      "title": "Capture Mountain Range Photographs",
+      "description": "Exit the rover in EVA suit and capture between 4 and 6 high-resolution mountain photographs with the EVA camera.",
+      "type": "EVA_PHOTOGRAPHY",
+      "target": "Sol3_Checkpoint"
+    },
+    {
+      "id": "SOL03_TASK_08",
+      "title": "Return to the Terrain Rover",
+      "description": "Return to the vehicle with the captured photographic dataset and re-enter via ladder.",
+      "type": "ROVER_ENTRY",
+      "target": "ladder"
+    },
+    {
+      "id": "SOL03_TASK_09",
+      "title": "Review Mountain Photographs in Mission OS",
+      "description": "Open Mission OS and review the photographic gallery and spatial telemetry captured at the overlook.",
+      "type": "MISSION_OS",
+      "target": "Main_Screen_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_10",
+      "title": "Submit Mountain Research Log",
+      "description": "Complete and save the field geological research log documenting mountain features and observations.",
+      "type": "RESEARCH_LOG",
+      "target": "Main_Screen_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_11",
+      "title": "Drive to Final Expedition Destination",
+      "description": "Navigate following the active beam to SOL3_Finishing_Point.",
+      "type": "DRIVING",
+      "target": "SOL3_Finishing_Point"
+    },
+    {
+      "id": "SOL03_TASK_12",
+      "title": "Final Mission Control Overview & Report",
+      "description": "Open Mission OS, review the complete consolidated 3-Sol mission history, and save the final expedition report.",
+      "type": "FINAL_REPORT",
+      "target": "Main_Screen_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_13",
+      "title": "Final Water and Nutrition Confirmation",
+      "description": "Perform the final life support resource assessment and save the confirmation record.",
+      "type": "FINAL_CHECK",
+      "target": "Water_and_nut_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_14",
+      "title": "Final Environmental Telemetry Confirmation",
+      "description": "Perform final environmental sensor checks and confirm surface telemetry.",
+      "type": "FINAL_CHECK",
+      "target": "Environment_Checking_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_15",
+      "title": "Final Equipment Inventory Audit",
+      "description": "Verify and lock the equipment inventory locker.",
+      "type": "FINAL_CHECK",
+      "target": "Tool_Section_Trigger"
+    },
+    {
+      "id": "SOL03_TASK_16",
+      "title": "Complete Journey",
+      "description": "Authorize final expedition sign-off in Mission OS and play the final expedition cinematic.",
+      "type": "EXPEDITION_COMPLETION",
+      "target": "Main_Screen_Trigger"
+    }
+  ],
+
+  "final_video": {
+    "path": "/assets/videos/finalVideo/finalVideo.mp4",
+    "trigger": "COMPLETE_JOURNEY_BUTTON"
+  }
+}
