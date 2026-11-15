@@ -32,11 +32,27 @@ export function EVACameraModal({
   const [feedback, setFeedback] = useState<string | null>(null);
   const [heading, setHeading] = useState(headingDegrees);
   const [pitch, setPitch] = useState(pitchDegrees);
+  const completionHandled = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    void mgr.refreshPhotos().then(saved => {
+      if (!active) return;
+      setPhotos(saved);
+      if (saved.length >= 4 && !completionHandled.current) {
+        completionHandled.current = true;
+        mgr.onExitCameraCheckPhotos(saved.length);
+        onSaveSuccess?.();
+        onClose(saved.length);
+      }
+    });
+    return () => { active = false; };
+  }, [mgr, onClose, onSaveSuccess]);
 
   // Capture screenshot from active WebGL canvas
   const captureScreenshot = useCallback(() => {
-    if (photos.length >= 6) {
-      setFeedback("Maximum limit of 6 photographs reached.");
+    if (photos.length >= 4) {
+      setFeedback("Maximum limit of 4 photographs reached.");
       return;
     }
     const canvas = getRendererCanvas?.() || getCanvas?.() || (document.querySelector("canvas") as HTMLCanvasElement | null);
@@ -56,8 +72,8 @@ export function EVACameraModal({
 
   const handleSavePreview = async () => {
     if (!currentPreview) return;
-    if (photos.length >= 6) {
-      setFeedback("Maximum limit of 6 photographs reached.");
+    if (photos.length >= 4) {
+      setFeedback("Maximum limit of 4 photographs reached.");
       return;
     }
 
@@ -78,9 +94,13 @@ export function EVACameraModal({
     setCurrentPreview(null);
 
     if (updated.length >= 4) {
-      setFeedback(`Photograph saved! (${updated.length}/6) — Minimum quota of 4 satisfied.`);
+      completionHandled.current = true;
+      mgr.onExitCameraCheckPhotos(updated.length);
+      onSaveSuccess?.();
+      onClose(updated.length);
+      setFeedback(`Photograph saved! (${updated.length}/4) — Photo task complete.`);
     } else {
-      setFeedback(`Photograph saved! (${updated.length}/6) — ${4 - updated.length} more required.`);
+      setFeedback(`Photograph saved! (${updated.length}/4) — ${4 - updated.length} more required.`);
     }
   };
 
@@ -146,7 +166,7 @@ export function EVACameraModal({
             <span>BEARING: <strong className="text-[#38d4f0]">{Math.round(heading)}° NW</strong></span>
             <span>ELEVATION: <strong className="text-white">+425.7m</strong></span>
             <span>QUOTA: <strong className={photos.length >= 4 ? "text-[#52d9a3]" : "text-[#f0a04b]"}>
-              {photos.length} / 4 MIN (MAX 6)
+              {photos.length} / 4
             </strong></span>
           </div>
         </div>
@@ -226,10 +246,10 @@ export function EVACameraModal({
         {/* Saved Photos Thumbnails */}
         <div className="flex items-center gap-3 rounded-lg border border-[#1f3f52] bg-[#07131ed0] p-3 backdrop-blur-md">
           <div className="text-[10px] font-mono text-[#8faec0] pr-2 border-r border-[#1f3f52]">
-            SAVED<br />ARCHIVE<br />({photos.length}/6)
+            SAVED<br />ARCHIVE<br />({photos.length}/4)
           </div>
           <div className="flex gap-2">
-            {[0, 1, 2, 3, 4, 5].map(idx => {
+            {[0, 1, 2, 3].map(idx => {
               const photo = photos[idx];
               return (
                 <div
@@ -267,9 +287,9 @@ export function EVACameraModal({
         <div className="flex items-center gap-3">
           <button
             onClick={captureScreenshot}
-            disabled={photos.length >= 6}
+            disabled={photos.length >= 4}
             className={`flex items-center gap-2.5 rounded-xl border px-6 py-3.5 text-sm font-bold font-mono transition-all ${
-              photos.length >= 6
+              photos.length >= 4
                 ? "border-[#405660] bg-[#0d161d] text-[#607580] cursor-not-allowed"
                 : "border-[#38d4f0] bg-[#12364a] text-[#38d4f0] hover:bg-[#38d4f0] hover:text-[#07131e] shadow-[0_0_20px_rgba(56,212,240,0.3)]"
             }`}

@@ -17,20 +17,32 @@
     },
     {
       "taskId": "SOL02_TASK_02",
-      "title": "Initiate Night-time Soil Investigation",
-      "message": "Access the Mission OS main computer and initiate the SOL 02 mission log.",
+      "title": "Review Previous Mission Records",
+      "message": "Review saved SOL 01 mission logs, completed tasks, observations and resource records.",
       "guidance": "Access the central command console inside the rover cabin and submit the initial mission record.",
       "destination": {
         "name": "Main Computer Console",
         "module": "Rover Interior",
         "section": "Cabin Forward"
       },
-      "activity": "Approach Main_Screen_Trigger and press E to open the Mission Operating System."
+      "activity": "Approach Main_Screen_Trigger and review the previous mission records."
     },
     {
       "taskId": "SOL02_TASK_03",
-      "title": "Check Night-time Environmental Conditions",
-      "message": "Record night-time temperature, pressure, wind and atmospheric CO2 readings.",
+      "title": "Inspect BOTAN Nutrition System",
+      "message": "Verify BOTAN water and nutrient reserves and confirm the system is operational.",
+      "guidance": "Approach the BOTAN resource station and record its status.",
+      "destination": {
+        "name": "BOTAN Nutrition System",
+        "module": "Rover Interior",
+        "section": "Resource Station"
+      },
+      "activity": "Approach Water_and_nut_Trigger and press E to inspect BOTAN."
+    },
+    {
+      "taskId": "SOL02_TASK_04",
+      "title": "Inspect Daytime Environment",
+      "message": "Record daytime temperature, pressure, wind and atmospheric CO2 readings.",
       "guidance": "Approach the environment sensor display station and record external telemetry.",
       "destination": {
         "name": "Environment Sensor Station",
@@ -40,34 +52,22 @@
       "activity": "Approach Environment_Checking_Trigger and press E to record environmental conditions."
     },
     {
-      "taskId": "SOL02_TASK_04",
-      "title": "Inspect Soil Sampling Tools",
-      "message": "Verify the soil scoop, containment canisters, and seal integrity.",
-      "guidance": "Inspect the tool rack to ensure all sampling instruments are calibrated and ready.",
+      "taskId": "SOL02_TASK_05",
+      "title": "Check Scientific Tools",
+      "message": "Inspect the available soil sampling and environmental investigation tools.",
+      "guidance": "Inspect the tool rack and confirm the required sampling equipment.",
       "destination": {
         "name": "Tool Storage Locker",
         "module": "Rover Interior",
         "section": "Starboard Bay"
       },
-      "activity": "Approach Tool_Section_Trigger and press E to inspect and confirm sampling tools."
-    },
-    {
-      "taskId": "SOL02_TASK_05",
-      "title": "Check Water and Nutrient Supplies",
-      "message": "Verify remaining water and nutrient reserve levels before rover departure.",
-      "guidance": "Examine the life-support resource dispenser and record reserve telemetry.",
-      "destination": {
-        "name": "Resource Dispenser Console",
-        "module": "Rover Interior",
-        "section": "Aft Cabin"
-      },
-      "activity": "Approach Water_and_nut_Trigger and press E to record resource reserves."
+      "activity": "Approach Tool_Section_Trigger and press E to inspect and confirm scientific tools."
     },
     {
       "taskId": "SOL02_TASK_06",
       "title": "Drive to Sol2_Checkpoint",
-      "message": "Follow the navigation beam across the night-time terrain to the checkpoint.",
-      "guidance": "Drive the rover toward Sol2_Checkpoint. Keep headlights on for maximum surface visibility.",
+      "message": "Follow the navigation beam across the daytime terrain to the checkpoint.",
+      "guidance": "Drive the rover toward Sol2_Checkpoint. Use the navigation beam to track the route across the sunlit surface.",
       "destination": {
         "name": "Sol2_Checkpoint Navigation Marker",
         "module": "Terrain",
@@ -89,9 +89,9 @@
     },
     {
       "taskId": "SOL02_TASK_08",
-      "title": "Return to Rover and Store Soil Sample",
-      "message": "Return to the rover and secure the soil sample in the onboard specimen bay.",
-      "guidance": "Climb into the rover through the ladder to transfer and secure your sample.",
+      "title": "Return to the Terrain Rover",
+      "message": "Return to the rover with the collected sample and re-enter the vehicle.",
+      "guidance": "Climb into the rover through the ladder to continue sample processing.",
       "destination": {
         "name": "Rover Entrance Ladder",
         "module": "Terrain",
@@ -101,33 +101,33 @@
     },
     {
       "taskId": "SOL02_TASK_09",
-      "title": "Run Automated Soil Sample Analysis",
-      "message": "Initiate automated spectroscopic and mineralogical analysis via Mission OS.",
-      "guidance": "Open the Mission OS to begin automated sample analysis and monitor results.",
+      "title": "Place Soil Sample in the Tools Rack",
+      "message": "Place the collected sample in the designated rack and confirm the transfer.",
+      "guidance": "Use the tools rack to secure the sample and start its automated analysis.",
       "destination": {
         "name": "Main Computer Console",
         "module": "Rover Interior",
         "section": "Cabin Forward"
       },
-      "activity": "Approach Main_Screen_Trigger and press E to run automated analysis."
+      "activity": "Approach Tool_Section_Trigger and press E to transfer the sample."
     },
     {
       "taskId": "SOL02_TASK_10",
-      "title": "Compile and Save Scientific Report",
-      "message": "Review the scientific sample findings and save the final Sol 02 research report.",
-      "guidance": "Submit your scientific report with mineral composition and moisture assessment.",
+      "title": "Analyze Soil Sample in Mission OS",
+      "message": "Review the generated soil analysis and save the scientific report.",
+      "guidance": "Open Mission OS to review sample results and submit the report.",
       "destination": {
         "name": "Main Computer Console",
         "module": "Rover Interior",
         "section": "Cabin Forward"
       },
-      "activity": "Approach Main_Screen_Trigger and press E to save the scientific report."
+      "activity": "Approach Main_Screen_Trigger and review analysis results and save the report."
     },
     {
       "taskId": "SOL02_TASK_11",
       "title": "Drive to Sol2_Finishing_Point",
       "message": "Follow the navigation beam to the mission culmination terminus.",
-      "guidance": "Drive the rover across the dark plain to Sol2_Finishing_Point.",
+      "guidance": "Drive the rover across the sunlit plain to Sol2_Finishing_Point.",
       "destination": {
         "name": "Sol2_Finishing_Point Terminus",
         "module": "Terrain",

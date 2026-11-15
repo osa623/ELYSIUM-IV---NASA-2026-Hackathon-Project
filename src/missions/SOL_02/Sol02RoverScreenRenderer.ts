@@ -51,7 +51,9 @@ export class Sol02RoverScreenRenderer {
     }
     if (!screenObj || !screenObj.isMesh) return;
 
-    reprojectPlanarUVs(screenObj.geometry);
+    reprojectPlanarUVs(screenObj.geometry, name === "Computer_Screen_03"
+      ? { uAxis: "x", vAxis: "z" }
+      : { uAxis: "x", vAxis: "y" });
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -67,9 +69,11 @@ export class Sol02RoverScreenRenderer {
 
     const material = new THREE.MeshStandardMaterial({
       map: texture,
+      side: THREE.DoubleSide,
+      toneMapped: false,
       emissive: new THREE.Color(0xffffff),
       emissiveMap: texture,
-      emissiveIntensity: 0.95,
+      emissiveIntensity: 1.2,
       roughness: 0.18,
       metalness: 0.1
     });
@@ -186,7 +190,7 @@ export class Sol02RoverScreenRenderer {
 
     ctx.fillStyle = "#8daec0";
     ctx.font = "12px monospace";
-    ctx.fillText("SOL 02 — NOCTURNAL SOIL INVESTIGATION", 16, 62);
+    ctx.fillText("SOL 02 — DAYTIME SOIL INVESTIGATION", 16, 62);
 
     ctx.fillStyle = "#f0a04b";
     ctx.font = "bold 18px monospace";
@@ -207,7 +211,7 @@ export class Sol02RoverScreenRenderer {
     ctx.strokeRect(16, 192, 240, 36);
     ctx.fillStyle = "#52d9a3";
     ctx.font = "bold 14px monospace";
-    ctx.fillText(manager.imagesUnlocked ? "ANALYSIS: UNLOCKED" : "NOCTURNAL ACTIVE", 28, 215);
+    ctx.fillText(manager.imagesUnlocked ? "ANALYSIS: UNLOCKED" : "DAYTIME ACTIVE", 28, 215);
   }
 
   // --- Screen 2: Environmental Telemetry ---
@@ -217,7 +221,7 @@ export class Sol02RoverScreenRenderer {
 
     ctx.fillStyle = "#f0a04b";
     ctx.font = "bold 16px monospace";
-    ctx.fillText("NIGHT-TIME MARTIAN TELEMETRY", 16, 26);
+    ctx.fillText("DAYTIME MARTIAN TELEMETRY", 16, 26);
 
     // Left Column
     ctx.fillStyle = "#9ec2d6";
@@ -253,7 +257,7 @@ export class Sol02RoverScreenRenderer {
 
     ctx.fillStyle = "#6590a8";
     ctx.font = "10px monospace";
-    ctx.fillText("NOCTURNAL THERMAL INERTIA", 270, 74);
+    ctx.fillText("DAYTIME THERMAL INERTIA", 270, 74);
 
     ctx.beginPath();
     ctx.strokeStyle = "#f0a04b";
@@ -269,7 +273,7 @@ export class Sol02RoverScreenRenderer {
 
     ctx.fillStyle = "#52d9a3";
     ctx.font = "10px monospace";
-    ctx.fillText("NOCTURNAL DUST: MODERATE", 270, 218);
+    ctx.fillText("DAYTIME DUST: MODERATE", 270, 218);
   }
 
   // --- Screen 3: System & Sample Status ---
@@ -299,7 +303,7 @@ export class Sol02RoverScreenRenderer {
         { label: "ROVER INGRESS", done: manager.isTaskComplete("SOL02_TASK_01") },
         { label: "SOL 01 LOG AUDIT", done: manager.isTaskComplete("SOL02_TASK_02") },
         { label: "BOTAN SYSTEM VERIFIED", done: manager.isTaskComplete("SOL02_TASK_03") },
-        { label: "NIGHT SENSORS LOGGED", done: manager.isTaskComplete("SOL02_TASK_04") },
+        { label: "DAYTIME SENSORS LOGGED", done: manager.isTaskComplete("SOL02_TASK_04") },
         { label: "TOOLS CHECKLIST", done: manager.isTaskComplete("SOL02_TASK_05") },
         { label: "CHECKPOINT REACHED", done: manager.isTaskComplete("SOL02_TASK_06") },
         { label: "SOIL SAMPLE COLLECTED", done: manager.isTaskComplete("SOL02_TASK_07") },

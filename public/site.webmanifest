@@ -1,13 +1,10 @@
 {
-  "name": "PHOBOSIA",
-  "short_name": "PHOBOSIA",
-  "icons": [
-    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/android-chrome-192x192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/android-chrome-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ],
-  "theme_color": "#05090d",
+  "name": "ELYSIUM IV",
+  "short_name": "ELYSIUM IV",
+  "description": "Three-Sol Mars rover exploration",
+  "start_url": "/play",
+  "display": "standalone",
   "background_color": "#05090d",
-  "display": "standalone"
+  "theme_color": "#05090d",
+  "icons": [{ "src": "/assets/images/elysium_iv_official_logo_4k_transparent.png", "sizes": "512x512", "type": "image/png" }]
 }

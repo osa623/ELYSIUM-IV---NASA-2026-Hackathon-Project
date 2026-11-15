@@ -120,7 +120,7 @@ function TriggerScreenView({ record, location, dataMode, sol, mission, missionSt
     {showSol3TargetGallery && <section className="[border-top:1px_solid_rgba(85,_205,_232,_0.2)] [padding-top:12px]">
       <header className="[margin-bottom:12px]"><div className="[color:#55cde8] [font-size:10px] [letter-spacing:0.14em]">SOL 3 · TARGET IMAGE CATALOGUE</div><p className="[margin:4px_0_0] [color:#9fb4c0] [font-size:11px]">Project imagery for comparison. The source does not include acquisition, instrument, or georeferencing metadata; these are not verified NASA observations.</p></header>
       <div className="[display:flex] [flex-direction:column] [gap:14px]">
-        {sol03Mission.targetCatalogue.map((target, index) => {
+        {((sol03Mission as any).targetCatalogue as any[] || []).map((target: any, index: number) => {
           const targetLabel = `Target ${String.fromCharCode(65 + index)} · ${target.targetNumber}`;
           const imageTypes: Array<{ key: "grayscale" | "color" | "thermal"; label: string }> = [
             { key: "grayscale", label: "Black-and-white satellite image" },

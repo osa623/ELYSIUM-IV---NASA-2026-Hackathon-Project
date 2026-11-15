@@ -10,7 +10,7 @@
       "profiles": {
         "arrival": {
           "title": "SOL 02 MISSION OVERVIEW",
-          "mission": "NIGHT SOIL INVESTIGATION",
+          "mission": "DAYTIME SOIL INVESTIGATION",
           "status": "INITIALIZING",
           "location": "SOL 02 STAGING AREA",
           "next_destination": "Sol2_Checkpoint"
@@ -26,12 +26,12 @@
     },
     "Computer_Screen_02": {
       "id": "Computer_Screen_02",
-      "type": "NIGHT_ENVIRONMENTAL_TELEMETRY",
+      "type": "DAYTIME_ENVIRONMENTAL_TELEMETRY",
       "width": 512,
       "height": 256,
       "profiles": {
         "arrival": {
-          "title": "NIGHT-TIME MARTIAN ENVIRONMENT",
+          "title": "DAYTIME MARTIAN ENVIRONMENT",
           "temperature_celsius": -78,
           "surface_pressure_mbar": 6.1,
           "wind_speed_m_s": 7.4,
@@ -40,7 +40,7 @@
           "visibility_km": 1.8
         },
         "investigation_complete": {
-          "title": "NIGHT-TIME MARTIAN ENVIRONMENT",
+          "title": "DAYTIME MARTIAN ENVIRONMENT",
           "temperature_celsius": -79,
           "surface_pressure_mbar": 6.0,
           "wind_speed_m_s": 8.1,

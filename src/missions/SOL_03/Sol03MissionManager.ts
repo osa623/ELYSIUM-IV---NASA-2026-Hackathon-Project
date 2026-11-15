@@ -286,7 +286,7 @@ export class Sol03MissionManager {
       sol_number: 3,
       location: "TERRAIN ROVER CABIN · MAIN OS CONSOLE",
       telemetry_snapshot: this.getTelemetry(),
-      user_entry: "SOL 01 surface reconnaissance and SOL 02 night soil spectrometry records audited. Baseline readiness verified for highland mountain survey.",
+      user_entry: "SOL 01 surface reconnaissance and SOL 02 daytime soil spectrometry records audited. Baseline readiness verified for highland mountain survey.",
       saved: true
     };
     this.missionLogs.push(log);
@@ -522,11 +522,12 @@ export class Sol03MissionManager {
 
   /** Task 16: Complete Journey button clicked */
   public completeJourney(): boolean {
+    if (this.sol03Completed || this.expeditionCompleted) return false;
     if (!this.canCompleteJourney()) {
       console.warn("[Sol03Mission] Complete Journey prerequisites not met.");
       return false;
     }
-    this.completeTask("SOL03_TASK_16");
+    if (!this.completeTask("SOL03_TASK_16")) return false;
     this.sol03Completed = true;
     this.expeditionCompleted = true;
     this.showFinalVideo = true;
@@ -585,5 +586,26 @@ export class Sol03MissionManager {
       console.warn("[Sol03Mission] Could not load from localStorage", e);
     }
     return false;
+  }
+
+  public resetMission(): void {
+    this.currentTaskId = "SOL03_TASK_01";
+    this.completedTaskIds.clear();
+    this.telemetryProfile = "initial";
+    this.missionLogs = [];
+    this.toolChecklist = DEFAULT_SOL03_TOOLS.map(item => ({ ...item }));
+    this.waterObservation = null;
+    this.environmentObservation = null;
+    this.researchLog = null;
+    this.finalReport = null;
+    this.finalWaterInspection = null;
+    this.finalEnvInspection = null;
+    this.finalToolInspection = false;
+    this.sol03Completed = false;
+    this.expeditionCompleted = false;
+    this.showFinalVideo = false;
+    this.cachedPhotos = [];
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* Storage can be unavailable. */ }
+    this.notify();
   }
 }

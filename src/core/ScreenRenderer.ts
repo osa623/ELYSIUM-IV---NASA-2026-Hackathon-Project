@@ -369,7 +369,7 @@ export class ScreenRenderer {
         break;
     }
 
-    if (state.currentDay === 8 && state.sol8?.started) {
+    if ((state.currentDay as number) === 8 && state.sol8?.started) {
       const warnings = [
         state.sol8.powerFailureActive ? { color: "#ff633e", title: "CRITICAL POWER FAILURE", body: `RESERVE POWER ${state.sol8.reservePowerPercent}% · GAMEPLAY SIMULATION` } : null,
         state.sol8.communicationFailureActive ? { color: "#e7aa45", title: "COMMUNICATION SYSTEM OFFLINE", body: "EXTERNAL COMMUNICATION UNAVAILABLE" } : null
@@ -408,7 +408,7 @@ export class ScreenRenderer {
     ctx.strokeStyle = "#477891";
     ctx.strokeRect(28, 255, w - 56, 140);
 
-    const mission = DAYS_CONFIG[state.currentDay];
+    const mission = DAYS_CONFIG[state.currentDay as MissionDayNumber] ?? DAYS_CONFIG[1];
     ctx.fillStyle = "#e88747";
     ctx.font = "bold 16px monospace";
     ctx.fillText(`EXPEDITION LOG · SOL 0${state.currentDay}: ${mission.title.toUpperCase()}`, 44, 290);
@@ -419,7 +419,7 @@ export class ScreenRenderer {
 
     ctx.fillStyle = state.objectiveState === "completed" ? "#44d788" : "#f1b344";
     ctx.font = "bold 15px monospace";
-    const taskProgress = getMissionTaskProgressFor(state.currentDay, state.completedStepIds);
+    const taskProgress = getMissionTaskProgressFor(state.currentDay as MissionDayNumber, state.completedStepIds);
     const statusText =
       state.objectiveState === "completed"
         ? "OBJECTIVE VALIDATED — READY FOR REST PERIOD"
@@ -519,6 +519,35 @@ export class ScreenRenderer {
 
     ctx.fillStyle = "#091722";
     ctx.fillRect(mapX, mapY, mapW, mapH);
+    // Deterministic surface grain gives the terrain display a visible ground
+    // texture without loading another image or adding a runtime dependency.
+    let seed = 7319 + state.currentDay * 97;
+    const random = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+    for (let y = 0; y < mapH; y += 9) {
+      for (let x = 0; x < mapW; x += 9) {
+        const tone = 35 + Math.floor(random() * 35);
+        ctx.fillStyle = `rgba(${tone + 35},${tone + 8},${tone},${0.12 + random() * 0.2})`;
+        ctx.fillRect(mapX + x, mapY + y, 8, 8);
+      }
+    }
+    // Low, irregular contour traces suggest relief and keep the waypoints legible.
+    ctx.save();
+    ctx.strokeStyle = "rgba(206,132,86,0.26)";
+    ctx.lineWidth = 1.2;
+    for (let row = 0; row < 7; row++) {
+      const baseY = mapY + 18 + row * (mapH - 36) / 6;
+      ctx.beginPath();
+      for (let x = 0; x <= mapW; x += 12) {
+        const y = baseY + Math.sin((x + row * 31) / 47) * 8 + Math.sin((x - row * 19) / 19) * 3;
+        if (x === 0) ctx.moveTo(mapX + x, y);
+        else ctx.lineTo(mapX + x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
     ctx.strokeStyle = "#385d73";
     ctx.strokeRect(mapX, mapY, mapW, mapH);
 
@@ -657,11 +686,11 @@ export class ScreenRenderer {
     ctx.fillText("LAUNCH ANCHOR: [470.0, 1.0, -58.7] · MARS TERRAIN", 28, 200);
 
     const hasSurvey = state.droneSurvey !== null;
-    ctx.fillStyle = hasSurvey ? "#44d788" : state.currentDay === 9 ? "#e88747" : "#8ba8b5";
+    ctx.fillStyle = hasSurvey ? "#44d788" : (state.currentDay as number) === 9 ? "#e88747" : "#8ba8b5";
     ctx.font = "bold 15px monospace";
     const statusText = hasSurvey
       ? "SURVEY STATUS: SOL 09 REMOTE SURVEY ARCHIVED"
-      : state.currentDay === 9
+      : (state.currentDay as number) === 9
       ? "SURVEY STATUS: READY FOR FPV SORTIE · ACCESS CONSOLE [E]"
       : "SURVEY STATUS: STANDBY AT LAUNCH DOCK";
     ctx.fillText(statusText, 28, 245);
@@ -764,15 +793,7 @@ export class ScreenRenderer {
 
     ctx.fillStyle = "#d0e2e8";
     ctx.font = "14px sans-serif";
-    if (state.currentDay < 7) {
-      ctx.fillText("Awaiting outdoor surface observation data from upcoming field sorties.", 44, 330);
-    } else if (state.currentDay === 7) {
-      ctx.fillText("Sol 07 Surface Observation in progress. Sample data pending transfer.", 44, 330);
-    } else if (state.currentDay === 8) {
-      ctx.fillText("Sol 08 Laboratory Analysis active. Access Analysis console [E] to review.", 44, 330);
-    } else {
-      ctx.fillText("Sol 08 Laboratory Analysis completed. Telemetry archived.", 44, 330);
-    }
+    ctx.fillText("Awaiting outdoor surface observation data from upcoming field sorties.", 44, 330);
   }
 
   private drawScienceAnalysis(ctx: CanvasRenderingContext2D, w: number, h: number, state: Readonly<MissionProgressState>): void {

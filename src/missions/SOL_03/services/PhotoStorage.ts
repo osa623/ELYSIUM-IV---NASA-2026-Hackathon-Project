@@ -6,6 +6,8 @@ export interface Sol03PhotoRecord {
   direction: string;
   worldPosition: [number, number, number];
   dataUrl: string; // Base64 data URL stored in IndexedDB
+  caption?: string;
+  heading?: string;
 }
 
 const DB_NAME = "elysium_iv_db";

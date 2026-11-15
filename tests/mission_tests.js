@@ -69,7 +69,7 @@ function completeSol3(mm, targetId = MASTER_TERRAIN_TARGETS[0].id) {
   prepare('SOL03_OBSERVATION_SITE_REVIEW', MASTER_TERRAIN_TARGETS.map(target => `TARGET:${target.id}`));
   prepare('SOL03_SYSTEM_CONSTRAINTS', ['SOL03-COMMS-SYSTEMS']);
   prepare('SOL03_SELECT_TARGET', [`TARGET:${targetId}`], { selectedTargetId: targetId, scientificQuestion: 'Which site profile merits a future observation?' });
-  prepare('SOL03_SELECT_DATASET', ['DATASET:PHOBOSIA_TARGET_PROFILE_TRAINING'], { datasetId: 'PHOBOSIA_TARGET_PROFILE_TRAINING' });
+  prepare('SOL03_SELECT_DATASET', ['DATASET:ELYSIUM_IV_TARGET_PROFILE_TRAINING'], { datasetId: 'PHOBOSIA_TARGET_PROFILE_TRAINING' });
   const refs = mm.getInvestigationRecords().filter(r => r.taskId.startsWith('SOL03_')).map(r => r.id);
   const result = mm.submitInvestigation({ taskId: 'SOL03_SUBMIT_TARGET_RECORD', evidenceReferences: refs, classification: 'proposal_submitted', rationale: 'A cautious training proposal with explicit limits.', limitations: ['Metadata only; not scientific observations.'], procedureChecks: [], selectedTargetId: targetId, datasetId: 'PHOBOSIA_TARGET_PROFILE_TRAINING', scientificQuestion: 'What should a future surface observation examine?' });
   assert.strictEqual(result.success, true, result.message);

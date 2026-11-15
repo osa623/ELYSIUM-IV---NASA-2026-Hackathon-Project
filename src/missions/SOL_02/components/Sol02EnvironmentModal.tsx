@@ -14,12 +14,18 @@ export function Sol02EnvironmentModal({ manager, onClose, onSaveSuccess }: Props
   const telemetry = mgr.getTelemetry();
   const [notes, setNotes] = useState(
     mgr.environmentObservation?.notes ||
-    "Night-time Martian surface conditions recorded: Ambient temperature dropped to -78°C with moderate surface wind at 7.4 m/s NE. Sensor array operational."
+    "Daytime Martian surface conditions recorded: Ambient temperature is -78°C with moderate surface wind at 7.4 m/s NE. Sensor array operational."
   );
   const [saved, setSaved] = useState(mgr.isTaskComplete("SOL02_TASK_04"));
+  const [saveError, setSaveError] = useState("");
 
   const handleSave = () => {
-    mgr.saveNightEnvironmentObservation(notes);
+    const completed = mgr.saveDaytimeEnvironmentObservation(notes);
+    if (!completed) {
+      setSaveError("Complete the BOTAN Nutrition System inspection before saving this report.");
+      return;
+    }
+    setSaveError("");
     setSaved(true);
     onSaveSuccess?.();
     setTimeout(onClose, 500);
@@ -34,10 +40,10 @@ export function Sol02EnvironmentModal({ manager, onClose, onSaveSuccess }: Props
         <header className="flex justify-between items-center border-b border-[#38d4f0]/20 pb-4 mb-5">
           <div>
             <div className="text-[10px] font-mono font-bold tracking-[0.16em] text-[#e88747]">
-              ELYSIUM IV · NIGHT SENSOR ARRAY · SOL 02
+              ELYSIUM IV · DAYTIME SENSOR ARRAY · SOL 02
             </div>
             <h2 className="text-xl font-bold font-kdam-thmor-pro text-white mt-1">
-              Night-time Martian Environment Inspection
+              Daytime Martian Environment Inspection
             </h2>
           </div>
           <button
@@ -55,7 +61,7 @@ export function Sol02EnvironmentModal({ manager, onClose, onSaveSuccess }: Props
             <div className="text-2xl font-bold font-mono text-[#f0a04b] mt-1">
               {telemetry.environment.temperature_celsius} °C
             </div>
-            <span className="text-[10px] text-[#7190a0]">Nocturnal radiational cooling</span>
+            <span className="text-[10px] text-[#7190a0]">Daytime surface temperature</span>
           </div>
 
           <div className="rounded-lg border border-[#1f3f52] bg-[#0c1b26] p-3.5">
@@ -86,7 +92,7 @@ export function Sol02EnvironmentModal({ manager, onClose, onSaveSuccess }: Props
         {/* Notes */}
         <div className="mb-5">
           <label className="block text-xs font-mono text-[#8faec0] mb-2">
-            RESEARCHER NOCTURNAL OBSERVATION ENTRY:
+            RESEARCHER DAYTIME OBSERVATION ENTRY:
           </label>
           <textarea
             value={notes}
@@ -107,9 +113,10 @@ export function Sol02EnvironmentModal({ manager, onClose, onSaveSuccess }: Props
             onClick={handleSave}
             className="flex items-center gap-2 rounded-lg border border-[#38d4f0] bg-[#12364a] px-5 py-2.5 text-xs font-bold font-mono text-[#38d4f0] hover:bg-[#38d4f0] hover:text-[#07131e] transition-all shadow-[0_0_15px_rgba(56,212,240,0.25)]"
           >
-            <span>💾</span> Save Night Environment Report
+            <span>💾</span> Save Daytime Environment Report
           </button>
         </footer>
+        {saveError && <p role="alert" className="mt-3 text-xs text-[#ffb17c]">{saveError}</p>}
       </div>
     </div>
   );

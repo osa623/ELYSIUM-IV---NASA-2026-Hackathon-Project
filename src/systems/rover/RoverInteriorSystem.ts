@@ -26,48 +26,28 @@ export class RoverInteriorSystem {
     this.toolSectionTrigger = interiorModel.getObjectByName("Tool_Section_Trigger") ?? null;
     this.waterAndNutTrigger = interiorModel.getObjectByName("Water_and_nut_Trigger") ?? null;
 
-    if (this.colliderSection01) {
-      this.colliderSection01.visible = false;
-    }
+    // Interaction volumes and collision helpers should never render as cabin
+    // surfaces, even when a replacement GLB gives them visible materials.
+    interiorModel.traverse(object => {
+      if (/trigger|spawn|collider|collirder/i.test(object.name)) object.visible = false;
+      const mesh = object as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      for (const material of materials) {
+        const standard = material as THREE.MeshStandardMaterial;
+        // The replacement GLB marks its fixture material with emissiveStrength
+        // 20, which renders the whole lamp surface as clipped white. Keep the
+        // fixture visible but bring it back to a normal cabin light level.
+        if (standard.isMeshStandardMaterial && standard.name.toLowerCase() === "light") {
+          standard.emissiveIntensity = Math.min(standard.emissiveIntensity, 1.25);
+          standard.needsUpdate = true;
+        }
+      }
+    });
 
     this.setupInteriorLights();
     this.setupScreenMaterials();
     this.updateBounds();
-  }
-
-  private setupInteriorLights(): void {
-    // Main Interior Lights (main_light_01 .. main_light_03)
-    // White light directed downward toward floor
-    const mainLightNames = ["main_light_01", "main_light_02", "main_light_03"];
-    mainLightNames.forEach((name) => {
-      const marker = this.interiorGroup.getObjectByName(name);
-      if (marker) {
-        const spot = new THREE.SpotLight(0xffffff, 20, 10, Math.PI / 3, 0.45, 1.2);
-        spot.position.set(0, 0, 0);
-        spot.userData.baseIntensity = 20;
-        spot.castShadow = false;
-        const target = new THREE.Object3D();
-        target.position.set(0, -6, 0); // Downward toward the floor
-        marker.add(target);
-        spot.target = target;
-        marker.add(spot);
-        this.interiorLights.push(spot);
-      }
-    });
-
-    // Secondary Interior Lights (2_light_01 .. 2_light_04)
-    // Soft white lighting directed downward toward floor
-    const secondaryLightNames = ["2_light_01", "2_light_02", "2_light_03", "2_light_04"];
-    secondaryLightNames.forEach((name) => {
-      const marker = this.interiorGroup.getObjectByName(name);
-      if (marker) {
-        const point = new THREE.PointLight(0xffffff, 8, 7, 1.5);
-        point.position.set(0, -0.2, 0);
-        point.userData.baseIntensity = 8;
-        marker.add(point);
-        this.interiorLights.push(point);
-      }
-    });
   }
 
   private setupScreenMaterials(): void {
@@ -91,14 +71,49 @@ export class RoverInteriorSystem {
     screenNames.forEach(name => {
       const screenObj = this.interiorGroup.getObjectByName(name) as THREE.Mesh | undefined;
       if (screenObj && screenObj.isMesh) {
-        const mat = screenObj.material as THREE.MeshStandardMaterial;
-        if (mat) {
-          mat.emissive = new THREE.Color(0x3892b0);
-          mat.emissiveIntensity = 0.75;
-          mat.roughness = 0.2;
+        const materials = Array.isArray(screenObj.material) ? screenObj.material : [screenObj.material];
+        for (const material of materials) {
+          const mat = material as THREE.MeshStandardMaterial;
+          if (!mat.isMeshStandardMaterial) continue;
+          // Preserve the GLB-authored screen map and emissive color. The old
+          // blanket blue emissive override clipped the displays to white-blue.
+          mat.roughness = Math.min(mat.roughness, 0.35);
+          mat.needsUpdate = true;
         }
       }
     });
+  }
+
+  private setupInteriorLights(): void {
+    // Low output, warm neutral cabin fill. The previous 42/16 intensities
+    // overexposed the close cabin surfaces and clipped their material detail.
+    const mainLightNames = ["main_light_01", "main_light_02", "main_light_03"];
+    for (const name of mainLightNames) {
+      const marker = this.interiorGroup.getObjectByName(name);
+      if (!marker) continue;
+      const spot = new THREE.SpotLight(0xfff4e8, 5, 12, Math.PI / 2.5, 0.65, 1.5);
+      spot.name = `${name}_RuntimeFill`;
+      spot.userData.baseIntensity = 5;
+      spot.castShadow = false;
+      spot.visible = false;
+      const target = new THREE.Object3D();
+      target.position.set(0, -1.8, 0);
+      marker.add(target);
+      spot.target = target;
+      marker.add(spot);
+      this.interiorLights.push(spot);
+    }
+    const secondaryNames = ["2_light_01", "2_light_02", "2_light_03", "2_light_04"];
+    for (const name of secondaryNames) {
+      const marker = this.interiorGroup.getObjectByName(name);
+      if (!marker) continue;
+      const fill = new THREE.PointLight(0xfff0df, 1, 7, 1.6);
+      fill.name = `${name}_RuntimeFill`;
+      fill.userData.baseIntensity = 1;
+      fill.visible = false;
+      marker.add(fill);
+      this.interiorLights.push(fill);
+    }
   }
 
   public updateBounds(): void {
@@ -198,16 +213,17 @@ export class RoverInteriorSystem {
   }
 
   public setLightsActive(active: boolean): void {
-    this.interiorLights.forEach(l => {
-      l.visible = active;
-      l.intensity = active ? (l.userData.baseIntensity ?? 10) : 0;
+    this.interiorLights.forEach(light => {
+      light.visible = active;
+      light.intensity = active ? (light.userData.baseIntensity ?? 1) : 0;
     });
   }
 
   public dispose(): void {
-    this.interiorLights.forEach(l => {
-      l.parent?.remove(l);
-      l.dispose();
+    this.interiorLights.forEach(light => {
+      if (light instanceof THREE.SpotLight) light.parent?.remove(light.target);
+      light.parent?.remove(light);
+      light.dispose();
     });
     this.interiorLights = [];
   }

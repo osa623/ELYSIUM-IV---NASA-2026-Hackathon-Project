@@ -257,7 +257,7 @@ export class Sol02MissionManager {
       sol_number: 2,
       location: "TERRAIN ROVER CABIN · MAIN OS CONSOLE",
       telemetry_snapshot: this.getTelemetry(),
-      user_entry: "SOL 01 surface reconnaissance data and resource baselines audited. System verified ready for night operations.",
+      user_entry: "SOL 01 surface reconnaissance data and resource baselines audited. System verified ready for daytime operations.",
       saved: true
     };
     this.missionLogs.push(log);
@@ -299,8 +299,10 @@ export class Sol02MissionManager {
     return true;
   }
 
-  /** Task 04: Inspect Night-time Environment */
-  public saveNightEnvironmentObservation(notes: string): boolean {
+  /** Task 04: Inspect Daytime Environment */
+  public saveDaytimeEnvironmentObservation(notes: string): boolean {
+    if (this.completedTaskIds.has("SOL02_TASK_04")) return true;
+    if (this.currentTaskId !== "SOL02_TASK_04" || !this.completedTaskIds.has("SOL02_TASK_03")) return false;
     const telemetry = this.getTelemetry();
     this.environmentObservation = {
       recorded_at: new Date().toISOString(),
@@ -319,16 +321,16 @@ export class Sol02MissionManager {
       sol_number: 2,
       location: "ENVIRONMENT SENSING STATION",
       telemetry_snapshot: { environment: telemetry.environment },
-      user_entry: notes.trim() || `Night environment recorded: Temp ${telemetry.environment.temperature_celsius}°C, Pressure ${telemetry.environment.pressure_mbar} mbar, Wind ${telemetry.environment.wind_speed_m_s} m/s ${telemetry.environment.wind_direction}, CO2 ${telemetry.environment.co2_percent}%.`,
+      user_entry: notes.trim() || `Daytime environment recorded: Temp ${telemetry.environment.temperature_celsius}°C, Pressure ${telemetry.environment.pressure_mbar} mbar, Wind ${telemetry.environment.wind_speed_m_s} m/s ${telemetry.environment.wind_direction}, CO2 ${telemetry.environment.co2_percent}%.`,
       saved: true
     };
     this.missionLogs.push(log);
-    if (this.currentTaskId === "SOL02_TASK_04") {
-      return this.completeTask("SOL02_TASK_04");
-    }
-    this.saveToStorage();
-    this.notify();
-    return true;
+    return this.completeTask("SOL02_TASK_04");
+  }
+
+  /** Backward-compatible method name used by older integrations. */
+  public saveNightEnvironmentObservation(notes: string): boolean {
+    return this.saveDaytimeEnvironmentObservation(notes);
   }
 
   /** Task 05: Confirm Scientific Tool Checklist */

@@ -104,6 +104,12 @@ export class RoverSystem {
   }
 
   exit(): void { this.velocity = 0; this.steering = 0; this.active = false; this.animateWheels(this.wheelRollAngle, 0); }
+
+  /** Restore the parked rover without changing its world position. */
+  prepareForExterior(): void {
+    this.rover.visible = true;
+    this.rover.updateWorldMatrix(true, true);
+  }
   switchView(): void { this.view = "THIRD PERSON"; }
   setView(view: RoverView): void { this.view = "THIRD PERSON"; }
 
@@ -121,6 +127,15 @@ export class RoverSystem {
     } else {
       this.rover.getWorldQuaternion(this.baseWorldQuaternion);
     }
+  }
+
+  /** Move the existing rover without rebuilding it or changing its active cabin state. */
+  public teleportWorldPose(position: THREE.Vector3, quaternion?: THREE.Quaternion): void {
+    this.velocity = 0;
+    this.steering = 0;
+    this.pitch = 0;
+    this.setWorldPose(position, quaternion);
+    this.animateWheels(this.wheelRollAngle, 0);
   }
 
   /** Returns true when the proposed rover footprint is clear. */

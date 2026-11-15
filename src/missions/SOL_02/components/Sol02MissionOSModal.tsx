@@ -43,6 +43,17 @@ export function Sol02MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
     setTimeout(() => setFeedback(null), 3000);
   };
 
+  const handleConfirmSampleTransfer = () => {
+    if (!mgr.soilSample) {
+      setFeedback("No soil sample is recorded yet. Collect the sample at the investigation site first.");
+      return;
+    }
+    if (mgr.confirmSampleTransferToRack()) {
+      setFeedback("Soil sample confirmed in the tools rack. Mission task 09 completed; continue to soil analysis.");
+      onSaveSuccess?.();
+    }
+  };
+
   return (
     <div
       onClick={e => e.stopPropagation()}
@@ -58,7 +69,7 @@ export function Sol02MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
                 ELYSIUM IV · OPERATING SYSTEM · SOL 02
               </div>
               <h1 className="text-lg font-bold font-kdam-thmor-pro text-white leading-tight">
-                Nocturnal Soil Investigation & Scientific OS
+                Daytime Soil Investigation & Scientific OS
               </h1>
             </div>
           </div>
@@ -136,7 +147,7 @@ export function Sol02MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
                   : "text-[#8faec0] hover:bg-[#0c1c28] hover:text-white"
               }`}
             >
-              <span className="text-sm">📊</span> Nocturnal Telemetry
+              <span className="text-sm">📊</span> Daytime Telemetry
             </button>
 
             <button
@@ -172,6 +183,15 @@ export function Sol02MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
                   <p className="text-xs font-mono text-[#a5c3d1] mt-1 leading-relaxed">
                     {currentTask?.description}
                   </p>
+                  {mgr.currentTaskId === "SOL02_TASK_09" && (
+                    <button
+                      onClick={handleConfirmSampleTransfer}
+                      disabled={!mgr.soilSample}
+                      className="mt-4 rounded-lg border border-[#f0a04b] bg-[#2d1b0f] px-4 py-2.5 text-xs font-bold font-mono text-[#f0a04b] hover:bg-[#f0a04b] hover:text-[#07131e] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Confirm Soil Sample in Tools Rack
+                    </button>
+                  )}
                   <div className="mt-3 flex items-center gap-4 text-xs font-mono">
                     <span className="text-[#8faec0]">
                       WAYPOINT: <strong className="text-[#38d4f0]">{mgr.getActiveDestination()}</strong>
@@ -322,11 +342,11 @@ export function Sol02MissionOSModal({ manager, onClose, onSaveSuccess }: Props) 
               </div>
             )}
 
-            {/* TAB 3: Nocturnal Telemetry */}
+            {/* TAB 3: Daytime Telemetry */}
             {activeTab === "telemetry" && (
               <div className="space-y-5">
                 <div className="text-xs font-mono font-bold text-[#8faec0] uppercase tracking-wider">
-                  Martian Surface Night Atmospheric Telemetry
+                  Martian Surface Daytime Atmospheric Telemetry
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">

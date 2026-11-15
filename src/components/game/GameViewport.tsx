@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Game } from "@/core/Game";
 import type { GameState } from "@/core/EventBus";
-import { PhobosiaOS } from "./PhobosiaOS";
+import { MissionOperatingSystem } from "./MissionOperatingSystem";
 import { SpeedTravelBar } from "./SpeedTravelBar";
 import {
   MASTER_TERRAIN_TARGETS,
@@ -28,7 +28,8 @@ import { Sol03MissionOSModal } from "@/missions/SOL_03/components/Sol03MissionOS
 import { Sol03WaterModal } from "@/missions/SOL_03/components/Sol03WaterModal";
 import { Sol03EnvironmentModal } from "@/missions/SOL_03/components/Sol03EnvironmentModal";
 import { Sol03ToolModal } from "@/missions/SOL_03/components/Sol03ToolModal";
-import { FinalVideoModal } from "@/missions/SOL_03/components/FinalVideoModal";
+import { MissionCompletionScreen } from "@/missions/SOL_03/components/MissionCompletionScreen";
+import { ENABLE_DEV_FAST_TRAVEL } from "@/systems/devFastTravel";
 
 const initialState: GameState = {
   ready: false,
@@ -88,7 +89,6 @@ const initialState: GameState = {
   sol5Images: [],
   sol5Flight: null,
   sol5Message: null,
-  finalDepartureVideo: false,
 
   showCinematicOverlay: false,
   showOSDesktop: false,
@@ -118,14 +118,15 @@ type GameViewportProps = {
   onReturnToMenu?: () => void;
   onReady?: () => void;
   replayState?: MissionProgressState;
+  startMode?: "new" | "continue" | "replay";
 };
 
-export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewportProps = {}) {
+export function GameViewport({ onReturnToMenu, onReady, replayState, startMode = "continue" }: GameViewportProps = {}) {
   const host = useRef<HTMLDivElement>(null);
   const game = useRef<Game | null>(null);
-  const video = useRef<HTMLVideoElement>(null);
   const [state, setState] = useState<GameState>(initialState);
-  const [finalVideoError, setFinalVideoError] = useState(false);
+  const [devTravelOpen, setDevTravelOpen] = useState(false);
+  const [devTravelMessage, setDevTravelMessage] = useState("");
 
   useEffect(() => { if (state.ready) onReady?.(); }, [state.ready, onReady]);
 
@@ -151,21 +152,27 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
 
   useEffect(() => {
     if (!areRequiredAssetsReady() || !host.current) return;
-    const instance = new Game(host.current, setState, replayState);
+    const instance = new Game(host.current, setState, replayState, startMode);
     game.current = instance;
     void instance.start();
     return () => instance.dispose();
-  }, [replayState]);
+  }, [replayState, startMode]);
 
   useEffect(() => {
     if (game.current?.missionManager.isReplayComplete) onReturnToMenu?.();
   }, [state.notification, state.objectiveState, onReturnToMenu]);
 
   useEffect(() => {
-    if (!state.finalDepartureVideo || !video.current) return;
-    const element = video.current;
-    void element.play().then(() => setFinalVideoError(false)).catch(() => setFinalVideoError(true));
-  }, [state.finalDepartureVideo]);
+    if (!ENABLE_DEV_FAST_TRAVEL || !state.ready || state.module !== "Mars Terrain") return;
+    const toggle = (event: KeyboardEvent) => {
+      if (event.code !== "KeyT" || event.repeat) return;
+      event.preventDefault();
+      setDevTravelOpen(value => !value);
+      setDevTravelMessage("");
+    };
+    window.addEventListener("keydown", toggle);
+    return () => window.removeEventListener("keydown", toggle);
+  }, [state.module, state.ready]);
 
   const canClickToLock =
     !state.panel &&
@@ -188,14 +195,10 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
   const mobileControlsBlocked = Boolean(state.panel || state.transition || state.showBriefingModal || state.showRoutePlanning ||
     state.showGeologicalForm || state.showSurfaceObservationForm || state.showScienceAnalysisModal || state.showDroneConsoleModal ||
     state.restFeedback || state.restTransition || state.showCinematicOverlay || state.showOSDesktop ||
-    state.cameraPresentation || state.finalDepartureVideo);
+    state.cameraPresentation);
 
   return (
     <div id="game" className="mobile-game relative h-screen w-screen bg-black" ref={host} onClick={() => canClickToLock && game.current?.lock()}>
-      {state.finalDepartureVideo && <div role="dialog" aria-label="Final departure cinematic" onKeyDown={event => event.preventDefault()} style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh", zIndex: 10000, background: "#000", overflow: "hidden" }}>
-        <video ref={video} src="/assets/videos/finalVideo/finalVideo.mp4" autoPlay playsInline preload="auto" disablePictureInPicture onCanPlay={() => setFinalVideoError(false)} onError={() => setFinalVideoError(true)} onEnded={() => { if (game.current?.finishSol11FinalVideo()) onReturnToMenu?.(); }} aria-label="Final ELYSIUM IV departure" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", background: "#000" }} />
-        {finalVideoError && <div style={{ position: "absolute", inset: 0, display: "grid", placeContent: "center", gap: 12, color: "#fff", background: "rgba(0,0,0,.88)", fontFamily: "monospace", textAlign: "center" }}><p>Final cinematic could not start. The campaign remains incomplete.</p><button onClick={() => { setFinalVideoError(false); void video.current?.play().catch(() => setFinalVideoError(true)); }} style={{ justifySelf: "center", padding: "10px 16px", border: "1px solid #7ca9b5", background: "#14242b", color: "white", cursor: "pointer" }}>RETRY PLAYBACK</button></div>}
-      </div>}
       {onReturnToMenu && <button
         type="button"
         className="[position:fixed] [top:16px] [left:16px] [z-index:60] [border:1px_solid_rgba(85,205,232,0.45)] [background:rgba(5,14,20,0.88)] [padding:8px_12px] [color:#c9e3e9] [font:10px_var(--font-mono,monospace)] [letter-spacing:0.1em] hover:[background:rgba(20,42,52,0.96)]"
@@ -206,6 +209,11 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
         activeModule={state.module}
         onTravel={(targetModule) => void game.current?.speedTravel(targetModule)}
       />  */}
+      {ENABLE_DEV_FAST_TRAVEL && state.module === "Mars Terrain" && state.ready && (
+        <DevFastTravelPanel game={game.current} open={devTravelOpen} message={devTravelMessage}
+          onToggle={() => { setDevTravelOpen(value => !value); setDevTravelMessage(""); }}
+          onTravel={destination => { const error = game.current?.devFastTravel(destination) ?? "Game is not ready."; setDevTravelMessage(error || "Travel complete."); setDevTravelOpen(false); }} />
+      )}
       {/* EVA visor frame and edge-positioned telemetry, based on the supplied Mars helmet reference. */}
       {state.evaSuitActive && !state.transition && !state.droneModeActive && !state.sol5DroneActive && !state.panel && !state.showOSDesktop && !state.showCinematicOverlay && (
         <div className="[position:fixed] [inset:0] [pointer-events:none] [z-index:20] [overflow:hidden]" aria-label="EVA helmet visor and suit HUD">
@@ -395,7 +403,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
 
         {/* 3B. PHOBOSIA OS FULLSCREEN DESKTOP */}
         {state.showOSDesktop && (
-          <PhobosiaOS
+          <MissionOperatingSystem
             game={game.current}
             state={state}
             onClose={() => game.current?.closeOSDesktop()}
@@ -495,7 +503,14 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
         {/* ELYSIUM IV · SOL 03 MODALS */}
         {state.showEVACameraModal && (
           <EVACameraModal
-            onClose={() => game.current?.closeSol03Modals()}
+            onClose={(savedCount) => {
+              const activeGame = game.current;
+              if (!activeGame) return;
+              activeGame.sol03MissionManager.onExitCameraCheckPhotos(savedCount ?? activeGame.sol03MissionManager.cachedPhotos.length);
+              activeGame.closeSol03Modals();
+              activeGame.syncMissionState();
+              activeGame.syncRoverScreens();
+            }}
             onSaveSuccess={() => {
               game.current?.syncMissionState();
               game.current?.syncRoverScreens();
@@ -544,10 +559,7 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
           />
         )}
         {state.showFinalVideoModal && (
-          <FinalVideoModal
-            onClose={() => setState(prev => ({ ...prev, showFinalVideoModal: false }))}
-            onReturnToMenu={onReturnToMenu}
-          />
+          <MissionCompletionScreen onFinish={() => onReturnToMenu?.()} />
         )}
 
         {/* Legacy 2D Panel Fallback */}
@@ -1223,4 +1235,23 @@ export function GameViewport({ onReturnToMenu, onReady, replayState }: GameViewp
       />}
     </div>
   );
+}
+
+function DevFastTravelPanel({ game, open, message, onToggle, onTravel }: {
+  game: Game | null;
+  open: boolean;
+  message: string;
+  onToggle: () => void;
+  onTravel: (destination: string) => void;
+}) {
+  const destinations = game?.getDevFastTravelDestinations() ?? [];
+  return <div className="[position:fixed] [top:16px] [right:18px] [z-index:65] [font:12px_var(--font-mono,monospace)]" onClick={event => event.stopPropagation()}>
+    <button type="button" onClick={onToggle} className="[border:1px_solid_rgba(85,205,232,0.55)] [background:rgba(4,15,22,0.92)] [padding:9px_13px] [color:#83e6ff] [letter-spacing:0.12em]">DEV FAST TRAVEL · T</button>
+    {open && <section className="[margin-top:8px] [width:270px] [max-height:65vh] [overflow:auto] [border:1px_solid_rgba(85,205,232,0.35)] [background:rgba(4,13,20,0.96)] [padding:12px] [color:#d8e8ee] [box-shadow:0_10px_32px_rgba(0,0,0,0.45)]">
+      <header className="[margin-bottom:8px] [color:#55cde8]">CURRENT SOL DESTINATIONS</header>
+      {destinations.length ? destinations.map(destination => <button key={destination.name} type="button" onClick={() => onTravel(destination.name)} className="[mb:6px] [block] [w-full] [border:1px_solid_#294857] [bg:#10232e] [px:9px] [py:8px] text-left [color:#e2edf0] hover:[border-color:#55cde8]">Travel to {destination.label}</button>) : <p className="[color:#90a8b2]">No loaded mission destinations found.</p>}
+      {message && <p role="status" className="[mt:8px] [color:#e2bb7f]">{message}</p>}
+      <button type="button" onClick={onToggle} className="[mt:6px] [color:#9bb7c1]">CLOSE</button>
+    </section>}
+  </div>;
 }

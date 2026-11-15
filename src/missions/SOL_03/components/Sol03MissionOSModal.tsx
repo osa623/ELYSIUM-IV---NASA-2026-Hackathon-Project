@@ -46,7 +46,7 @@ export function Sol03MissionOSModal({ manager, onClose, onSaveSuccess, onComplet
   );
   const [reportSummary, setReportSummary] = useState(
     mgr.finalReport?.executiveSummary ||
-      "Three-sol autonomous Martian surface expedition successfully completed across the Elysium Planitia and highland flanks. Traverse encompasses initial terrain navigation, nocturnal soil mineralogy, and high-altitude photography."
+      "Three-sol autonomous Martian surface expedition successfully completed across the Elysium Planitia and highland flanks. Traverse encompasses initial terrain navigation, daytime soil mineralogy, and high-altitude photography."
   );
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export function Sol03MissionOSModal({ manager, onClose, onSaveSuccess, onComplet
       heading: reportHeading,
       executiveSummary: reportSummary,
       sol01Evaluation: "SOL 01: Traverse verified across southern basalt plains. Habitat and life support systems verified.",
-      sol02Evaluation: "SOL 02: Nocturnal soil sampling achieved. Fe-Mg silicate matrix with dry ferric regolith confirmed.",
+      sol02Evaluation: "SOL 02: Daytime soil sampling achieved. Fe-Mg silicate matrix with dry ferric regolith confirmed.",
       sol03Evaluation: "SOL 03: Highland ascent achieved. Mountain photography catalogued and resource depletion audited.",
       recommendations: "Authorize return phase and transmit consolidated telemetry dossier to Mission Control.",
       savedAt: new Date().toISOString()
@@ -104,9 +104,10 @@ export function Sol03MissionOSModal({ manager, onClose, onSaveSuccess, onComplet
 
   const handleCompleteJourneyClick = () => {
     if (mgr.canCompleteJourney()) {
-      mgr.completeJourney();
-      onSaveSuccess?.();
-      onCompleteJourney?.();
+      if (mgr.completeJourney()) {
+        onSaveSuccess?.();
+        onCompleteJourney?.();
+      }
     }
   };
 
@@ -341,11 +342,11 @@ export function Sol03MissionOSModal({ manager, onClose, onSaveSuccess, onComplet
 
                   <div className="rounded-xl border border-[#38d4f0]/20 bg-[#0a1824] p-4">
                     <div className="text-xs font-bold font-mono text-[#e88747] mb-2">
-                      SOL 02 · NOCTURNAL SOIL INVESTIGATION
+                      SOL 02 · DAYTIME SOIL INVESTIGATION
                     </div>
                     <div className="space-y-1.5 text-xs text-[#a5c4d4] font-mono">
                       <div>Status: <span className="text-emerald-400">Validated</span></div>
-                      <div>Night Condition: -78°C · Wind 7.4 m/s NE</div>
+                      <div>Daytime Condition: -78°C · Wind 7.4 m/s NE</div>
                       <div>Water Level: 70% (175L)</div>
                       <div>Soil Analysis: Ferric Silicate matrix with dry regolith</div>
                       <div>Specimen: Soil Core Sample #SOL02-S1 Archived</div>
@@ -441,16 +442,16 @@ export function Sol03MissionOSModal({ manager, onClose, onSaveSuccess, onComplet
                         <div className="aspect-[4/3] bg-[#050b11]">
                           <img
                             src={photo.dataUrl}
-                            alt={photo.caption}
+                            alt={photo.caption || photo.direction}
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="p-2.5 bg-[#0a1824] border-t border-[#1b3445] text-xs font-mono">
                           <div className="flex justify-between items-center text-[10px] text-[#38d4f0]">
                             <span>PHOTO #{idx + 1}</span>
-                            <span>{photo.heading}</span>
+                            <span>{photo.heading || `${photo.headingDegrees}° ${photo.direction}`}</span>
                           </div>
-                          <div className="text-white truncate font-sans text-xs mt-0.5">{photo.caption}</div>
+                          <div className="text-white truncate font-sans text-xs mt-0.5">{photo.caption || `Highland Bearing ${photo.headingDegrees}°`}</div>
                         </div>
                       </div>
                     ))}
@@ -558,7 +559,7 @@ export function Sol03MissionOSModal({ manager, onClose, onSaveSuccess, onComplet
                     <div className="text-emerald-400 font-bold">THREE-SOL MILESTONE SUMMARY</div>
                     <div className="text-[#a5c4d4] font-sans text-xs space-y-1">
                       <div>• <strong>SOL 01:</strong> 8 tasks completed. Plains traverse, checkpoint telemetry, vehicle systems confirmed.</div>
-                      <div>• <strong>SOL 02:</strong> 12 tasks completed. Nocturnal soil investigation, core sampling, sample bay transfer.</div>
+                      <div>• <strong>SOL 02:</strong> 12 tasks completed. Daytime soil investigation, core sampling, sample bay transfer.</div>
                       <div>• <strong>SOL 03:</strong> Highland ascent, 4+ mountain EVA photographs, final environmental audits.</div>
                     </div>
                   </div>

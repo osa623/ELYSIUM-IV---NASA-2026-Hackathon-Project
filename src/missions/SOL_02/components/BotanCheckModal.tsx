@@ -14,7 +14,7 @@ export function BotanCheckModal({ manager, onClose, onSaveSuccess }: Props) {
   const telemetry = mgr.getTelemetry();
   const [notes, setNotes] = useState(
     mgr.botanObservation?.notes ||
-    "BOTAN hydroponics reservoir and nutrient infusion pump operational. Baseline reserves nominal for night incubation cycle."
+    "BOTAN hydroponics reservoir and nutrient infusion pump operational. Baseline reserves nominal for daytime observation cycle."
   );
   const [saved, setSaved] = useState(mgr.isTaskComplete("SOL02_TASK_03"));
 
