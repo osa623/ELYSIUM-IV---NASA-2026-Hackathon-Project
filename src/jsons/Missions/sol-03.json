@@ -16,6 +16,20 @@
     "finishing_point": "SOL3_Finishing_Point",
     "environment_map": "/assets/exr/mars-dunes-day-light_2K_fc2ff73b-6eed-4836-92ed-f94e0d2d649f.exr"
   },
+  "targetCatalogue": [
+    {
+      "targetId": "TARGET_ALPHA_CRATER_RIM",
+      "targetNumber": 1,
+      "name": "Alpha Crater Rim",
+      "geographicName": "Highland Rim",
+      "scientificDescription": "Prominent highland ridge with basaltic outcrops.",
+      "marsCoordinates": { "latitude": "14.2° N", "longitude": "175.4° E" },
+      "outpostDistance": "2.4 km",
+      "observationStatus": "SURVEY_COMPLETED",
+      "terrainEvidence": "Layered regolith and basalt boulders",
+      "images": []
+    }
+  ],
 
   "telemetry_profiles": {
     "initial": {

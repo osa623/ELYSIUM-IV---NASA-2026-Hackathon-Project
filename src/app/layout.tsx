@@ -5,24 +5,22 @@ import "./public.css";
 import "../components/menu/MainMenu.css";
 export const metadata: Metadata = {
   metadataBase: siteUrl ?? undefined,
-  title: { default: "PHOBOSIA | Interactive Mars Exploration", template: "%s | PHOBOSIA" },
-  description: "Explore PHOBOSIA, a browser-based 3D Mars experience set at a fictional outpost, with mission-based exploration and scientific observation activities.",
+  title: { default: "ELYSIUM IV | Interactive Mars Exploration", template: "%s | ELYSIUM IV" },
+  description: "Explore ELYSIUM IV, a browser-based 3D Mars rover exploration experience across Martian terrains and scientific investigations.",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/assets/images/elysium_iv_official_logo_4k_transparent.png", sizes: "any" },
     ],
-    shortcut: "/favicon.ico",
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/assets/images/elysium_iv_official_logo_4k_transparent.png",
+    apple: [{ url: "/assets/images/elysium_iv_official_logo_4k_transparent.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/site.webmanifest",
   openGraph: {
     type: "website",
-    siteName: "PHOBOSIA",
-    ...(siteUrl ? { images: [{ url: "/phobosia-social.png", width: 1200, height: 630, alt: "PHOBOSIA — an interactive 3D Mars exploration experience" }] } : {}),
+    siteName: "ELYSIUM IV",
+    ...(siteUrl ? { images: [{ url: "/assets/images/elysium_iv_official_logo_4k_transparent.png", width: 1200, height: 630, alt: "ELYSIUM IV — Interactive 3D Mars Exploration" }] } : {}),
   },
-  twitter: { card: siteUrl ? "summary_large_image" : "summary", ...(siteUrl ? { images: ["/phobosia-social.png"] } : {}) },
+  twitter: { card: siteUrl ? "summary_large_image" : "summary", ...(siteUrl ? { images: ["/assets/images/elysium_iv_official_logo_4k_transparent.png"] } : {}) },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
   other: {
     "msapplication-TileColor": "#05090d",

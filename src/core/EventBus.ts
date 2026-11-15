@@ -106,6 +106,21 @@ export interface GameState {
   showSol01ToolModal: boolean;
   showSol01ResourceModal: boolean;
 
+  // Elysium IV SOL 02
+  showSol02MissionOS: boolean;
+  showSol02EnvironmentModal: boolean;
+  showSol02ToolModal: boolean;
+  showBotanCheckModal: boolean;
+  showSoilInvestigationModal: boolean;
+
+  // Elysium IV SOL 03
+  showSol03MissionOS: boolean;
+  showSol03WaterModal: boolean;
+  showSol03EnvironmentModal: boolean;
+  showSol03ToolModal: boolean;
+  showEVACameraModal: boolean;
+  showFinalVideoModal: boolean;
+
   // Day 1 Camera Presentation Banner
   cameraPresentation: {
     active: boolean;

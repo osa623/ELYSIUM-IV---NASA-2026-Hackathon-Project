@@ -9,11 +9,11 @@ const links = [
 ] as const;
 
 export function PublicHeader() {
-  return <header className="public-header"><Link className="public-brand" href="/" aria-label="PHOBOSIA home"><span className="public-brand-mark">P</span><span>PHOBOSIA</span></Link><nav aria-label="Main navigation" className="public-nav">{links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}</nav><Link className="public-nav-cta" href="/play">Launch experience <span aria-hidden="true">↗</span></Link></header>;
+  return <header className="public-header"><Link className="public-brand" href="/" aria-label="ELYSIUM IV home"><img src="/assets/images/elysium_iv_official_logo_4k_transparent.png" alt="ELYSIUM IV" className="h-8 w-auto inline-block mr-2" /><span>ELYSIUM IV</span></Link><nav aria-label="Main navigation" className="public-nav">{links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}</nav><Link className="public-nav-cta" href="/play">Launch experience <span aria-hidden="true">↗</span></Link></header>;
 }
 
 export function PublicFooter() {
-  return <footer className="public-footer"><Link className="public-brand" href="/"><span className="public-brand-mark">P</span><span>PHOBOSIA</span></Link><p>An independent, fictional Mars outpost experience. Not affiliated with or endorsed by NASA.</p><nav aria-label="Footer navigation">{links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}</nav></footer>;
+  return <footer className="public-footer"><Link className="public-brand" href="/"><img src="/assets/images/elysium_iv_official_logo_4k_transparent.png" alt="ELYSIUM IV" className="h-7 w-auto inline-block mr-2" /><span>ELYSIUM IV</span></Link><p>An independent, fictional Mars outpost experience. Not affiliated with or endorsed by NASA.</p><nav aria-label="Footer navigation">{links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}</nav></footer>;
 }
 
 export function PublicShell({ children }: { children: React.ReactNode }) {

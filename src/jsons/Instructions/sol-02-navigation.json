@@ -1,68 +1,155 @@
 {
-    "sol": 2,
-    "missionId": "PHOBOSIA_SOL_02",
-    "version": 1,
-    "instructions": [
-        {
-            "taskId": "SOL02_HABITAT_MAIN_STATUS",
-            "title": "Review Habitat Status, Life Support, and Emergency Information",
-            "message": "Begin with the Habitat status displays.",
-            "guidance": "Review the available overview, life-support, and emergency information together. Inspect their related records and logs, then record what the evidence supports and note uncertainty or unavailable data.",
-            "destination": { "name": "Habitat Main Monitoring Area", "module": "Habitat", "section": "Status, Life Support, and Emergency Views" },
-            "activity": "Use the existing Habitat monitor and submit one combined status investigation."
-        },
-        {
-            "taskId": "SOL02_WATER_NUTRITION",
-            "title": "Inspect Water and Nutrition Systems",
-            "message": "Proceed to the Habitat water and nutrition station.",
-            "guidance": "Review the available system status, procedure, and inspection logs. Base your conclusion only on supplied records.",
-            "destination": { "name": "Habitat Water and Nutrition Station", "module": "Habitat", "section": "Water and Nutrition Station" },
-            "activity": "Approach the existing station interaction point, open its interface, and submit the investigation."
-        },
-        {
-            "taskId": "SOL02_ENGINEERING_MONITORING",
-            "title": "Inspect Engineering Monitoring",
-            "message": "Continue to the Engineering monitoring section.",
-            "guidance": "Review the available indicators, operational information, and monitoring logs. Record relevant observations.",
-            "destination": { "name": "Engineering Monitoring Section", "module": "Engineering Unit", "section": "Monitoring Section" },
-            "activity": "Approach the existing section interaction point and submit the monitoring review."
-        },
-        {
-            "taskId": "SOL02_POWER_INVESTIGATION",
-            "title": "Investigate the Power Unit",
-            "message": "Proceed to the Engineering power section.",
-            "guidance": "Inspect the available power status, procedures, and logs. Compare readings with limits only when the records provide them, then explain and submit your conclusion.",
-            "destination": { "name": "Engineering Power Section", "module": "Engineering Unit", "section": "Power Section" },
-            "activity": "Approach the existing power workstation interaction point and submit the evidence-linked investigation."
-        },
-        {
-            "taskId": "SOL02_ENGINEERING_LIFESUPPORT",
-            "title": "Inspect Engineering Life Support",
-            "message": "Review the Engineering life support section.",
-            "guidance": "Read the available operating procedure and records, then document a conclusion that reflects the evidence and its limitations.",
-            "destination": { "name": "Engineering Life Support Section", "module": "Engineering Unit", "section": "Life Support Section" },
-            "activity": "Use the existing Engineering life-support interface and submit the investigation."
-        },
-        {
-            "taskId": "SOL02_DIAGNOSTICS",
-            "title": "Review Engineering Diagnostics",
-            "message": "Continue to the Engineering diagnostics workstation.",
-            "guidance": "Review the available diagnostic procedure, test information, and logs. Missing diagnostic data is not itself proof of a fault.",
-            "destination": { "name": "Engineering Diagnostics Workstation", "module": "Engineering Unit", "section": "Diagnostics Workstation" },
-            "activity": "Use the existing diagnostics interface and submit your assessment."
-        },
-        {
-            "taskId": "SOL02_READINESS_ASSESSMENT",
-            "title": "Submit the Outpost Readiness Assessment",
-            "message": "Review the inspection records and prepare the readiness assessment.",
-            "guidance": "Reference the submitted inspection evidence, identify unresolved concerns, and choose a readiness conclusion supported by the records.",
-            "destination": { "name": "Engineering Monitoring Section", "module": "Engineering Unit", "section": "Readiness Assessment" },
-            "activity": "Submit the final readiness assessment with its supporting record references.",
-            "requiresCompletedTasks": ["SOL02_HABITAT_MAIN_STATUS", "SOL02_WATER_NUTRITION", "SOL02_ENGINEERING_MONITORING", "SOL02_POWER_INVESTIGATION", "SOL02_ENGINEERING_LIFESUPPORT", "SOL02_DIAGNOSTICS"]
-        }
-    ],
-    "completion": {
-        "title": "Sol 2 Required Activities Complete",
-        "message": "All mandatory Sol 2 activities are complete. Return to the Habitat Rest Area and use the existing rest interaction to conclude the Sol."
+  "sol": 2,
+  "missionId": "ELYSIUM_IV_SOL_02",
+  "version": 2,
+  "instructions": [
+    {
+      "taskId": "SOL02_TASK_01",
+      "title": "Enter the Terrain Rover",
+      "message": "Locate the rover near the SOL 02 starting point and enter through the ladder.",
+      "guidance": "Approach the rover ladder and press E to climb inside the rover cabin.",
+      "destination": {
+        "name": "Rover Entrance Ladder",
+        "module": "Terrain",
+        "section": "Exterior"
+      },
+      "activity": "Approach the rover ladder and press E to enter the rover interior."
+    },
+    {
+      "taskId": "SOL02_TASK_02",
+      "title": "Initiate Night-time Soil Investigation",
+      "message": "Access the Mission OS main computer and initiate the SOL 02 mission log.",
+      "guidance": "Access the central command console inside the rover cabin and submit the initial mission record.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Approach Main_Screen_Trigger and press E to open the Mission Operating System."
+    },
+    {
+      "taskId": "SOL02_TASK_03",
+      "title": "Check Night-time Environmental Conditions",
+      "message": "Record night-time temperature, pressure, wind and atmospheric CO2 readings.",
+      "guidance": "Approach the environment sensor display station and record external telemetry.",
+      "destination": {
+        "name": "Environment Sensor Station",
+        "module": "Rover Interior",
+        "section": "Port Workstation"
+      },
+      "activity": "Approach Environment_Checking_Trigger and press E to record environmental conditions."
+    },
+    {
+      "taskId": "SOL02_TASK_04",
+      "title": "Inspect Soil Sampling Tools",
+      "message": "Verify the soil scoop, containment canisters, and seal integrity.",
+      "guidance": "Inspect the tool rack to ensure all sampling instruments are calibrated and ready.",
+      "destination": {
+        "name": "Tool Storage Locker",
+        "module": "Rover Interior",
+        "section": "Starboard Bay"
+      },
+      "activity": "Approach Tool_Section_Trigger and press E to inspect and confirm sampling tools."
+    },
+    {
+      "taskId": "SOL02_TASK_05",
+      "title": "Check Water and Nutrient Supplies",
+      "message": "Verify remaining water and nutrient reserve levels before rover departure.",
+      "guidance": "Examine the life-support resource dispenser and record reserve telemetry.",
+      "destination": {
+        "name": "Resource Dispenser Console",
+        "module": "Rover Interior",
+        "section": "Aft Cabin"
+      },
+      "activity": "Approach Water_and_nut_Trigger and press E to record resource reserves."
+    },
+    {
+      "taskId": "SOL02_TASK_06",
+      "title": "Drive to Sol2_Checkpoint",
+      "message": "Follow the navigation beam across the night-time terrain to the checkpoint.",
+      "guidance": "Drive the rover toward Sol2_Checkpoint. Keep headlights on for maximum surface visibility.",
+      "destination": {
+        "name": "Sol2_Checkpoint Navigation Marker",
+        "module": "Terrain",
+        "section": "Surface Path"
+      },
+      "activity": "Drive the rover to within 50 meters of Sol2_Checkpoint."
+    },
+    {
+      "taskId": "SOL02_TASK_07",
+      "title": "Collect Martian Soil Sample",
+      "message": "Exit rover on foot, proceed to the investigation site, and extract the sample.",
+      "guidance": "Exit the rover, walk to Sol2_Mission_investigation, and press E to collect the soil core.",
+      "destination": {
+        "name": "Sol2_Mission_investigation Site",
+        "module": "Terrain",
+        "section": "Investigation Zone"
+      },
+      "activity": "Approach Sol2_Mission_investigation on foot and press E to extract soil sample."
+    },
+    {
+      "taskId": "SOL02_TASK_08",
+      "title": "Return to Rover and Store Soil Sample",
+      "message": "Return to the rover and secure the soil sample in the onboard specimen bay.",
+      "guidance": "Climb into the rover through the ladder to transfer and secure your sample.",
+      "destination": {
+        "name": "Rover Entrance Ladder",
+        "module": "Terrain",
+        "section": "Exterior"
+      },
+      "activity": "Approach the rover ladder and press E to store sample in the rover."
+    },
+    {
+      "taskId": "SOL02_TASK_09",
+      "title": "Run Automated Soil Sample Analysis",
+      "message": "Initiate automated spectroscopic and mineralogical analysis via Mission OS.",
+      "guidance": "Open the Mission OS to begin automated sample analysis and monitor results.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Approach Main_Screen_Trigger and press E to run automated analysis."
+    },
+    {
+      "taskId": "SOL02_TASK_10",
+      "title": "Compile and Save Scientific Report",
+      "message": "Review the scientific sample findings and save the final Sol 02 research report.",
+      "guidance": "Submit your scientific report with mineral composition and moisture assessment.",
+      "destination": {
+        "name": "Main Computer Console",
+        "module": "Rover Interior",
+        "section": "Cabin Forward"
+      },
+      "activity": "Approach Main_Screen_Trigger and press E to save the scientific report."
+    },
+    {
+      "taskId": "SOL02_TASK_11",
+      "title": "Drive to Sol2_Finishing_Point",
+      "message": "Follow the navigation beam to the mission culmination terminus.",
+      "guidance": "Drive the rover across the dark plain to Sol2_Finishing_Point.",
+      "destination": {
+        "name": "Sol2_Finishing_Point Terminus",
+        "module": "Terrain",
+        "section": "Surface Path"
+      },
+      "activity": "Drive the rover to within 50 meters of Sol2_Finishing_Point."
+    },
+    {
+      "taskId": "SOL02_TASK_12",
+      "title": "Complete SOL 02 Mission",
+      "message": "Exit the rover and validate SOL 02 mission completion.",
+      "guidance": "Exit the rover, approach the finishing marker, and press E to finalize SOL 02.",
+      "destination": {
+        "name": "Sol2_Finishing_Point Terminus",
+        "module": "Terrain",
+        "section": "Exterior"
+      },
+      "activity": "Exit rover and press E at finishing point to complete SOL 02."
     }
+  ],
+  "completion": {
+    "title": "SOL 02 MISSION COMPLETE",
+    "message": "All SOL 02 scientific objectives validated. Preparing transfer to SOL 03."
+  }
 }

@@ -353,7 +353,7 @@ export function configureModuleLighting(
       const existing = moduleRoot.getObjectByName("MarsSun_DirectionalLight");
       if (existing?.type === "DirectionalLight") sun = existing as THREE.DirectionalLight;
     }
-    if (!sun) sun = new THREE.DirectionalLight(0xffe2c2, 2.8);
+    if (!sun) sun = new THREE.DirectionalLight(0xffe2c2, 3.6);
     sun.name = "MarsSun_DirectionalLight";
     if (sun.parent !== sunReference) sunReference.attach(sun);
     sun.position.set(0, 0, 0);
@@ -736,7 +736,7 @@ export function getModuleHemisphereConfig(module: ModuleName): {
     return {
       skyColor: 0xd48858,
       groundColor: 0x3a2215,
-      intensity: 0.75
+      intensity: 1.25
     };
   }
 
